@@ -18,8 +18,8 @@ namespace WindowsRunnerCSharp
     class Program
     {
         private static HttpListener _listener = new HttpListener();
-        const int ListeningPort = 3600;
-
+        const string ListeningPortKey = "game_port";
+        
         const string AssetFilePath = @"C:\Assets\testassetfile.txt";
         private const string GameCertAlias = "winRunnerTestCert";
 
@@ -52,11 +52,6 @@ namespace WindowsRunnerCSharp
 
         static void Main(string[] args)
         {
-            // Start the http server
-            string address = $"http://*:{ListeningPort}/";
-            _listener.Prefixes.Add(address);
-            _listener.Start();
-
             // GSDK Setup
             GameserverSDK.Start();
             GameserverSDK.RegisterShutdownCallback(OnShutdown);
@@ -69,8 +64,15 @@ namespace WindowsRunnerCSharp
                 _assetFileText = File.ReadAllText(AssetFilePath);
             }
 
-            // Load our game certificate if it was installed
             IDictionary<string, string> initialConfig = GameserverSDK.getConfigSettings();
+
+            // Start the http server
+            int listeningPort = int.Parse(initialConfig[ListeningPortKey]);
+            string address = $"http://*:{listeningPort}/";
+            _listener.Prefixes.Add(address);
+            _listener.Start();
+
+            // Load our game certificate if it was installed
             if (initialConfig?.ContainsKey(GameCertAlias) == true)
             {
                 string expectedThumbprint = initialConfig[GameCertAlias];
