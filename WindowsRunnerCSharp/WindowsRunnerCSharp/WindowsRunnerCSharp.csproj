@@ -51,7 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="com.playfab.csharpgsdk">
-      <Version>0.3.181110</Version>
+      <Version>0.4.181201</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>11.0.2</Version>
