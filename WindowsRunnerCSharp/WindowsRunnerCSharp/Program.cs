@@ -33,7 +33,7 @@ namespace WindowsRunnerCSharp
 
         static void OnShutdown()
         {
-            GameserverSDK.LogMessage("Shutting down...");
+            LogMessage("Shutting down...");
             _listener.Stop();
             _listener.Close();
         }
@@ -46,14 +46,28 @@ namespace WindowsRunnerCSharp
 
         static void OnMaintenanceScheduled(DateTimeOffset time)
         {
-            GameserverSDK.LogMessage($"Maintenance Scheduled at: {time}");
+            LogMessage($"Maintenance Scheduled at: {time}");
             _nextMaintenance = time;
         }
 
         static void Main(string[] args)
         {
             // GSDK Setup
-            GameserverSDK.Start();
+            try
+            {
+                GameserverSDK.Start();
+            }
+            catch (Microsoft.Playfab.Gaming.GSDK.CSharp.GSDKInitializationException initEx)
+            {
+                LogMessage("Cannot start GSDK. Please make sure the MockAgent is running. ", false);
+                LogMessage($"Got Exception: {initEx.ToString()}", false);
+                return;
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"Got Exception: {ex.ToString()}", false);
+            }
+
             GameserverSDK.RegisterShutdownCallback(OnShutdown);
             GameserverSDK.RegisterHealthCallback(IsHealthy);
             GameserverSDK.RegisterMaintenanceCallback(OnMaintenanceScheduled);
@@ -67,10 +81,19 @@ namespace WindowsRunnerCSharp
             IDictionary<string, string> initialConfig = GameserverSDK.getConfigSettings();
 
             // Start the http server
-            int listeningPort = int.Parse(initialConfig[ListeningPortKey]);
-            string address = $"http://*:{listeningPort}/";
-            _listener.Prefixes.Add(address);
-            _listener.Start();
+            if (initialConfig?.ContainsKey(ListeningPortKey) == true)
+            {
+                int listeningPort = int.Parse(initialConfig[ListeningPortKey]);
+                string address = $"http://*:{listeningPort}/";
+                _listener.Prefixes.Add(address);
+                _listener.Start();
+            }
+            else
+            {
+                LogMessage($"Cannot find {ListeningPortKey} in GSDK Config Settings. Please make sure the MockAgent is running " +
+                           $"and that the MultiplayerSettings.json file includes {ListeningPortKey} as a GamePort Name.");
+                return;
+            }
 
             // Load our game certificate if it was installed
             if (initialConfig?.ContainsKey(GameCertAlias) == true)
@@ -86,12 +109,12 @@ namespace WindowsRunnerCSharp
                 }
                 else
                 {
-                    GameserverSDK.LogMessage("Could not find installed game cert in LocalMachine\\My. Expected thumbprint is: " + expectedThumbprint);
+                    LogMessage("Could not find installed game cert in LocalMachine\\My. Expected thumbprint is: " + expectedThumbprint);
                 }
             }
             else
             {
-                GameserverSDK.LogMessage("Config did not contain cert! Config is: " + string.Join(";", initialConfig.Select(x => x.Key + "=" + x.Value)));
+                LogMessage("Config did not contain cert! Config is: " + string.Join(";", initialConfig.Select(x => x.Key + "=" + x.Value)));
             }
 
             Thread t = new Thread(ProcessRequests);
@@ -106,13 +129,13 @@ namespace WindowsRunnerCSharp
 
                 if (activeConfig.TryGetValue(GameserverSDK.SessionCookieKey, out string sessionCookie))
                 {
-                    GameserverSDK.LogMessage($"The session cookie from the allocation call is: {sessionCookie}");
+                    LogMessage($"The session cookie from the allocation call is: {sessionCookie}");
                 }
             }
             else
             {
                 // No allocation happened, the server is getting terminated (likely because there are too many already in standing by)
-                GameserverSDK.LogMessage("Server is getting terminated.");
+                LogMessage("Server is getting terminated.");
             }
         }
 
@@ -130,8 +153,7 @@ namespace WindowsRunnerCSharp
                     HttpListenerResponse response = context.Response;
 
                     string requestMessage = string.Format("HTTP:Received {0}", request.Headers.ToString());
-                    GameserverSDK.LogMessage(requestMessage);
-                    Console.WriteLine(requestMessage);
+                    LogMessage(requestMessage);
 
                     IDictionary<string, string> config = null;
 
@@ -165,12 +187,21 @@ namespace WindowsRunnerCSharp
                 catch (HttpListenerException httpEx)
                 {
                     // This one is expected if we stopped the listener because we were asked to shutdown
-                    GameserverSDK.LogMessage($"Got HttpListenerException: {httpEx.ToString()}, we are being shut down.");
+                    LogMessage($"Got HttpListenerException: {httpEx.ToString()}, we are being shut down.");
                 }
                 catch (Exception ex)
                 {
-                    GameserverSDK.LogMessage($"Got Exception: {ex.ToString()}");
+                    LogMessage($"Got Exception: {ex.ToString()}");
                 }
+            }
+        }
+
+        private static void LogMessage(string message, bool enableGSDKLogging = true)
+        {
+            Console.WriteLine(message);
+            if (enableGSDKLogging)
+            {
+                GameserverSDK.LogMessage(message);
             }
         }
     }
