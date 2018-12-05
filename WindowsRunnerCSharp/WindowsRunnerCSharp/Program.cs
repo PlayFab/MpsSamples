@@ -71,7 +71,7 @@ namespace WindowsRunnerCSharp
             GameserverSDK.RegisterShutdownCallback(OnShutdown);
             GameserverSDK.RegisterHealthCallback(IsHealthy);
             GameserverSDK.RegisterMaintenanceCallback(OnMaintenanceScheduled);
-            
+
             // Read our asset file
             if (File.Exists(AssetFilePath))
             {
@@ -79,7 +79,7 @@ namespace WindowsRunnerCSharp
             }
 
             IDictionary<string, string> initialConfig = GameserverSDK.getConfigSettings();
-            
+
             // Start the http server
             if (initialConfig?.ContainsKey(ListeningPortKey) == true)
             {
