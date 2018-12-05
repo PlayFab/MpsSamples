@@ -90,7 +90,8 @@ namespace WindowsRunnerCSharp
             }
             else
             {
-                LogMessage("Cannot find ListeningPortKey in GSDK Config Settings. Please make sure the MockAgent is running.");
+                LogMessage($"Cannot find {ListeningPortKey} in GSDK Config Settings. Please make sure the MockAgent is running " +
+                           $"and that the MultiplayerSettings.json file includes {ListeningPortKey} as a GamePort Name.");
                 return;
             }
 

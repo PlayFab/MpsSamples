@@ -30,4 +30,6 @@ To run this sample locally:
 
 **Known Limitations**
 * Currently, this sample will only work locally if you are also running the local agent. If you see a GSDK Exception on initialization, make sure the local agent is running.
-* Note that the Debug version of the sample still has issues that are being corrected. Please build the solution as **Release|x64**.
+* If you continue to see an issue repeatedly after starting the local agent or changing the MultiplayerSettings.json file, close the program (Visual Studio, Powershell,
+* Command Prompt, etc.) you were using to run the WindowsRunnerCSharp executable or solution, start the local agent, reopen the program, and try running the 
+* WindowsRunnerCSharp executable or solution again. 
