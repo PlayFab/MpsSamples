@@ -152,13 +152,22 @@ namespace WindowsRunnerCSharp
                     HttpListenerRequest request = context.Request;
                     HttpListenerResponse response = context.Response;
 
-                    string requestMessage = string.Format("HTTP:Received {0}", request.Headers.ToString());
+                    string requestMessage = $"HTTP:Received {request.Headers.ToString()}";
                     LogMessage(requestMessage);
 
                     IDictionary<string, string> config = null;
 
-                    // For each request, "add" a connected player
-                    players.Add(new ConnectedPlayer("gamer" + requestCount));
+                    // For each request, "add" a connected player, but limit player count to 20.
+                    const int maxPlayers = 20;
+                    if (players.Count < maxPlayers )
+                    {
+                        players.Add(new ConnectedPlayer("gamer" + requestCount));
+                    }
+                    else
+                    {
+                        LogMessage($"Player not added since max of {maxPlayers} is reached. Current request count: {requestCount}.");
+                    }
+
                     requestCount++;
                     GameserverSDK.UpdateConnectedPlayers(players);
 
