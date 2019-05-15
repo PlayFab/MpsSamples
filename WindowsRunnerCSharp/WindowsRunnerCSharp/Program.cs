@@ -178,6 +178,16 @@ namespace WindowsRunnerCSharp
                     config.Add("logsDirectory", GameserverSDK.GetLogsDirectory());
                     config.Add("installedCertThumbprint", _installedCertThumbprint);
 
+
+                    if (_isActivated)
+                    {
+                        IList<string> players = GameserverSDK.GetInitialPlayers();
+                        config.Add("players", players == null ? "NULL" : string.Join(", ", players));
+
+                    }
+
+                    config.Add("connectionInfo", JsonConvert.SerializeObject(GameserverSDK.GetGameServerConnectionInfo()));
+
                     if (_nextMaintenance != DateTimeOffset.MinValue)
                     {
                         config.Add("nextMaintenance", _nextMaintenance.ToLocalTime().ToString());
