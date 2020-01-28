@@ -7,30 +7,32 @@ using PlayFab.ClientModels;
 using Mirror;
 using PlayFab.Helpers;
 
-public class Startup : MonoBehaviour {
+public class Startup : MonoBehaviour
+{
     PlayFabAuthService _authService;
-    UnityNetworkingClient _unc;
+    NewNetworkManager _nm;
     MessageWindow _messageWindow;
 
     // Use this for initialization
-    void Start () {
+    void Start()
+    {
         _authService = PlayFabAuthService.Instance;
         PlayFabAuthService.OnDisplayAuthentication += OnDisplayAuth;
         PlayFabAuthService.OnLoginSuccess += OnLoginSuccess;
 
-        _unc = UnityNetworkingClient.Instance;
-        _unc.OnDisconnected.AddListener(OnDisconnected);
-        _unc.OnConnected.AddListener(OnConnected);
-        NetworkClient.RegisterHandler(UnityNetworkingClient.CustomGameServerMessageTypes.ShutdownMessage, OnServerShutdown);
-        NetworkClient.RegisterHandler(UnityNetworkingClient.CustomGameServerMessageTypes.MaintenanceMessage, OnMaintenanceMessage);
+        _nm = NewNetworkManager.Instance;
+        _nm.OnDisconnected.AddListener(OnDisconnected);
+        _nm.OnConnected.AddListener(OnConnected);
+        NetworkClient.RegisterHandler(CustomGameServerMessageTypes.ShutdownMessage, OnServerShutdown);
+        NetworkClient.RegisterHandler(CustomGameServerMessageTypes.MaintenanceMessage, OnMaintenanceMessage);
 
         _messageWindow = MessageWindow.Instance;
     }
 
     private void OnMaintenanceMessage(NetworkMessage netMsg)
     {
-        var message = netMsg.ReadMessage<UnityNetworkingClient.MaintenanceMessage>();
-        _messageWindow.Title.text = "Maintenance Shutown scheduled";
+        var message = netMsg.ReadMessage<MaintenanceMessage>();
+        _messageWindow.Title.text = "Maintenance Shutdown scheduled";
         _messageWindow.Message.text = string.Format("Maintenance is scheduled for: {0}", message.ScheduledMaintenanceUTC.ToString("MM-DD-YYYY hh:mm:ss"));
         _messageWindow.gameObject.SetActive(true);
     }
@@ -59,7 +61,7 @@ public class Startup : MonoBehaviour {
         _messageWindow.Message.text = string.Format("You logged in successfully. ID:{0}", success.PlayFabId);
         _messageWindow.gameObject.SetActive(true);
 
-        NetworkClient.connection.Send(UnityNetworkingClient.CustomGameServerMessageTypes.ReceiveAuthenticate, new UnityNetworkingClient.ReceiveAuthenticateMessage()
+        NetworkClient.connection.Send(CustomGameServerMessageTypes.ReceiveAuthenticate, new ReceiveAuthenticateMessage()
         {
             PlayFabId = success.PlayFabId
         });

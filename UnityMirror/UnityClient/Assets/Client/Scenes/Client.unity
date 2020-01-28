@@ -278,10 +278,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1081966833}
-  - component: {fileID: 1081966832}
-  - component: {fileID: 1081966834}
   - component: {fileID: 1081966831}
   - component: {fileID: 1081966830}
+  - component: {fileID: 1081966835}
   m_Layer: 0
   m_Name: NetworkingClient
   m_TagString: Untagged
@@ -344,18 +343,6 @@ MonoBehaviour:
   NoDelay: 1
   serverMaxMessageSize: 16384
   clientMaxMessageSize: 16384
---- !u!114 &1081966832
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1081966829}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0002ebde7ab87d44af63b7d6d8cf258, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &1081966833
 Transform:
   m_ObjectHideFlags: 0
@@ -370,7 +357,7 @@ Transform:
   m_Father: {fileID: 1114855880}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1081966834
+--- !u!114 &1081966835
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -379,14 +366,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1081966829}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8aab4c8111b7c411b9b92cf3dbc5bd4e, type: 3}
+  m_Script: {fileID: 11500000, guid: 3eebb30ac1bf17d419e9a4ac397b7cc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 1
-  runInBackground: 0
-  startOnHeadless: 0
+  runInBackground: 1
+  startOnHeadless: 1
   serverTickRate: 30
-  showDebugMessages: 1
+  showDebugMessages: 0
   offlineScene: 
   onlineScene: 
   transport: {fileID: 1081966831}
@@ -449,6 +436,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1635625263500382, guid: 76988798c5a3abc4e9369a319befc512, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1880269208491452, guid: 76988798c5a3abc4e9369a319befc512, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
