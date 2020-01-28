@@ -31,15 +31,19 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
 1. Make sure you have Docker for Windows installed, check [here](https://docs.docker.com/docker-for-windows/install/) for installation instructions. You should have configured it to use Windows Containers. 
 1. Download the repository
 1. Open the two projects. 
+1. Build the server (UnityServer) project.
+    - Run Build from Unity IDE
+    - Navigate to the build output folder
+    - Select all files and then right click and select "Send to -> Compressed (zipped) Folder"
+    - Please bear in mind that you should not compress the folder containing the Unity output, just the files themselves.
 1. Open the folder where you have downloaded the *LocalMultiplayerAgent* and modify the *MultiplayerSettings.json* file. Set the following values: 
-    - RunContainers = true
+    - RunContainers = `true`
     - OutputFolder = A local path with enough space on your machine. Useful data for your game will be written there.
-    - LocalFilePath = Path to a zipped folder of the build output for the server project. Something like: F:\\MPSUnitySample\\Output\\game.zip
-    - StartGameCommand = C:\\Assets\\UnityServer.exe -batchmode -logFile C:\\GameLogs\\UnityEditor.log
+    - LocalFilePath = Path to the zip created above of the build output for the server project. 
+    - StartGameCommand = `C:\\Assets\\UnityServer.exe -batchmode -logFile C:\\GameLogs\\UnityEditor.log`
     - Within GamePort, set Number to 7777 and Protocol to TCP. Also make a note of the external port number, called NodePort
-1. Build the server (UnityServer) project. Compress the entire output and save it to a file (zip format), which path corresponds to the *LocalFilePath* that you edited above. When compressing bear in mind that you should not compress the folder containing the Unity output, just the files themselves.
 1. In PowerShell
-    - Run the LocalMultiplayerAgentSetup file in *agentfolder/setup.ps1* (you may need to open Powershell with admin permissions for this purpose)
+    - Run the LocalMultiplayerAgentSetup file in *agentfolder/setup.ps1* (you may need to open Powershell with admin permissions for this purpose). If you get a signing violation, you may need to run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process` ensure you verify the script has been downloaded from our github because this bypasses all signing. You should also close 
     - Run the Local Multiplayer Agent located in *agentfolder/MockVmAgent.exe*. Observe the output messages from the Agent and that the game is in *StandingBy* state.
 1. As soon as your Agent is receiving heartbeats, you can Build/Run or Run inside Editor the client (UnityClient) project. Observe that the game is in *Active* state. When the server finishes execution, your client will disconnect as well.
 
