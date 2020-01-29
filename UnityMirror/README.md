@@ -11,6 +11,7 @@ This repository is the home of a custom game server example, made in unity3d, th
 - Basic or Intermediate knowledge of Unity
 - Recent version of the [PlayFab Game Server SDK](https://github.com/PlayFab/gsdk/tree/master/UnityGsdk)
 - When running locally you must have a copy of [Local Multiplayer Agent](https://github.com/PlayFab/LocalMultiplayerAgent)
+- It is recommended that you first run the [WindowsRunnerCSharp](https://github.com/PlayFab/gsdkSamples/blob/master/WindowsRunnerCSharp/README.md) sample.
 
 ## gsdk - Game Server SDK (aka Multiplayer Agent API)
 
@@ -28,10 +29,13 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
 
 ## Getting Started for Windows game servers using Windows Containers
 
+### Setup
 1. Make sure you have Docker for Windows installed, check [here](https://docs.docker.com/docker-for-windows/install/) for installation instructions. You should have configured it to use Windows Containers. 
-1. Download the repository
-1. Open the two projects. 
-1. Build the server (UnityServer) project.
+1. Download the [repository](https://github.com/PlayFab/gsdkSamples)
+1. Open the two UnityMirror projects (UnityServer and UnityClient) and make sure they build. 
+
+### Running the Server
+1. Build the UnityServer project.
     - Run Build from Unity IDE
     - Navigate to the build output folder
     - Select all files and then right click and select "Send to -> Compressed (zipped) Folder"
@@ -45,7 +49,19 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
 1. In PowerShell
     - Run the LocalMultiplayerAgentSetup file in *agentfolder/setup.ps1* (you may need to open Powershell with admin permissions for this purpose). If you get a signing violation, you may need to run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process` ensure you verify the script has been downloaded from our github because this bypasses all signing. You should also close 
     - Run the Local Multiplayer Agent located in *agentfolder/MockVmAgent.exe*. Observe the output messages from the Agent and that the game is in *StandingBy* state.
-1. As soon as your Agent is receiving heartbeats, you can Build/Run or Run inside Editor the client (UnityClient) project. Observe that the game is in *Active* state. When the server finishes execution, your client will disconnect as well.
+1. You will see the mock agent report state. Wait for reports to go from `CurrentGameState: StandingBy` to `CurrentGameState: Active`
+
+### Running the client
+1. With the server running, open the UnityClient project in the Unity IDE.
+1. Click the menu button PlayFab->MakePlayFabSharedSettings
+1. In the PlayFabSharedSettings widget, set your [Title Id](https://docs.microsoft.com/en-us/gaming/playfab/personas/developer#retrieving-your-titleid). It is a hex number, generally 4 or 5 digits.
+
+
+As soon as your Agent is receiving heartbeats, you can Build/Run or Run inside Editor the client (UnityClient) project. Observe that the game is in *Active* state. When the server finishes execution, your client will disconnect as well.
+
+## Debugging issues
+- If you run into issues, the first place to look is the logs.  Client logs are available in the Unity IDE. Server logs are dropped in the `OutputFolder` specified in the MultiplayerSettings.json.
+- Check out additional information about [Locally debugging game servers](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/locally-debugging-game-servers-and-integration-with-playfab)
 
 ## PlayFabMulitiplayerAgent API reference
 
