@@ -194,3 +194,25 @@ public class AgentListener : MonoBehaviour {
     }
 }
  ```
+
+## Running Unity Server as a Linux executable
+
+You can use Unity to publish a Linux executable for your game server. This will allow you to use it on PlayFab Multiplayer Services using Ubuntu Linux Virtual Machines. You can find the instructions to deploy Linux based builds [here](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/deploying-linux-based-builds). Furthermore, you can debug your Linux game server locally using the instructions [here](https://github.com/PlayFab/LocalMultiplayerAgent/blob/master/linuxContainersOnWindows.md).
+
+To build the Unity Server as a Linux executable, you need to follow these instructions:
+
+- [Install Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/)
+- Make sure it's running [Linux Containers](https://docs.docker.com/docker-for-windows/#switch-between-windows-and-linux-containers)
+- You should mount one of your hard drives, instructions [here](https://docs.docker.com/docker-for-windows/#file-sharing)
+- Open and publish UnityServer as a Linux executable. Do not forget to *tick* "Server Build" on the Build window
+- As soon as your project is built, you need to make it into a container. Go to the folder where you published your Linux build and create the following Dockerfile, properly changing the file and folder names.
+
+```Dockerfile
+FROM ubuntu:18.04
+WORKDIR /game
+ADD UnityServer.x86_64 .
+ADD UnityServer_Data ./UnityServer_Data
+CMD ["/game/UnityServer.x86_64", "-nographics", "-batchmode"]
+```
+
+- You're now ready to build your image! If you want to develop locally, you can use `docker build -t myregistry.io/mygame:0.1 .` to build your game and test it with [LocalMultiplayerAgent](https://github.com/PlayFab/LocalMultiplayerAgent). Or, you can get the proper PlayFab container registry credentials (using [this](https://docs.microsoft.com/en-us/rest/api/playfab/multiplayer/multiplayerserver/getcontainerregistrycredentials?view=playfab-rest) API call or from the Builds page on PlayFab web site). Once you do that, you can `docker build/tag/push` your container image to the PlayFab container registry and spin game servers running it.
