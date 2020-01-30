@@ -11,6 +11,7 @@ This repository is the home of a custom game server example, made in unity3d, th
 - Basic or Intermediate knowledge of Unity
 - Recent version of the [PlayFab Game Server SDK](https://github.com/PlayFab/gsdk/tree/master/UnityGsdk)
 - When running locally you must have a copy of [Local Multiplayer Agent](https://github.com/PlayFab/LocalMultiplayerAgent)
+- It is recommended that you first run the [WindowsRunnerCSharp](https://github.com/PlayFab/gsdkSamples/blob/master/WindowsRunnerCSharp/README.md) sample.
 
 ## gsdk - Game Server SDK (aka Multiplayer Agent API)
 
@@ -28,20 +29,42 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
 
 ## Getting Started for Windows game servers using Windows Containers
 
+### Setup
 1. Make sure you have Docker for Windows installed, check [here](https://docs.docker.com/docker-for-windows/install/) for installation instructions. You should have configured it to use Windows Containers. 
-1. Download the repository
-1. Open the two projects. 
+1. Download the [repository](https://github.com/PlayFab/gsdkSamples)
+1. Open the two UnityMirror projects (UnityServer and UnityClient) and make sure they build. 
+
+### Running the Server
+1. Build the UnityServer project.
+    - Run Build from Unity IDE
+        - Target platform = Windows
+        - Architecture = x86_64
+        - Server Build = \<checked\>
+    - Navigate to the build output folder
+    - Select all files and then right click and select "Send to -> Compressed (zipped) Folder"
+    - Please bear in mind that you should not compress the folder containing the Unity output, just the files themselves.
 1. Open the folder where you have downloaded the *LocalMultiplayerAgent* and modify the *MultiplayerSettings.json* file. Set the following values: 
-    - RunContainers = true
+    - RunContainers = `true`
     - OutputFolder = A local path with enough space on your machine. Useful data for your game will be written there.
-    - LocalFilePath = Path to a zipped folder of the build output for the server project. Something like: F:\\MPSUnitySample\\Output\\game.zip
-    - StartGameCommand = C:\\Assets\\UnityServer.exe -batchmode -logFile C:\\GameLogs\\UnityEditor.log
+    - LocalFilePath = Path to the zip created above of the build output for the server project. 
+    - StartGameCommand = `C:\\Assets\\UnityServer.exe -batchmode -logFile C:\\GameLogs\\UnityEditor.log`
     - Within GamePort, set Number to 7777 and Protocol to TCP. Also make a note of the external port number, called NodePort
-1. Build the server (UnityServer) project. Compress the entire output and save it to a file (zip format), which path corresponds to the *LocalFilePath* that you edited above. When compressing bear in mind that you should not compress the folder containing the Unity output, just the files themselves.
 1. In PowerShell
-    - Run the LocalMultiplayerAgentSetup file in *agentfolder/setup.ps1* (you may need to open Powershell with admin permissions for this purpose)
-    - Run the Local Multiplayer Agent located in *agentfolder/MockVmAgent.exe*. Observe the output messages from the Agent and that the game is in *StandingBy* state.
-1. As soon as your Agent is receiving heartbeats, you can Build/Run or Run inside Editor the client (UnityClient) project. Observe that the game is in *Active* state. When the server finishes execution, your client will disconnect as well.
+    - Run the LocalMultiplayerAgentSetup file in *agentfolder/setup.ps1* (you may need to open Powershell with admin permissions for this purpose). If you get a signing violation, you may need to run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process`.
+    - Run the Local Multiplayer Agent located in *agentfolder/MockVmAgent.exe*.
+1. You will see the mock agent report state. Wait for reports to go from `Waiting for heartbeats from the game server.....` to `CurrentGameState: StandingBy` to `CurrentGameState: Active` then proceed to the next step
+
+### Running the client
+1. With the server running, open the UnityClient project in the Unity IDE.
+1. Click the menu button PlayFab->MakePlayFabSharedSettings
+1. In the PlayFabSharedSettings widget, set your [Title Id](https://docs.microsoft.com/en-us/gaming/playfab/personas/developer#retrieving-your-titleid). It is a hex number, generally 4 or 5 digits.
+1. Ensure your server is still running and in the Active state from the step above then click File->Build/Run or Run inside Editor the client (UnityClient) project. Observe that the game is in *Active* state. When the server finishes execution, your client will disconnect as well.
+
+## Debugging issues
+- Make sure the server is still running. It will shutdown after `NumHeartBeatsForTerminateResponse` heartbeats. If you would like more time, you can increase this value.
+- Check out the logs.  Client logs are available in the Unity IDE. Server logs are dropped in the `OutputFolder` specified in the MultiplayerSettings.json.
+- Check out additional information about [Locally debugging game servers](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/locally-debugging-game-servers-and-integration-with-playfab)
+
 
 ## PlayFabMulitiplayerAgent API reference
 
