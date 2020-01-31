@@ -27,7 +27,7 @@ There are two projects included in this repository.
 
 This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replacement for Unity's UNET Networking System. You can see Mirror's documentation [here](https://mirror-networking.com/docs/General/index.html).
 
-## Getting Started for Windows game servers using Windows Containers
+## Getting Started for Windows game servers using local Windows Containers
 
 ### Setup
 1. Make sure you have Docker for Windows installed, check [here](https://docs.docker.com/docker-for-windows/install/) for installation instructions. You should have configured it to use Windows Containers. 
@@ -64,6 +64,38 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
 - Make sure the server is still running. It will shutdown after `NumHeartBeatsForTerminateResponse` heartbeats. If you would like more time, you can increase this value.
 - Check out the logs.  Client logs are available in the Unity IDE. Server logs are dropped in the `OutputFolder` specified in the MultiplayerSettings.json.
 - Check out additional information about [Locally debugging game servers](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/locally-debugging-game-servers-and-integration-with-playfab)
+
+
+## Getting Started with a real VM.
+Once you have gotten a build running locally, you are ready to try uploading to a real VM.
+
+### Creating a build
+Follow the instructions for [Deploying PlayFab multiplayer server builds](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/deploying-playfab-multiplayer-server-builds). You will need to have the following settings in Game Manager, Powershell, or the HTTP API:
+* Information
+    * Build Name: \<Pick anything\>
+    * Virtual machine selection: D2v2
+    * Servers per machine: 1
+* Virtual Machine OS: Windows
+* Container Image: Windows Server Core
+* Assets: 
+    * \<Upload the asset package created above\>
+    * Mount path `C:\Assets`
+    * Start Command (Note you do not need the double backslash since it is no longer in JSON): `C:\Assets\UnityServer.exe -batchmode -logFile C:\GameLogs\UnityEditor.log`
+* Network:
+    * Port: 7777
+    * Name: game_port
+    * Protocol: TCP
+* Regions: Select any region
+    * Standby servers: 1
+    * Maximum servers: 2
+
+### Allocating a build
+1. Follow the [quickstart guide](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/quickstart-for-multiplayer-servers-api-powershell), but instead of using the provided test server as an asset, use the zipped folder you created in step 1.
+
+** TODO FILL ME IN **
+
+### Connecting to the build
+** TODO FILL ME IN **
 
 
 ## PlayFabMulitiplayerAgent API reference

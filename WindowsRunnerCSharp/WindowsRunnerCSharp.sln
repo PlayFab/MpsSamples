@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsRunnerCSharp", "WindowsRunnerCSharp\WindowsRunnerCSharp.csproj", "{F16CD088-CA7C-4926-A766-2B2C2F36C91D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsRunnerCSharpClient", "WindowsRunnerCSharpClient\WindowsRunnerCSharpClient.csproj", "{C14085C7-84CC-45E8-BEE3-8B34E9B46BFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -15,6 +17,10 @@ Global
 		{F16CD088-CA7C-4926-A766-2B2C2F36C91D}.Debug|x64.Build.0 = Debug|x64
 		{F16CD088-CA7C-4926-A766-2B2C2F36C91D}.Release|x64.ActiveCfg = Release|x64
 		{F16CD088-CA7C-4926-A766-2B2C2F36C91D}.Release|x64.Build.0 = Release|x64
+		{C14085C7-84CC-45E8-BEE3-8B34E9B46BFC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C14085C7-84CC-45E8-BEE3-8B34E9B46BFC}.Debug|x64.Build.0 = Debug|Any CPU
+		{C14085C7-84CC-45E8-BEE3-8B34E9B46BFC}.Release|x64.ActiveCfg = Release|Any CPU
+		{C14085C7-84CC-45E8-BEE3-8B34E9B46BFC}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
