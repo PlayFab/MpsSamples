@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
@@ -11,6 +12,7 @@ using PlayFab;
 using PlayFab.ClientModels;
 using PlayFab.MultiplayerModels;
 using PlayFab.QoS;
+using EmptyResponse = PlayFab.MultiplayerModels.EmptyResponse;
 
 namespace WindowsRunnerCSharpClient
 {
@@ -47,33 +49,40 @@ namespace WindowsRunnerCSharpClient
                 throw new Exception($"Login failed with HttpStatus={login.Error.HttpStatus}");
             }
             Console.WriteLine($"Logged in player {login.Result.PlayFabId} (CustomId={playerId})");
+            Console.WriteLine();
 
             // Measure QoS
-            PlayFabSettings.staticSettings.TitleId = titleId;              // TODO this makes me sad
-            await PlayFabClientAPI.LoginWithCustomIDAsync(loginRequest);   // TODO this makes me sad
-
-            PlayFabQosApi qosApi = new PlayFabQosApi();
-            QosResult qosResult = await qosApi.GetQosResultAsync(10000);
+            Stopwatch sw = Stopwatch.StartNew();
+            PlayFabQosApi qosApi = new PlayFabQosApi(settings, clientApi.authenticationContext);
+            QosResult qosResult = await qosApi.GetQosResultAsync(250, degreeOfParallelism:4, pingsPerRegion:10);
             if (qosResult.ErrorCode != 0)
             {
                 Console.WriteLine(qosResult.ErrorMessage);
                 throw new Exception($"QoS ping failed with ErrorCode={qosResult.ErrorCode}");
             }
-            Console.WriteLine("Pinged QoS servers with results:");
-            //string resultsStr = JsonSerializer.Serialize<List<QosRegionResult>>(qosResult.RegionResults); // TODO this doesn't work because they are fields
-            string resultsStr = string.Join(Environment.NewLine,
-                qosResult.RegionResults.Select(x => $"{x.Region} - {x.LatencyMs}ms"));
+            
+            Console.WriteLine($"Pinged QoS servers in {sw.ElapsedMilliseconds}ms with results:");
+            string resultsStr = JsonSerializer.Serialize(qosResult.RegionResults, new JsonSerializerOptions() {WriteIndented = true});
             Console.WriteLine(resultsStr);
+            int timeouts = qosResult.RegionResults.Sum(x => x.NumTimeouts);
+            Console.WriteLine(string.Join(Environment.NewLine,
+                qosResult.RegionResults.Select(x => $"{x.Region} - {x.LatencyMs}ms")));
+
+            Console.WriteLine($"NumTimeouts={timeouts}");
             Console.WriteLine();
             
             // Allocate a server
             string sessionId = Guid.NewGuid().ToString();
+            List<string> preferredRegions = qosResult.RegionResults
+                .Where(x => x.ErrorCode == (int) QosErrorCode.Success)
+                .Select(x => x.Region).ToList();
+            
             PlayFabMultiplayerInstanceAPI mpApi = new PlayFabMultiplayerInstanceAPI(settings, clientApi.authenticationContext);
             PlayFabResult<RequestMultiplayerServerResponse> server =
                 await mpApi.RequestMultiplayerServerAsync(new RequestMultiplayerServerRequest()
                     {
                         BuildId = buildId,
-                        PreferredRegions = qosResult.RegionResults.Select(x => x.Region).ToList(),
+                        PreferredRegions = preferredRegions,
                         SessionId = sessionId
                     }
                 );
