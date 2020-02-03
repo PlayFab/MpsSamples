@@ -22,7 +22,7 @@ namespace WindowsRunnerCSharpClient
     /// </summary>
     public class Program
     {
-        private static readonly HttpClient _httpClient = new HttpClient();
+        private static readonly HttpClient HttpClient = new HttpClient();
         
         public static Task Main(string[] args)
         {
@@ -96,7 +96,7 @@ namespace WindowsRunnerCSharpClient
             Console.WriteLine($"Allocated server {serverLoc}");
 
             // Issue Http request against the server
-            using (HttpResponseMessage getResult = await _httpClient.GetAsync("http://" + serverLoc))
+            using (HttpResponseMessage getResult = await HttpClient.GetAsync("http://" + serverLoc))
             {
                 getResult.EnsureSuccessStatusCode();
                 
