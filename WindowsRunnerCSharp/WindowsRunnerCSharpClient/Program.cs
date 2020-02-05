@@ -31,7 +31,7 @@ namespace WindowsRunnerCSharpClient
             return rootCommand.InvokeAsync(args);
         }
 
-        private static async Task Run(string titleId, string playerId, string buildId, string region)
+        private static async Task Run(string titleId, string playerId, string buildId, string region, bool isDetail)
         {
             PlayFabApiSettings settings = new PlayFabApiSettings() {TitleId = titleId};
             PlayFabClientInstanceAPI clientApi = new PlayFabClientInstanceAPI(settings);
@@ -62,8 +62,14 @@ namespace WindowsRunnerCSharpClient
             }
             
             Console.WriteLine($"Pinged QoS servers in {sw.ElapsedMilliseconds}ms with results:");
-            string resultsStr = JsonSerializer.Serialize(qosResult.RegionResults, new JsonSerializerOptions() {WriteIndented = true});
-            Console.WriteLine(resultsStr);
+
+            if (isDetail)
+            {
+                string resultsStr = JsonSerializer.Serialize(qosResult.RegionResults,
+                    new JsonSerializerOptions() {WriteIndented = true});
+                Console.WriteLine(resultsStr);
+            }
+
             int timeouts = qosResult.RegionResults.Sum(x => x.NumTimeouts);
             Console.WriteLine(string.Join(Environment.NewLine,
                 qosResult.RegionResults.Select(x => $"{x.Region} - {x.LatencyMs}ms")));
