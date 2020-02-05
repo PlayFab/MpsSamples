@@ -6,13 +6,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.ClientModels;
 using PlayFab.MultiplayerModels;
 using PlayFab.QoS;
-using EmptyResponse = PlayFab.MultiplayerModels.EmptyResponse;
 
 namespace WindowsRunnerCSharpClient
 {
@@ -31,7 +30,7 @@ namespace WindowsRunnerCSharpClient
             return rootCommand.InvokeAsync(args);
         }
 
-        private static async Task Run(string titleId, string playerId, string buildId, string region, bool isDetail)
+        private static async Task Run(string titleId, string playerId, string buildId, bool verbose)
         {
             PlayFabApiSettings settings = new PlayFabApiSettings() {TitleId = titleId};
             PlayFabClientInstanceAPI clientApi = new PlayFabClientInstanceAPI(settings);
@@ -63,10 +62,9 @@ namespace WindowsRunnerCSharpClient
             
             Console.WriteLine($"Pinged QoS servers in {sw.ElapsedMilliseconds}ms with results:");
 
-            if (isDetail)
+            if (verbose)
             {
-                string resultsStr = JsonSerializer.Serialize(qosResult.RegionResults,
-                    new JsonSerializerOptions() {WriteIndented = true});
+                string resultsStr = JsonConvert.SerializeObject(qosResult.RegionResults, Formatting.Indented);
                 Console.WriteLine(resultsStr);
             }
 

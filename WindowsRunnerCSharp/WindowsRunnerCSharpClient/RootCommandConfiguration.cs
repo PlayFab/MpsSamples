@@ -10,7 +10,7 @@ namespace WindowsRunnerCSharpClient
     /// </summary>
     public static class RootCommandConfiguration
     {
-        public static RootCommand GenerateCommand(Func<string, string, string, string, bool, Task> onInvoke)
+        public static RootCommand GenerateCommand(Func<string, string, string, bool, Task> onInvoke)
         {
             var rootCommand = new RootCommand()
             {
@@ -31,8 +31,8 @@ namespace WindowsRunnerCSharpClient
                     Argument = new Argument<string>(),
                     Required = true
                 },
-                new Option("--detail",
-                    "When passed, print detailed QoS results")
+                new Option("--verbose",
+                    "When passed, print verbose results")
                 {
                     Argument = new Argument<bool>(),
                     Required = false
