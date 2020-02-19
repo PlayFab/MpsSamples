@@ -5,14 +5,9 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
-        <!--<PackageReference Include="PlayFabAllSDK" Version="1.65.200121" />-->
+        <PackageReference Include="PlayFabAllSDK" Version="1.66.200218" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
         <PackageReference Include="System.CommandLine.Experimental" Version="0.3.0-alpha.19577.1" />
-    </ItemGroup>
-    <ItemGroup>
-      <Reference Include="PlayFabAllSDK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\tmpdeps\netstandard2.0\PlayFabAllSDK.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>
