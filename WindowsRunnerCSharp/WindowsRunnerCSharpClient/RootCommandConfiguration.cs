@@ -26,7 +26,7 @@ namespace WindowsRunnerCSharpClient
                     Argument = new Argument<string>(defaultValue: () => Guid.NewGuid().ToString())
                 },
                 new Option("--buildId",
-                    "Build id, if not specified a GUID will be used")
+                    "Build id (GUID)")
                 {
                     Argument = new Argument<string>(),
                     Required = true
