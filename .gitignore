@@ -9,6 +9,7 @@
 *.sln.docstates
 *.lock.json
 .vscode/
+.idea/
 
 #Ignore generated visual studio projects
 *_gen.vcxproj*

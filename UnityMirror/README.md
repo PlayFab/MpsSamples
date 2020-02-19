@@ -27,7 +27,7 @@ There are two projects included in this repository.
 
 This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replacement for Unity's UNET Networking System. You can see Mirror's documentation [here](https://mirror-networking.com/docs/General/index.html).
 
-## Getting Started for Windows game servers using Windows Containers
+## Getting Started for Windows game servers using local Windows Containers
 
 ### Setup
 1. Make sure you have Docker for Windows installed, check [here](https://docs.docker.com/docker-for-windows/install/) for installation instructions. You should have configured it to use Windows Containers. 
