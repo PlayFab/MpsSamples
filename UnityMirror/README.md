@@ -210,8 +210,7 @@ To build the Unity Server as a Linux executable, you need to follow these instru
 ```Dockerfile
 FROM ubuntu:18.04
 WORKDIR /game
-ADD UnityServer.x86_64 .
-ADD UnityServer_Data ./UnityServer_Data
+ADD . .
 CMD ["/game/UnityServer.x86_64", "-nographics", "-batchmode"]
 ```
 
