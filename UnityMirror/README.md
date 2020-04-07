@@ -2,16 +2,17 @@
 
 ## Overview
 
-This repository is the home of a custom game server example, made in unity3d, that shows how to create a game server that can talk to PlayFab's new multiplayer platform.   There are a couple key components such as the MultiPlayer Agent and a sample game client in this repository.  The purpose of this project is to provide you with an out-of-box example that you, as a game developer, can use as a starting point for your own game server.  In addition, we will identify in this document key parts of this project so that you can integrate what is needed into an existing project.
+This repository is the home of a custom game server example, made in Unity game engine, that shows how to create a game server that can talk to PlayFab's new multiplayer platform. There are a couple key components such as the MultiPlayer Agent API (GSDK) and a sample game client in this repository.  The purpose of this project is to provide you with an out-of-box example that you, as a game developer, can use as a starting point for your own game server.  In addition, we will identify in this document key parts of this project so that you can integrate what is needed into an existing project.
 
 ## Prerequisites
 
 - Unity Engine (tested with 2019.2.18f1)
 - Understanding of C# language
 - Basic or Intermediate knowledge of Unity
-- Recent version of the [PlayFab Game Server SDK](https://github.com/PlayFab/gsdk/tree/master/UnityGsdk)
+- Recent version of the [PlayFab Game Server SDK](https://github.com/PlayFab/gsdk/tree/master/UnityGsdk) - included
+- [PlayFab Unity SDK](https://github.com/PlayFab/UnitySDK) - included in the sample
 - When running locally you must have a copy of [Local Multiplayer Agent](https://github.com/PlayFab/LocalMultiplayerAgent)
-- It is recommended that you first run the [WindowsRunnerCSharp](https://github.com/PlayFab/gsdkSamples/blob/master/WindowsRunnerCSharp/README.md) sample.
+- It is recommended that you first run the [WindowsRunnerCSharp](https://github.com/PlayFab/gsdkSamples/blob/master/WindowsRunnerCSharp/README.md) sample to get acquainted with the GSDK.
 
 ## gsdk - Game Server SDK (aka Multiplayer Agent API)
 
@@ -35,6 +36,8 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
 1. Open the two UnityMirror projects (UnityServer and UnityClient) and make sure they build. 
 
 ### Running the Server
+1. Configure PlayFab integration.
+    - This sample integrates with PlayFab API. To configure your credentials, you should use `Window->PlayFab->Editor Extensions` from the Unity IDE.
 1. Build the UnityServer project.
     - Run Build from Unity IDE
         - Target platform = Windows

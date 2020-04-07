@@ -1,18 +1,18 @@
-﻿using System;
-using System.Globalization;
-using PlayFab.Internal;
-
-namespace PlayFab.Json
+﻿namespace PlayFab.MultiplayerAgent.Helpers
 {
-    public class SimpleJsonInstance : ISerializerPlugin
+    using System;
+    using System.Globalization;
+    using System.Reflection;
+
+    public class SimpleJsonInstance
     {
         /// <summary>
         /// Most users shouldn't access this
         /// JsonWrapper.Serialize, and JsonWrapper.Deserialize will always use it automatically (Unless you deliberately mess with them)
         /// Any Serialization of an object in the PlayFab namespace should just use JsonWrapper
         /// </summary>
-        public static PlayFabSimpleJsonCuztomization ApiSerializerStrategy = new PlayFabSimpleJsonCuztomization();
-        public class PlayFabSimpleJsonCuztomization : PocoJsonSerializerStrategy
+        public static PlayFabSimpleJsonCustomization ApiSerializerStrategy = new PlayFabSimpleJsonCustomization();
+        public class PlayFabSimpleJsonCustomization : PocoJsonSerializerStrategy
         {
             /// <summary>
             /// Convert the json value into the destination field/property
@@ -31,14 +31,14 @@ namespace PlayFab.Json
                 else if (type == typeof(DateTime))
                 {
                     DateTime output;
-                    var result = DateTime.TryParseExact(valueStr, PlayFabUtil._defaultDateTimeFormats, CultureInfo.InvariantCulture, PlayFabUtil.DateTimeStyles, out output);
+                    var result = DateTime.TryParseExact(valueStr, _defaultDateTimeFormats, CultureInfo.InvariantCulture, _dateTimeStyles, out output);
                     if (result)
                         return output;
                 }
                 else if (type == typeof(DateTimeOffset))
                 {
                     DateTimeOffset output;
-                    var result = DateTimeOffset.TryParseExact(valueStr, PlayFabUtil._defaultDateTimeFormats, CultureInfo.InvariantCulture, PlayFabUtil.DateTimeStyles, out output);
+                    var result = DateTimeOffset.TryParseExact(valueStr, _defaultDateTimeFormats, CultureInfo.InvariantCulture, _dateTimeStyles, out output);
                     if (result)
                         return output;
                 }
@@ -63,12 +63,12 @@ namespace PlayFab.Json
                 }
                 else if (input is DateTime)
                 {
-                    output = ((DateTime)input).ToString(PlayFabUtil._defaultDateTimeFormats[PlayFabUtil.DEFAULT_UTC_OUTPUT_INDEX], CultureInfo.InvariantCulture);
+                    output = ((DateTime)input).ToString(_defaultDateTimeFormats[DEFAULT_UTC_OUTPUT_INDEX], CultureInfo.InvariantCulture);
                     return true;
                 }
                 else if (input is DateTimeOffset)
                 {
-                    output = ((DateTimeOffset)input).ToString(PlayFabUtil._defaultDateTimeFormats[PlayFabUtil.DEFAULT_UTC_OUTPUT_INDEX], CultureInfo.InvariantCulture);
+                    output = ((DateTimeOffset)input).ToString(_defaultDateTimeFormats[DEFAULT_UTC_OUTPUT_INDEX], CultureInfo.InvariantCulture);
                     return true;
                 }
                 else if (input is TimeSpan)
@@ -78,6 +78,31 @@ namespace PlayFab.Json
                 }
                 return base.TrySerializeKnownTypes(input, out output);
             }
+            
+            public static readonly string[] _defaultDateTimeFormats = new string[]{ // All parseable ISO 8601 formats for DateTime.[Try]ParseExact - Lets us deserialize any legacy timestamps in one of these formats
+                // These are the standard format with ISO 8601 UTC markers (T/Z)
+                "yyyy-MM-ddTHH:mm:ss.FFFFFFZ",
+                "yyyy-MM-ddTHH:mm:ss.FFFFZ",
+                "yyyy-MM-ddTHH:mm:ss.FFFZ", // DEFAULT_UTC_OUTPUT_INDEX
+                "yyyy-MM-ddTHH:mm:ss.FFZ",
+                "yyyy-MM-ddTHH:mm:ssZ",
+
+                // These are the standard format without ISO 8601 UTC markers (T/Z)
+                "yyyy-MM-dd HH:mm:ss.FFFFFF",
+                "yyyy-MM-dd HH:mm:ss.FFFF",
+                "yyyy-MM-dd HH:mm:ss.FFF",
+                "yyyy-MM-dd HH:mm:ss.FF", // DEFAULT_LOCAL_OUTPUT_INDEX
+                "yyyy-MM-dd HH:mm:ss",
+
+                // These are the result of an input bug, which we now have to support as long as the db has entries formatted like this
+                "yyyy-MM-dd HH:mm.ss.FFFF",
+                "yyyy-MM-dd HH:mm.ss.FFF",
+                "yyyy-MM-dd HH:mm.ss.FF",
+                "yyyy-MM-dd HH:mm.ss",
+            };
+
+            public const int DEFAULT_UTC_OUTPUT_INDEX = 2; // The default format everybody should use
+            private static DateTimeStyles _dateTimeStyles = DateTimeStyles.RoundtripKind;
         }
 
         public T DeserializeObject<T>(string json)

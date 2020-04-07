@@ -9,7 +9,7 @@ using PlayFab.MultiplayerAgent.Model;
 public class AgentListener : MonoBehaviour {
     private List<ConnectedPlayer> _connectedPlayers;
     public UnityNetworkServer UNetServer;
-    public bool Debugging = false;
+    public bool Debugging = true;
     // Use this for initialization
     void Start () {
         _connectedPlayers = new List<ConnectedPlayer>();

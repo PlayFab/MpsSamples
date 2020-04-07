@@ -69,7 +69,7 @@ using System.Text;
 // ReSharper disable LoopCanBeConvertedToQuery
 // ReSharper disable RedundantExplicitArrayCreation
 // ReSharper disable SuggestUseVarKeywordEvident
-namespace PlayFab.Json
+namespace PlayFab.MultiplayerAgent.Helpers
 {
     public enum NullValueHandling
     {
