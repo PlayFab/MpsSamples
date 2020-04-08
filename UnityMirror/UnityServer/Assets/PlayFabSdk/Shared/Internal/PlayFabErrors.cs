@@ -453,25 +453,61 @@ namespace PlayFab
         EntityAPIKeyOrSecretInvalid = 1449,
         EconomyServiceUnavailable = 1450,
         EconomyServiceInternalError = 1451,
-        KustoProxyQueryRateLimitExceeded = 1455,
-        EntityAPIKeyCreationDisabledForEntity = 1456,
-        StudioCreationRateLimited = 1457,
-        StudioCreationInProgress = 1458,
-        DuplicateStudioName = 1459,
-        StudioNotFound = 1460,
-        StudioDeletionInProgress = 1461,
-        StudioDeactivated = 1462,
+        QueryRateLimitExceeded = 1452,
+        EntityAPIKeyCreationDisabledForEntity = 1453,
+        ForbiddenByEntityPolicy = 1454,
+        UpdateInventoryRateLimitExceeded = 1455,
+        StudioCreationRateLimited = 1456,
+        StudioCreationInProgress = 1457,
+        DuplicateStudioName = 1458,
+        StudioNotFound = 1459,
+        StudioDeleted = 1460,
+        StudioDeactivated = 1461,
+        StudioActivated = 1462,
         TitleCreationRateLimited = 1463,
         TitleCreationInProgress = 1464,
         DuplicateTitleName = 1465,
-        TitleNotFound = 1466,
-        TitleDeletionInProgress = 1467,
+        TitleActivationRateLimited = 1466,
+        TitleActivationInProgress = 1467,
         TitleDeactivated = 1468,
-        TitleAlreadyActivated = 1469,
+        TitleActivated = 1469,
         CloudScriptAzureFunctionsExecutionTimeLimitExceeded = 1470,
         CloudScriptAzureFunctionsArgumentSizeExceeded = 1471,
         CloudScriptAzureFunctionsReturnSizeExceeded = 1472,
         CloudScriptAzureFunctionsHTTPRequestError = 1473,
+        VirtualCurrencyBetaGetError = 1474,
+        VirtualCurrencyBetaCreateError = 1475,
+        VirtualCurrencyBetaInitialDepositSaveError = 1476,
+        VirtualCurrencyBetaSaveError = 1477,
+        VirtualCurrencyBetaDeleteError = 1478,
+        VirtualCurrencyBetaRestoreError = 1479,
+        VirtualCurrencyBetaSaveConflict = 1480,
+        VirtualCurrencyBetaUpdateError = 1481,
+        InsightsManagementDatabaseNotFound = 1482,
+        InsightsManagementOperationNotFound = 1483,
+        InsightsManagementErrorPendingOperationExists = 1484,
+        InsightsManagementSetPerformanceLevelInvalidParameter = 1485,
+        InsightsManagementSetStorageRetentionInvalidParameter = 1486,
+        InsightsManagementGetStorageUsageInvalidParameter = 1487,
+        InsightsManagementGetOperationStatusInvalidParameter = 1488,
+        DuplicatePurchaseTransactionId = 1489,
+        EvaluationModePlayerCountExceeded = 1490,
+        GetPlayersInSegmentRateLimitExceeded = 1491,
+        CloudScriptFunctionNameSizeExceeded = 1492,
+        InsightsManagementTitleInEvaluationMode = 1493,
+        CloudScriptAzureFunctionsQueueRequestError = 1494,
+        EvaluationModeTitleCountExceeded = 1495,
+        InsightsManagementTitleNotInFlight = 1496,
+        LimitNotFound = 1497,
+        LimitNotAvailableViaAPI = 1498,
+        InsightsManagementSetStorageRetentionBelowMinimum = 1499,
+        InsightsManagementSetStorageRetentionAboveMaximum = 1500,
+        AppleNotEnabledForTitle = 1501,
+        InsightsManagementNewActiveEventExportLimitInvalid = 1502,
+        InsightsManagementSetPerformanceRateLimited = 1503,
+        PartyRequestsThrottledFromRateLimiter = 1504,
+        XboxServiceTooManyRequests = 1505,
+        NintendoSwitchNotEnabledForTitle = 1506,
         MatchmakingEntityInvalid = 2001,
         MatchmakingPlayerAttributesInvalid = 2002,
         MatchmakingQueueNotFound = 2016,
@@ -507,23 +543,54 @@ namespace PlayFab
         CatalogFeatureDisabled = 4009,
         CatalogConfigInvalid = 4010,
         CatalogUnauthorized = 4011,
+        CatalogItemTypeInvalid = 4012,
+        CatalogBadRequest = 4013,
+        CatalogTooManyRequests = 4014,
         ExportInvalidStatusUpdate = 5000,
         ExportInvalidPrefix = 5001,
         ExportBlobContainerDoesNotExist = 5002,
-        ExportEventNameNotFound = 5003,
-        ExportExportTitleIdNotFound = 5004,
+        ExportNotFound = 5004,
         ExportCouldNotUpdate = 5005,
         ExportInvalidStorageType = 5006,
         ExportAmazonBucketDoesNotExist = 5007,
         ExportInvalidBlobStorage = 5008,
         ExportKustoException = 5009,
-        ExportKustoExceptionPartialErrorOnNewExport = 5010,
-        ExportKustoExceptionEdit = 5011,
         ExportKustoConnectionFailed = 5012,
         ExportUnknownError = 5013,
         ExportCantEditPendingExport = 5014,
         ExportLimitExports = 5015,
-        ExportLimitEvents = 5016
+        ExportLimitEvents = 5016,
+        ExportInvalidPartitionStatusModification = 5017,
+        ExportCouldNotCreate = 5018,
+        ExportNoBackingDatabaseFound = 5019,
+        ExportCouldNotDelete = 5020,
+        ExportCannotDetermineEventQuery = 5021,
+        ExportInvalidQuerySchemaModification = 5022,
+        ExportQuerySchemaMissingRequiredColumns = 5023,
+        ExportCannotParseQuery = 5024,
+        ExportControlCommandsNotAllowed = 5025,
+        ExportQueryMissingTableReference = 5026,
+        TitleNotEnabledForParty = 6000,
+        PartyVersionNotFound = 6001,
+        MultiplayerServerBuildReferencedByMatchmakingQueue = 6002,
+        ExperimentationExperimentStopped = 7000,
+        ExperimentationExperimentRunning = 7001,
+        ExperimentationExperimentNotFound = 7002,
+        ExperimentationExperimentNeverStarted = 7003,
+        ExperimentationExperimentDeleted = 7004,
+        ExperimentationClientTimeout = 7005,
+        ExperimentationInvalidVariantConfiguration = 7006,
+        ExperimentationInvalidVariableConfiguration = 7007,
+        ExperimentInvalidId = 7008,
+        ExperimentationNoScorecard = 7009,
+        ExperimentationTreatmentAssignmentFailed = 7010,
+        ExperimentationTreatmentAssignmentDisabled = 7011,
+        ExperimentationInvalidDuration = 7012,
+        ExperimentationMaxExperimentsReached = 7013,
+        ExperimentationExperimentSchedulingInProgress = 7014,
+        MaxActionDepthExceeded = 8000,
+        TitleNotOnUpdatedPricingPlan = 9000,
+        SnapshotNotFound = 11000
     }
 
     public class PlayFabError
@@ -533,30 +600,35 @@ namespace PlayFab
         public string HttpStatus;
         public PlayFabErrorCode Error;
         public string ErrorMessage;
-        public Dictionary<string, List<string> > ErrorDetails;
+        public Dictionary<string, List<string>> ErrorDetails;
         public object CustomData;
 
-        public override string ToString() {
-            var sb = new System.Text.StringBuilder();
-            if (ErrorDetails != null) {
-                foreach (var kv in ErrorDetails) {
-                    sb.Append(kv.Key);
-                    sb.Append(": ");
-                    sb.Append(string.Join(", ", kv.Value.ToArray()));
-                    sb.Append(" | ");
-                }
-            }
-            return string.Format("{0} PlayFabError({1}, {2}, {3} {4}", ApiEndpoint, Error, ErrorMessage, HttpCode, HttpStatus) + (sb.Length > 0 ? " - Details: " + sb.ToString() + ")" : ")");
+        public override string ToString()
+        {
+            return GenerateErrorReport();
         }
 
         [ThreadStatic]
         private static StringBuilder _tempSb;
+        /// <summary>
+        /// This converts the PlayFabError into a human readable string describing the error.
+        /// If error is not found, it will return the http code, status, and error
+        /// </summary>
+        /// <returns>A description of the error that we just incur.</returns>
         public string GenerateErrorReport()
         {
             if (_tempSb == null)
                 _tempSb = new StringBuilder();
             _tempSb.Length = 0;
-            _tempSb.Append(ApiEndpoint).Append(": ").Append(ErrorMessage);
+            if (String.IsNullOrEmpty(ErrorMessage))
+            {
+                _tempSb.Append(ApiEndpoint).Append(": ").Append("Http Code: ").Append(HttpCode.ToString()).Append("\nHttp Status: ").Append(HttpStatus).Append("\nError: ").Append(Error.ToString()).Append("\n");
+            }
+            else
+            {
+                _tempSb.Append(ApiEndpoint).Append(": ").Append(ErrorMessage);
+            }
+
             if (ErrorDetails != null)
                 foreach (var pair in ErrorDetails)
                     foreach (var msg in pair.Value)
@@ -576,6 +648,8 @@ namespace PlayFab
 
     public enum PlayFabExceptionCode
     {
+        AuthContextRequired,
+        BuildError,
         DeveloperKeyNotSet,
         EntityTokenNotSet,
         NotLoggedIn,

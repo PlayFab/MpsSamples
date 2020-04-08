@@ -62,7 +62,8 @@ namespace PlayFab.MultiplayerModels
         WestEurope,
         WestUs,
         ChinaEast2,
-        ChinaNorth2
+        ChinaNorth2,
+        SouthAfricaNorth
     }
 
     public enum AzureVmFamily
@@ -101,6 +102,40 @@ namespace PlayFab.MultiplayerModels
     }
 
     [Serializable]
+    public class BuildAliasDetailsResponse : PlayFabResultCommon
+    {
+        /// <summary>
+        /// The guid string alias Id of the alias to be created or updated.
+        /// </summary>
+        public string AliasId;
+        /// <summary>
+        /// The alias name.
+        /// </summary>
+        public string AliasName;
+        /// <summary>
+        /// Array of build selection criteria.
+        /// </summary>
+        public List<BuildSelectionCriterion> BuildSelectionCriteria;
+        /// <summary>
+        /// The page size on the response.
+        /// </summary>
+        public int PageSize;
+        /// <summary>
+        /// The skip token for the paged response.
+        /// </summary>
+        public string SkipToken;
+    }
+
+    [Serializable]
+    public class BuildAliasParams : PlayFabBaseModel
+    {
+        /// <summary>
+        /// The guid string alias ID to use for the request.
+        /// </summary>
+        public string AliasId;
+    }
+
+    [Serializable]
     public class BuildRegion : PlayFabBaseModel
     {
         /// <summary>
@@ -108,20 +143,24 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public CurrentServerStats CurrentServerStats;
         /// <summary>
+        /// Optional settings to control dynamic adjustment of standby target
+        /// </summary>
+        public DynamicStandbySettings DynamicStandbySettings;
+        /// <summary>
         /// The maximum number of multiplayer servers for the region.
         /// </summary>
         public int MaxServers;
         /// <summary>
         /// The build region.
         /// </summary>
-        public AzureRegion? Region;
+        public string Region;
         /// <summary>
-        /// The number of standby multiplayer servers for the region.
+        /// The target number of standby multiplayer servers for the region.
         /// </summary>
         public int StandbyServers;
         /// <summary>
         /// The status of multiplayer servers in the build region. Valid values are - Unknown, Initialized, Deploying, Deployed,
-        /// Unhealthy.
+        /// Unhealthy, Deleting, Deleted.
         /// </summary>
         public string Status;
     }
@@ -130,17 +169,30 @@ namespace PlayFab.MultiplayerModels
     public class BuildRegionParams : PlayFabBaseModel
     {
         /// <summary>
+        /// Optional settings to control dynamic adjustment of standby target. If not specified, dynamic standby is disabled
+        /// </summary>
+        public DynamicStandbySettings DynamicStandbySettings;
+        /// <summary>
         /// The maximum number of multiplayer servers for the region.
         /// </summary>
         public int MaxServers;
         /// <summary>
         /// The build region.
         /// </summary>
-        public AzureRegion Region;
+        public string Region;
         /// <summary>
         /// The number of standby multiplayer servers for the region.
         /// </summary>
         public int StandbyServers;
+    }
+
+    [Serializable]
+    public class BuildSelectionCriterion : PlayFabBaseModel
+    {
+        /// <summary>
+        /// Dictionary of build ids and their respective weights for distribution of allocation requests.
+        /// </summary>
+        public Dictionary<string,uint> BuildWeightDistribution;
     }
 
     [Serializable]
@@ -192,6 +244,29 @@ namespace PlayFab.MultiplayerModels
     {
     }
 
+    /// <summary>
+    /// Cancels all backfill tickets of which the player is a member in a given queue that are not cancelled or matched. This
+    /// API is useful if you lose track of what tickets the player is a member of (if the server crashes for instance) and want
+    /// to "reset".
+    /// </summary>
+    [Serializable]
+    public class CancelAllServerBackfillTicketsForPlayerRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// The entity key of the player whose backfill tickets should be canceled.
+        /// </summary>
+        public EntityKey Entity;
+        /// <summary>
+        /// The name of the queue from which a player's backfill tickets should be canceled.
+        /// </summary>
+        public string QueueName;
+    }
+
+    [Serializable]
+    public class CancelAllServerBackfillTicketsForPlayerResult : PlayFabResultCommon
+    {
+    }
+
     public enum CancellationReason
     {
         Requested,
@@ -225,6 +300,32 @@ namespace PlayFab.MultiplayerModels
 
     [Serializable]
     public class CancelMatchmakingTicketResult : PlayFabResultCommon
+    {
+    }
+
+    /// <summary>
+    /// Only servers can cancel a backfill ticket. The ticket can be in three different states when it is cancelled. 1: the
+    /// ticket is matching. If the ticket is cancelled, it will stop matching. 2: the ticket is matched. A matched ticket cannot
+    /// be cancelled. 3: the ticket is already cancelled and nothing happens. There may be race conditions between the ticket
+    /// getting matched and the server making a cancellation request. The server must handle the possibility that the cancel
+    /// request fails if a match is found before the cancellation request is processed. We do not allow resubmitting a cancelled
+    /// ticket. Create a new ticket instead.
+    /// </summary>
+    [Serializable]
+    public class CancelServerBackfillTicketRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// The name of the queue the ticket is in.
+        /// </summary>
+        public string QueueName;
+        /// <summary>
+        /// The Id of the ticket to find a match for.
+        /// </summary>
+        public string TicketId;
+    }
+
+    [Serializable]
+    public class CancelServerBackfillTicketResult : PlayFabResultCommon
     {
     }
 
@@ -272,7 +373,8 @@ namespace PlayFab.MultiplayerModels
     {
         ManagedWindowsServerCore,
         CustomLinux,
-        ManagedWindowsServerCorePreview
+        ManagedWindowsServerCorePreview,
+        Invalid
     }
 
     [Serializable]
@@ -298,7 +400,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The AzureRegion
         /// </summary>
-        public AzureRegion? Region;
+        public string Region;
         /// <summary>
         /// The total core capacity for the (Region, VmFamily)
         /// </summary>
@@ -307,6 +409,22 @@ namespace PlayFab.MultiplayerModels
         /// The AzureVmFamily
         /// </summary>
         public AzureVmFamily? VmFamily;
+    }
+
+    /// <summary>
+    /// Creates a multiplayer server build alias and returns the created alias.
+    /// </summary>
+    [Serializable]
+    public class CreateBuildAliasRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// The alias name.
+        /// </summary>
+        public string AliasName;
+        /// <summary>
+        /// Array of build selection criteria.
+        /// </summary>
+        public List<BuildSelectionCriterion> BuildSelectionCriteria;
     }
 
     /// <summary>
@@ -328,19 +446,9 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public ContainerImageReference ContainerImageReference;
         /// <summary>
-        /// The name of the container repository.
-        /// </summary>
-        [Obsolete("Use 'ContainerImageReference' instead", false)]
-        public string ContainerRepositoryName;
-        /// <summary>
         /// The container command to run when the multiplayer server has been allocated, including any arguments.
         /// </summary>
         public string ContainerRunCommand;
-        /// <summary>
-        /// The tag for the container.
-        /// </summary>
-        [Obsolete("Use 'ContainerImageReference' instead", false)]
-        public string ContainerTag;
         /// <summary>
         /// The list of game assets related to the build.
         /// </summary>
@@ -351,7 +459,7 @@ namespace PlayFab.MultiplayerModels
         public List<GameCertificateReferenceParams> GameCertificateReferences;
         /// <summary>
         /// Metadata to tag the build. The keys are case insensitive. The build metadata is made available to the server through
-        /// Game Server SDK (GSDK).
+        /// Game Server SDK (GSDK).Constraints: Maximum number of keys: 30, Maximum key length: 50, Maximum value length: 100
         /// </summary>
         public Dictionary<string,string> Metadata;
         /// <summary>
@@ -416,6 +524,10 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public int MultiplayerServerCountPerVm;
         /// <summary>
+        /// The OS platform used for running the game process.
+        /// </summary>
+        public string OsPlatform;
+        /// <summary>
         /// The ports the build is mapped on.
         /// </summary>
         public List<Port> Ports;
@@ -423,6 +535,10 @@ namespace PlayFab.MultiplayerModels
         /// The region configuration for the build.
         /// </summary>
         public List<BuildRegion> RegionConfigurations;
+        /// <summary>
+        /// The type of game server being hosted.
+        /// </summary>
+        public string ServerType;
         /// <summary>
         /// The VM size the build was created on.
         /// </summary>
@@ -452,8 +568,17 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public List<GameCertificateReferenceParams> GameCertificateReferences;
         /// <summary>
+        /// The directory containing the game executable. This would be the start path of the game assets that contain the main game
+        /// server executable. If not provided, a best effort will be made to extract it from the start game command.
+        /// </summary>
+        public string GameWorkingDirectory;
+        /// <summary>
+        /// The instrumentation configuration for the build.
+        /// </summary>
+        public InstrumentationConfiguration InstrumentationConfiguration;
+        /// <summary>
         /// Metadata to tag the build. The keys are case insensitive. The build metadata is made available to the server through
-        /// Game Server SDK (GSDK).
+        /// Game Server SDK (GSDK).Constraints: Maximum number of keys: 30, Maximum key length: 50, Maximum value length: 100
         /// </summary>
         public Dictionary<string,string> Metadata;
         /// <summary>
@@ -506,6 +631,15 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public List<GameCertificateReference> GameCertificateReferences;
         /// <summary>
+        /// The directory containing the game executable. This would be the start path of the game assets that contain the main game
+        /// server executable. If not provided, a best effort will be made to extract it from the start game command.
+        /// </summary>
+        public string GameWorkingDirectory;
+        /// <summary>
+        /// The instrumentation configuration for this build.
+        /// </summary>
+        public InstrumentationConfiguration InstrumentationConfiguration;
+        /// <summary>
         /// The metadata of the build.
         /// </summary>
         public Dictionary<string,string> Metadata;
@@ -514,6 +648,10 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public int MultiplayerServerCountPerVm;
         /// <summary>
+        /// The OS platform used for running the game process.
+        /// </summary>
+        public string OsPlatform;
+        /// <summary>
         /// The ports the build is mapped on.
         /// </summary>
         public List<Port> Ports;
@@ -521,6 +659,10 @@ namespace PlayFab.MultiplayerModels
         /// The region configuration for the build.
         /// </summary>
         public List<BuildRegion> RegionConfigurations;
+        /// <summary>
+        /// The type of game server being hosted.
+        /// </summary>
+        public string ServerType;
         /// <summary>
         /// The command to run when the multiplayer server has been allocated, including any arguments.
         /// </summary>
@@ -582,7 +724,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The region of virtual machine to create the remote user for.
         /// </summary>
-        public AzureRegion Region;
+        public string Region;
         /// <summary>
         /// The username to create the remote user with.
         /// </summary>
@@ -608,6 +750,39 @@ namespace PlayFab.MultiplayerModels
         /// The username for the remote user that was created.
         /// </summary>
         public string Username;
+    }
+
+    /// <summary>
+    /// The server specifies all the members, their teams and their attributes, and the server details if applicable.
+    /// </summary>
+    [Serializable]
+    public class CreateServerBackfillTicketRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// How long to attempt matching this ticket in seconds.
+        /// </summary>
+        public int GiveUpAfterSeconds;
+        /// <summary>
+        /// The users who will be part of this ticket, along with their team assignments.
+        /// </summary>
+        public List<MatchmakingPlayerWithTeamAssignment> Members;
+        /// <summary>
+        /// The Id of a match queue.
+        /// </summary>
+        public string QueueName;
+        /// <summary>
+        /// The details of the server the members are connected to.
+        /// </summary>
+        public ServerDetails ServerDetails;
+    }
+
+    [Serializable]
+    public class CreateServerBackfillTicketResult : PlayFabResultCommon
+    {
+        /// <summary>
+        /// The Id of the ticket to find a match for.
+        /// </summary>
+        public string TicketId;
     }
 
     /// <summary>
@@ -664,6 +839,34 @@ namespace PlayFab.MultiplayerModels
     }
 
     /// <summary>
+    /// Deletes a multiplayer server build alias.
+    /// </summary>
+    [Serializable]
+    public class DeleteBuildAliasRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// The guid string alias ID of the alias to perform the action on.
+        /// </summary>
+        public string AliasId;
+    }
+
+    /// <summary>
+    /// Removes a multiplayer server build's region.
+    /// </summary>
+    [Serializable]
+    public class DeleteBuildRegionRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// The guid string ID of the build we want to update regions for.
+        /// </summary>
+        public string BuildId;
+        /// <summary>
+        /// The build region to delete.
+        /// </summary>
+        public string Region;
+    }
+
+    /// <summary>
     /// Deletes a multiplayer server build.
     /// </summary>
     [Serializable]
@@ -701,7 +904,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The region of the multiplayer server where the remote user is to delete.
         /// </summary>
-        public AzureRegion Region;
+        public string Region;
         /// <summary>
         /// The username of the remote user to delete.
         /// </summary>
@@ -710,6 +913,37 @@ namespace PlayFab.MultiplayerModels
         /// The virtual machine ID the multiplayer server is located on.
         /// </summary>
         public string VmId;
+    }
+
+    [Serializable]
+    public class DynamicStandbySettings : PlayFabBaseModel
+    {
+        /// <summary>
+        /// List of auto standing by trigger values and corresponding standing by multiplier. Defaults to 1.5X at 50%, 3X at 25%,
+        /// and 4X at 5%
+        /// </summary>
+        public List<DynamicStandbyThreshold> DynamicFloorMultiplierThresholds;
+        /// <summary>
+        /// When true, dynamic standby will be enabled
+        /// </summary>
+        public bool IsEnabled;
+        /// <summary>
+        /// The time it takes to reduce target standing by to configured floor value after an increase. Defaults to 30 minutes
+        /// </summary>
+        public int? RampDownSeconds;
+    }
+
+    [Serializable]
+    public class DynamicStandbyThreshold : PlayFabBaseModel
+    {
+        /// <summary>
+        /// When the trigger threshold is reached, multiply by this value
+        /// </summary>
+        public double Multiplier;
+        /// <summary>
+        /// The multiplier will be applied when the actual standby divided by target standby floor is less than this value
+        /// </summary>
+        public double TriggerThresholdPercentage;
     }
 
     [Serializable]
@@ -747,7 +981,7 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public string Id;
         /// <summary>
-        /// Entity type. See https://api.playfab.com/docs/tutorials/entities/entitytypes
+        /// Entity type. See https://docs.microsoft.com/gaming/playfab/features/data/entities/available-built-in-entity-types
         /// </summary>
         public string Type;
     }
@@ -810,6 +1044,18 @@ namespace PlayFab.MultiplayerModels
     }
 
     /// <summary>
+    /// Returns the details about a multiplayer server build alias.
+    /// </summary>
+    [Serializable]
+    public class GetBuildAliasRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// The guid string alias ID of the alias to perform the action on.
+        /// </summary>
+        public string AliasId;
+    }
+
+    /// <summary>
     /// Returns the details about a multiplayer server build.
     /// </summary>
     [Serializable]
@@ -862,6 +1108,10 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public List<GameCertificateReference> GameCertificateReferences;
         /// <summary>
+        /// The instrumentation configuration of the build.
+        /// </summary>
+        public InstrumentationConfiguration InstrumentationConfiguration;
+        /// <summary>
         /// Metadata of the build. The keys are case insensitive. The build metadata is made available to the server through Game
         /// Server SDK (GSDK).
         /// </summary>
@@ -871,6 +1121,10 @@ namespace PlayFab.MultiplayerModels
         /// </summary>
         public int MultiplayerServerCountPerVm;
         /// <summary>
+        /// The OS platform used for running the game process.
+        /// </summary>
+        public string OsPlatform;
+        /// <summary>
         /// The ports the build is mapped on.
         /// </summary>
         public List<Port> Ports;
@@ -878,6 +1132,10 @@ namespace PlayFab.MultiplayerModels
         /// The region configuration for the build.
         /// </summary>
         public List<BuildRegion> RegionConfigurations;
+        /// <summary>
+        /// The type of game server being hosted.
+        /// </summary>
+        public string ServerType;
         /// <summary>
         /// The command to run when the multiplayer server has been allocated, including any arguments. This only applies to managed
         /// builds. If the build is a custom build, this field will be null.
@@ -943,7 +1201,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The reason why the current ticket was canceled. This field is only set if the ticket is in canceled state.
         /// </summary>
-        public CancellationReason? CancellationReason;
+        public string CancellationReasonString;
         /// <summary>
         /// The server date and time at which ticket was created.
         /// </summary>
@@ -1045,7 +1303,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The region the multiplayer server is located in to get details for.
         /// </summary>
-        public AzureRegion Region;
+        public string Region;
         /// <summary>
         /// The title generated guid string session ID of the multiplayer server to get details for. This is to keep track of
         /// multiplayer server sessions.
@@ -1079,7 +1337,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The region the multiplayer server is located in.
         /// </summary>
-        public AzureRegion? Region;
+        public string Region;
         /// <summary>
         /// The string server ID of the multiplayer server generated by PlayFab.
         /// </summary>
@@ -1096,6 +1354,41 @@ namespace PlayFab.MultiplayerModels
         /// The virtual machine ID that the multiplayer server is located on.
         /// </summary>
         public string VmId;
+    }
+
+    /// <summary>
+    /// Gets multiplayer server logs for a specific server id in a region. The logs are available only after a server has
+    /// terminated.
+    /// </summary>
+    [Serializable]
+    public class GetMultiplayerServerLogsRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// The server ID of multiplayer server to get logs for.
+        /// </summary>
+        public string ServerId;
+    }
+
+    [Serializable]
+    public class GetMultiplayerServerLogsResponse : PlayFabResultCommon
+    {
+        /// <summary>
+        /// URL for logs download.
+        /// </summary>
+        public string LogDownloadUrl;
+    }
+
+    /// <summary>
+    /// Gets multiplayer server logs for a specific server id in a region. The logs are available only after a server has
+    /// terminated.
+    /// </summary>
+    [Serializable]
+    public class GetMultiplayerSessionLogsBySessionIdRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// The server ID of multiplayer server to get logs for.
+        /// </summary>
+        public string SessionId;
     }
 
     /// <summary>
@@ -1140,7 +1433,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The region of the multiplayer server to get remote login information for.
         /// </summary>
-        public AzureRegion Region;
+        public string Region;
         /// <summary>
         /// The virtual machine ID the multiplayer server is located on.
         /// </summary>
@@ -1158,6 +1451,69 @@ namespace PlayFab.MultiplayerModels
         /// The remote login port of multiplayer server.
         /// </summary>
         public int Port;
+    }
+
+    /// <summary>
+    /// The ticket includes the players, their attributes, their teams, the ticket status, the match Id and the server details
+    /// when applicable, etc. Only servers can get the ticket.
+    /// </summary>
+    [Serializable]
+    public class GetServerBackfillTicketRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// Determines whether the matchmaking attributes will be returned as an escaped JSON string or as an un-escaped JSON
+        /// object.
+        /// </summary>
+        public bool EscapeObject;
+        /// <summary>
+        /// The name of the queue to find a match for.
+        /// </summary>
+        public string QueueName;
+        /// <summary>
+        /// The Id of the ticket to find a match for.
+        /// </summary>
+        public string TicketId;
+    }
+
+    [Serializable]
+    public class GetServerBackfillTicketResult : PlayFabResultCommon
+    {
+        /// <summary>
+        /// The reason why the current ticket was canceled. This field is only set if the ticket is in canceled state.
+        /// </summary>
+        public string CancellationReasonString;
+        /// <summary>
+        /// The server date and time at which ticket was created.
+        /// </summary>
+        public DateTime Created;
+        /// <summary>
+        /// How long to attempt matching this ticket in seconds.
+        /// </summary>
+        public int GiveUpAfterSeconds;
+        /// <summary>
+        /// The Id of a match.
+        /// </summary>
+        public string MatchId;
+        /// <summary>
+        /// A list of Users that are part of this ticket, along with their team assignments.
+        /// </summary>
+        public List<MatchmakingPlayerWithTeamAssignment> Members;
+        /// <summary>
+        /// The Id of a match queue.
+        /// </summary>
+        public string QueueName;
+        /// <summary>
+        /// The details of the server the members are connected to.
+        /// </summary>
+        public ServerDetails ServerDetails;
+        /// <summary>
+        /// The current ticket status. Possible values are: WaitingForMatch, Canceled and Matched.
+        /// </summary>
+        public string Status;
+        /// <summary>
+        /// The Id of the ticket to find a match for.
+        /// </summary>
+        public string TicketId;
     }
 
     /// <summary>
@@ -1193,6 +1549,17 @@ namespace PlayFab.MultiplayerModels
         /// The various quotas for multiplayer servers for the title.
         /// </summary>
         public TitleMultiplayerServersQuotas Quotas;
+    }
+
+    [Serializable]
+    public class InstrumentationConfiguration : PlayFabBaseModel
+    {
+        /// <summary>
+        /// The list of processes to be monitored on a VM for this build. Providing processes will turn on performance metrics
+        /// collection for this build. Process names should not include extensions. If the game server process is: GameServer.exe;
+        /// then, ProcessesToMonitor = [ GameServer ]
+        /// </summary>
+        public List<string> ProcessesToMonitor;
     }
 
     /// <summary>
@@ -1254,6 +1621,15 @@ namespace PlayFab.MultiplayerModels
         /// The skip token for the paged response.
         /// </summary>
         public string SkipToken;
+    }
+
+    [Serializable]
+    public class ListBuildAliasesForTitleResponse : PlayFabResultCommon
+    {
+        /// <summary>
+        /// The list of build aliases for the title
+        /// </summary>
+        public List<BuildAliasDetailsResponse> BuildAliases;
     }
 
     /// <summary>
@@ -1419,7 +1795,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The region the multiplayer servers to list.
         /// </summary>
-        public AzureRegion Region;
+        public string Region;
         /// <summary>
         /// The skip token for the paged request.
         /// </summary>
@@ -1437,6 +1813,60 @@ namespace PlayFab.MultiplayerModels
         /// The page size on the response.
         /// </summary>
         public int PageSize;
+        /// <summary>
+        /// The skip token for the paged response.
+        /// </summary>
+        public string SkipToken;
+    }
+
+    /// <summary>
+    /// Returns a list of quality of service servers for party.
+    /// </summary>
+    [Serializable]
+    public class ListPartyQosServersRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// Qos servers version
+        /// </summary>
+        public string Version;
+    }
+
+    [Serializable]
+    public class ListPartyQosServersResponse : PlayFabResultCommon
+    {
+        /// <summary>
+        /// The page size on the response.
+        /// </summary>
+        public int PageSize;
+        /// <summary>
+        /// The list of QoS servers.
+        /// </summary>
+        public List<QosServer> QosServers;
+        /// <summary>
+        /// The skip token for the paged response.
+        /// </summary>
+        public string SkipToken;
+    }
+
+    /// <summary>
+    /// Returns a list of quality of service servers for a title.
+    /// </summary>
+    [Serializable]
+    public class ListQosServersForTitleRequest : PlayFabRequestCommon
+    {
+    }
+
+    [Serializable]
+    public class ListQosServersForTitleResponse : PlayFabResultCommon
+    {
+        /// <summary>
+        /// The page size on the response.
+        /// </summary>
+        public int PageSize;
+        /// <summary>
+        /// The list of QoS servers.
+        /// </summary>
+        public List<QosServer> QosServers;
         /// <summary>
         /// The skip token for the paged response.
         /// </summary>
@@ -1469,6 +1899,31 @@ namespace PlayFab.MultiplayerModels
     }
 
     /// <summary>
+    /// List all server backfill ticket Ids the user is a member of.
+    /// </summary>
+    [Serializable]
+    public class ListServerBackfillTicketsForPlayerRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// The entity key for which to find the ticket Ids.
+        /// </summary>
+        public EntityKey Entity;
+        /// <summary>
+        /// The name of the queue the tickets are in.
+        /// </summary>
+        public string QueueName;
+    }
+
+    [Serializable]
+    public class ListServerBackfillTicketsForPlayerResult : PlayFabResultCommon
+    {
+        /// <summary>
+        /// The list of backfill ticket Ids the user is a member of.
+        /// </summary>
+        public List<string> TicketIds;
+    }
+
+    /// <summary>
     /// Returns a list of virtual machines for a title.
     /// </summary>
     [Serializable]
@@ -1485,7 +1940,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The region of the virtual machines to list.
         /// </summary>
-        public AzureRegion Region;
+        public string Region;
         /// <summary>
         /// The skip token for the paged request.
         /// </summary>
@@ -1562,6 +2017,14 @@ namespace PlayFab.MultiplayerModels
         public string TeamId;
     }
 
+    /// <summary>
+    /// Returns a list of summarized details of all multiplayer server builds for a title.
+    /// </summary>
+    [Serializable]
+    public class MultiplayerEmptyRequest : PlayFabRequestCommon
+    {
+    }
+
     [Serializable]
     public class MultiplayerServerSummary : PlayFabBaseModel
     {
@@ -1576,7 +2039,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The region the multiplayer server is located in.
         /// </summary>
-        public AzureRegion? Region;
+        public string Region;
         /// <summary>
         /// The string server ID of the multiplayer server generated by PlayFab.
         /// </summary>
@@ -1593,6 +2056,12 @@ namespace PlayFab.MultiplayerModels
         /// The virtual machine ID that the multiplayer server is located on.
         /// </summary>
         public string VmId;
+    }
+
+    public enum OsPlatform
+    {
+        Windows,
+        Linux
     }
 
     [Serializable]
@@ -1624,7 +2093,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The region the QoS server is located in.
         /// </summary>
-        public AzureRegion? Region;
+        public string Region;
         /// <summary>
         /// The QoS server URL.
         /// </summary>
@@ -1638,6 +2107,10 @@ namespace PlayFab.MultiplayerModels
     public class RequestMultiplayerServerRequest : PlayFabRequestCommon
     {
         /// <summary>
+        /// The identifiers of the build alias to use for the request.
+        /// </summary>
+        public BuildAliasParams BuildAliasParams;
+        /// <summary>
         /// The guid string build ID of the multiplayer server to request.
         /// </summary>
         public string BuildId;
@@ -1650,7 +2123,7 @@ namespace PlayFab.MultiplayerModels
         /// The preferred regions to request a multiplayer server from. The Multiplayer Service will iterate through the regions in
         /// the specified order and allocate a server from the first one that has servers available.
         /// </summary>
-        public List<AzureRegion> PreferredRegions;
+        public List<string> PreferredRegions;
         /// <summary>
         /// Data encoded as a string that is passed to the game server when requested. This can be used to to communicate
         /// information such as game mode or map through the request flow.
@@ -1688,7 +2161,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The region the multiplayer server is located in.
         /// </summary>
-        public AzureRegion? Region;
+        public string Region;
         /// <summary>
         /// The string server ID of the multiplayer server generated by PlayFab.
         /// </summary>
@@ -1750,6 +2223,12 @@ namespace PlayFab.MultiplayerModels
         public string Region;
     }
 
+    public enum ServerType
+    {
+        Container,
+        Process
+    }
+
     /// <summary>
     /// Executes the shutdown callback from the GSDK and terminates the multiplayer server session. The callback in the GSDK
     /// will allow for graceful shutdown with a 15 minute timeoutIf graceful shutdown has not been completed before 15 minutes
@@ -1765,7 +2244,7 @@ namespace PlayFab.MultiplayerModels
         /// <summary>
         /// The region of the multiplayer server to shut down.
         /// </summary>
-        public AzureRegion Region;
+        public string Region;
         /// <summary>
         /// A guid string session ID of the multiplayer server to shut down.
         /// </summary>
@@ -1807,6 +2286,59 @@ namespace PlayFab.MultiplayerModels
         /// The core capacity for the various regions and VM Family
         /// </summary>
         public List<CoreCapacity> CoreCapacities;
+    }
+
+    /// <summary>
+    /// Removes the specified tag from the image. After this operation, a 'docker pull' will fail for the specified image and
+    /// tag combination. Morever, ListContainerImageTags will not return the specified tag.
+    /// </summary>
+    [Serializable]
+    public class UntagContainerImageRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// The container image which tag we want to remove.
+        /// </summary>
+        public string ImageName;
+        /// <summary>
+        /// The tag we want to remove.
+        /// </summary>
+        public string Tag;
+    }
+
+    /// <summary>
+    /// Creates a multiplayer server build alias and returns the created alias.
+    /// </summary>
+    [Serializable]
+    public class UpdateBuildAliasRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// The guid string alias Id of the alias to be updated.
+        /// </summary>
+        public string AliasId;
+        /// <summary>
+        /// The alias name.
+        /// </summary>
+        public string AliasName;
+        /// <summary>
+        /// Array of build selection criteria.
+        /// </summary>
+        public List<BuildSelectionCriterion> BuildSelectionCriteria;
+    }
+
+    /// <summary>
+    /// Updates a multiplayer server build's region.
+    /// </summary>
+    [Serializable]
+    public class UpdateBuildRegionRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// The guid string ID of the build we want to update regions for.
+        /// </summary>
+        public string BuildId;
+        /// <summary>
+        /// The updated region configuration that should be applied to the specified build.
+        /// </summary>
+        public BuildRegionParams BuildRegion;
     }
 
     /// <summary>
