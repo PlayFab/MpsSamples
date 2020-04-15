@@ -1060,6 +1060,35 @@ namespace PlayFab.AdminModels
         public string Schedule;
     }
 
+    /// <summary>
+    /// Task name is unique within a title. Using a task name that's already taken will cause a name conflict error. Too many
+    /// create-task requests within a short time will cause a create conflict error.
+    /// </summary>
+    [Serializable]
+    public class CreateInsightsScheduledScalingTaskRequest : PlayFabRequestCommon
+    {
+        /// <summary>
+        /// Description the task
+        /// </summary>
+        public string Description;
+        /// <summary>
+        /// Whether the schedule is active. Inactive schedule will not trigger task execution.
+        /// </summary>
+        public bool IsActive;
+        /// <summary>
+        /// Name of the task. This is a unique identifier for tasks in the title.
+        /// </summary>
+        public string Name;
+        /// <summary>
+        /// Task details related to Insights Scaling
+        /// </summary>
+        public InsightsScalingTaskParameter Parameter;
+        /// <summary>
+        /// Cron expression for the run schedule of the task. The expression should be in UTC.
+        /// </summary>
+        public string Schedule;
+    }
+
     [Serializable]
     public class CreateOpenIdConnectionRequest : PlayFabRequestCommon
     {
@@ -1505,7 +1534,7 @@ namespace PlayFab.AdminModels
         /// </summary>
         public string Id;
         /// <summary>
-        /// Entity type. See https://api.playfab.com/docs/tutorials/entities/entitytypes
+        /// Entity type. See https://docs.microsoft.com/gaming/playfab/features/data/entities/available-built-in-entity-types
         /// </summary>
         public string Type;
     }
@@ -2061,25 +2090,61 @@ namespace PlayFab.AdminModels
         EntityAPIKeyOrSecretInvalid,
         EconomyServiceUnavailable,
         EconomyServiceInternalError,
-        KustoProxyQueryRateLimitExceeded,
+        QueryRateLimitExceeded,
         EntityAPIKeyCreationDisabledForEntity,
+        ForbiddenByEntityPolicy,
+        UpdateInventoryRateLimitExceeded,
         StudioCreationRateLimited,
         StudioCreationInProgress,
         DuplicateStudioName,
         StudioNotFound,
-        StudioDeletionInProgress,
+        StudioDeleted,
         StudioDeactivated,
+        StudioActivated,
         TitleCreationRateLimited,
         TitleCreationInProgress,
         DuplicateTitleName,
-        TitleNotFound,
-        TitleDeletionInProgress,
+        TitleActivationRateLimited,
+        TitleActivationInProgress,
         TitleDeactivated,
-        TitleAlreadyActivated,
+        TitleActivated,
         CloudScriptAzureFunctionsExecutionTimeLimitExceeded,
         CloudScriptAzureFunctionsArgumentSizeExceeded,
         CloudScriptAzureFunctionsReturnSizeExceeded,
         CloudScriptAzureFunctionsHTTPRequestError,
+        VirtualCurrencyBetaGetError,
+        VirtualCurrencyBetaCreateError,
+        VirtualCurrencyBetaInitialDepositSaveError,
+        VirtualCurrencyBetaSaveError,
+        VirtualCurrencyBetaDeleteError,
+        VirtualCurrencyBetaRestoreError,
+        VirtualCurrencyBetaSaveConflict,
+        VirtualCurrencyBetaUpdateError,
+        InsightsManagementDatabaseNotFound,
+        InsightsManagementOperationNotFound,
+        InsightsManagementErrorPendingOperationExists,
+        InsightsManagementSetPerformanceLevelInvalidParameter,
+        InsightsManagementSetStorageRetentionInvalidParameter,
+        InsightsManagementGetStorageUsageInvalidParameter,
+        InsightsManagementGetOperationStatusInvalidParameter,
+        DuplicatePurchaseTransactionId,
+        EvaluationModePlayerCountExceeded,
+        GetPlayersInSegmentRateLimitExceeded,
+        CloudScriptFunctionNameSizeExceeded,
+        InsightsManagementTitleInEvaluationMode,
+        CloudScriptAzureFunctionsQueueRequestError,
+        EvaluationModeTitleCountExceeded,
+        InsightsManagementTitleNotInFlight,
+        LimitNotFound,
+        LimitNotAvailableViaAPI,
+        InsightsManagementSetStorageRetentionBelowMinimum,
+        InsightsManagementSetStorageRetentionAboveMaximum,
+        AppleNotEnabledForTitle,
+        InsightsManagementNewActiveEventExportLimitInvalid,
+        InsightsManagementSetPerformanceRateLimited,
+        PartyRequestsThrottledFromRateLimiter,
+        XboxServiceTooManyRequests,
+        NintendoSwitchNotEnabledForTitle,
         MatchmakingEntityInvalid,
         MatchmakingPlayerAttributesInvalid,
         MatchmakingQueueNotFound,
@@ -2115,23 +2180,54 @@ namespace PlayFab.AdminModels
         CatalogFeatureDisabled,
         CatalogConfigInvalid,
         CatalogUnauthorized,
+        CatalogItemTypeInvalid,
+        CatalogBadRequest,
+        CatalogTooManyRequests,
         ExportInvalidStatusUpdate,
         ExportInvalidPrefix,
         ExportBlobContainerDoesNotExist,
-        ExportEventNameNotFound,
-        ExportExportTitleIdNotFound,
+        ExportNotFound,
         ExportCouldNotUpdate,
         ExportInvalidStorageType,
         ExportAmazonBucketDoesNotExist,
         ExportInvalidBlobStorage,
         ExportKustoException,
-        ExportKustoExceptionPartialErrorOnNewExport,
-        ExportKustoExceptionEdit,
         ExportKustoConnectionFailed,
         ExportUnknownError,
         ExportCantEditPendingExport,
         ExportLimitExports,
-        ExportLimitEvents
+        ExportLimitEvents,
+        ExportInvalidPartitionStatusModification,
+        ExportCouldNotCreate,
+        ExportNoBackingDatabaseFound,
+        ExportCouldNotDelete,
+        ExportCannotDetermineEventQuery,
+        ExportInvalidQuerySchemaModification,
+        ExportQuerySchemaMissingRequiredColumns,
+        ExportCannotParseQuery,
+        ExportControlCommandsNotAllowed,
+        ExportQueryMissingTableReference,
+        TitleNotEnabledForParty,
+        PartyVersionNotFound,
+        MultiplayerServerBuildReferencedByMatchmakingQueue,
+        ExperimentationExperimentStopped,
+        ExperimentationExperimentRunning,
+        ExperimentationExperimentNotFound,
+        ExperimentationExperimentNeverStarted,
+        ExperimentationExperimentDeleted,
+        ExperimentationClientTimeout,
+        ExperimentationInvalidVariantConfiguration,
+        ExperimentationInvalidVariableConfiguration,
+        ExperimentInvalidId,
+        ExperimentationNoScorecard,
+        ExperimentationTreatmentAssignmentFailed,
+        ExperimentationTreatmentAssignmentDisabled,
+        ExperimentationInvalidDuration,
+        ExperimentationMaxExperimentsReached,
+        ExperimentationExperimentSchedulingInProgress,
+        MaxActionDepthExceeded,
+        TitleNotOnUpdatedPricingPlan,
+        SnapshotNotFound
     }
 
     [Serializable]
@@ -2326,7 +2422,8 @@ namespace PlayFab.AdminModels
     public class GetDataReportResult : PlayFabResultCommon
     {
         /// <summary>
-        /// The URL where the requested report can be downloaded.
+        /// The URL where the requested report can be downloaded. This can be any PlayFab generated reports. The full list of
+        /// reports can be found at: https://docs.microsoft.com/en-us/gaming/playfab/features/analytics/reports/quickstart.
         /// </summary>
         public string DownloadUrl;
     }
@@ -2834,7 +2931,7 @@ namespace PlayFab.AdminModels
     public class GetStoreItemsRequest : PlayFabRequestCommon
     {
         /// <summary>
-        /// catalog version to store items from. Use default catalog version if null
+        /// Catalog version to store items from. Use default catalog version if null
         /// </summary>
         public string CatalogVersion;
         /// <summary>
@@ -3060,7 +3157,11 @@ namespace PlayFab.AdminModels
     }
 
     /// <summary>
-    /// Result of granting an item to a user
+    /// Result of granting an item to a user. Note, to retrieve additional information for an item such as Tags, Description
+    /// that are the same across all instances of the item, a call to GetCatalogItems is required. The ItemID of can be matched
+    /// to a catalog entry, which contains the additional information. Also note that Custom Data is only set when the User's
+    /// specific instance has updated the CustomData via a call to UpdateUserInventoryItemCustomData. Other fields such as
+    /// UnitPrice and UnitCurrency are only set when the item was granted via a purchase.
     /// </summary>
     [Serializable]
     public class GrantedItemInstance : PlayFabBaseModel
@@ -3087,7 +3188,8 @@ namespace PlayFab.AdminModels
         /// </summary>
         public string CharacterId;
         /// <summary>
-        /// A set of custom key-value pairs on the inventory item.
+        /// A set of custom key-value pairs on the instance of the inventory item, which is not to be confused with the catalog
+        /// item's custom data.
         /// </summary>
         public Dictionary<string,string> CustomData;
         /// <summary>
@@ -3127,11 +3229,11 @@ namespace PlayFab.AdminModels
         /// </summary>
         public bool Result;
         /// <summary>
-        /// Currency type for the cost of the catalog item.
+        /// Currency type for the cost of the catalog item. Not available when granting items.
         /// </summary>
         public string UnitCurrency;
         /// <summary>
-        /// Cost of the catalog item in the given currency.
+        /// Cost of the catalog item in the given currency. Not available when granting items.
         /// </summary>
         public uint UnitPrice;
         /// <summary>
@@ -3228,6 +3330,15 @@ namespace PlayFab.AdminModels
     }
 
     [Serializable]
+    public class InsightsScalingTaskParameter : PlayFabBaseModel
+    {
+        /// <summary>
+        /// Insights Performance Level to scale to.
+        /// </summary>
+        public int Level;
+    }
+
+    [Serializable]
     public class ItemGrant : PlayFabBaseModel
     {
         /// <summary>
@@ -3259,10 +3370,11 @@ namespace PlayFab.AdminModels
     }
 
     /// <summary>
-    /// A unique instance of an item in a user's inventory. Note, to retrieve additional information for an item instance (such
-    /// as Tags, Description, or Custom Data that are set on the root catalog item), a call to GetCatalogItems is required. The
-    /// Item ID of the instance can then be matched to a catalog entry, which contains the additional information. Also note
-    /// that Custom Data is only set here from a call to UpdateUserInventoryItemCustomData.
+    /// A unique instance of an item in a user's inventory. Note, to retrieve additional information for an item such as Tags,
+    /// Description that are the same across all instances of the item, a call to GetCatalogItems is required. The ItemID of can
+    /// be matched to a catalog entry, which contains the additional information. Also note that Custom Data is only set when
+    /// the User's specific instance has updated the CustomData via a call to UpdateUserInventoryItemCustomData. Other fields
+    /// such as UnitPrice and UnitCurrency are only set when the item was granted via a purchase.
     /// </summary>
     [Serializable]
     public class ItemInstance : PlayFabBaseModel
@@ -3285,7 +3397,8 @@ namespace PlayFab.AdminModels
         /// </summary>
         public string CatalogVersion;
         /// <summary>
-        /// A set of custom key-value pairs on the inventory item.
+        /// A set of custom key-value pairs on the instance of the inventory item, which is not to be confused with the catalog
+        /// item's custom data.
         /// </summary>
         public Dictionary<string,string> CustomData;
         /// <summary>
@@ -3317,11 +3430,11 @@ namespace PlayFab.AdminModels
         /// </summary>
         public int? RemainingUses;
         /// <summary>
-        /// Currency type for the cost of the catalog item.
+        /// Currency type for the cost of the catalog item. Not available when granting items.
         /// </summary>
         public string UnitCurrency;
         /// <summary>
-        /// Cost of the catalog item in the given currency.
+        /// Cost of the catalog item in the given currency. Not available when granting items.
         /// </summary>
         public uint UnitPrice;
         /// <summary>
@@ -3438,7 +3551,9 @@ namespace PlayFab.AdminModels
         CustomServer,
         NintendoSwitch,
         FacebookInstantGames,
-        OpenIdConnect
+        OpenIdConnect,
+        Apple,
+        NintendoSwitchAccount
     }
 
     [Serializable]
@@ -3832,6 +3947,10 @@ namespace PlayFab.AdminModels
         /// </summary>
         public LoginIdentityProvider? Origination;
         /// <summary>
+        /// List of player variants for experimentation
+        /// </summary>
+        public List<string> PlayerExperimentVariants;
+        /// <summary>
         /// PlayFab Player ID
         /// </summary>
         public string PlayerId;
@@ -3900,6 +4019,10 @@ namespace PlayFab.AdminModels
         /// Player display name
         /// </summary>
         public string DisplayName;
+        /// <summary>
+        /// List of experiment variants for the player.
+        /// </summary>
+        public List<string> ExperimentVariants;
         /// <summary>
         /// UTC time when the player most recently logged in to the title
         /// </summary>
@@ -3982,6 +4105,10 @@ namespace PlayFab.AdminModels
         /// Whether to show the display name. Defaults to false
         /// </summary>
         public bool ShowDisplayName;
+        /// <summary>
+        /// Whether to show player's experiment variants. Defaults to false
+        /// </summary>
+        public bool ShowExperimentVariants;
         /// <summary>
         /// Whether to show the last login time. Defaults to false
         /// </summary>
@@ -4575,7 +4702,9 @@ namespace PlayFab.AdminModels
     public enum ScheduledTaskType
     {
         CloudScript,
-        ActionsOnPlayerSegment
+        ActionsOnPlayerSegment,
+        CloudScriptAzureFunctions,
+        InsightsScheduledScaling
     }
 
     [Serializable]
@@ -4964,6 +5093,10 @@ namespace PlayFab.AdminModels
         /// UTC timestamp when the task completed.
         /// </summary>
         public DateTime? CompletedAt;
+        /// <summary>
+        /// Error message for last processing attempt, if an error occured.
+        /// </summary>
+        public string ErrorMessage;
         /// <summary>
         /// Estimated time remaining in seconds.
         /// </summary>
@@ -5458,6 +5591,10 @@ namespace PlayFab.AdminModels
         /// </summary>
         public UserAndroidDeviceInfo AndroidDeviceInfo;
         /// <summary>
+        /// Sign in with Apple account information, if an Apple account has been linked
+        /// </summary>
+        public UserAppleIdInfo AppleAccountInfo;
+        /// <summary>
         /// Timestamp indicating when the user account was created
         /// </summary>
         public DateTime Created;
@@ -5491,6 +5628,10 @@ namespace PlayFab.AdminModels
         public UserKongregateInfo KongregateInfo;
         /// <summary>
         /// Nintendo Switch account information, if a Nintendo Switch account has been linked
+        /// </summary>
+        public UserNintendoSwitchAccountIdInfo NintendoSwitchAccountInfo;
+        /// <summary>
+        /// Nintendo Switch device information, if a Nintendo Switch device has been linked
         /// </summary>
         public UserNintendoSwitchDeviceIdInfo NintendoSwitchDeviceIdInfo;
         /// <summary>
@@ -5542,6 +5683,15 @@ namespace PlayFab.AdminModels
         /// Android device ID
         /// </summary>
         public string AndroidDeviceId;
+    }
+
+    [Serializable]
+    public class UserAppleIdInfo : PlayFabBaseModel
+    {
+        /// <summary>
+        /// Apple subject ID
+        /// </summary>
+        public string AppleSubjectId;
     }
 
     [Serializable]
@@ -5660,6 +5810,15 @@ namespace PlayFab.AdminModels
     }
 
     [Serializable]
+    public class UserNintendoSwitchAccountIdInfo : PlayFabBaseModel
+    {
+        /// <summary>
+        /// Nintendo Switch account subject ID
+        /// </summary>
+        public string NintendoSwitchAccountSubjectId;
+    }
+
+    [Serializable]
     public class UserNintendoSwitchDeviceIdInfo : PlayFabBaseModel
     {
         /// <summary>
@@ -5708,7 +5867,9 @@ namespace PlayFab.AdminModels
         ServerCustomId,
         NintendoSwitchDeviceId,
         FacebookInstantGamesId,
-        OpenIdConnect
+        OpenIdConnect,
+        Apple,
+        NintendoSwitchAccount
     }
 
     [Serializable]

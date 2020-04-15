@@ -16,7 +16,7 @@ namespace PlayFab.EventsModels
         /// </summary>
         public string Id;
         /// <summary>
-        /// Entity type. See https://api.playfab.com/docs/tutorials/entities/entitytypes
+        /// Entity type. See https://docs.microsoft.com/gaming/playfab/features/data/entities/available-built-in-entity-types
         /// </summary>
         public string Type;
     }
@@ -29,7 +29,7 @@ namespace PlayFab.EventsModels
         /// </summary>
         public EntityKey Entity;
         /// <summary>
-        /// The namespace in which the event is defined. It must begin with 'com.playfab.events.'
+        /// The namespace in which the event is defined. Allowed namespaces can vary by API.
         /// </summary>
         public string EventNamespace;
         /// <summary>

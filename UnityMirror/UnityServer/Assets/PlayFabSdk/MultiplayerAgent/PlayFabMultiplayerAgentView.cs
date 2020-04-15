@@ -1,4 +1,6 @@
-﻿namespace PlayFab
+﻿using System;
+
+namespace PlayFab
 {
     using MultiplayerAgent.Model;
     using UnityEngine;
@@ -35,7 +37,7 @@
             bool isTerminating = PlayFabMultiplayerAgentAPI.CurrentState.CurrentGameState == GameState.Terminated ||
                                  PlayFabMultiplayerAgentAPI.CurrentState.CurrentGameState == GameState.Terminating;
             bool isCancelled = PlayFabMultiplayerAgentAPI.CurrentErrorState == ErrorStates.Cancelled;
-
+            
             if (!isTerminating && !isCancelled && !PlayFabMultiplayerAgentAPI.IsProcessing && _timer >= max)
             {
                 if (PlayFabMultiplayerAgentAPI.IsDebugging)
@@ -45,14 +47,14 @@
 
                 PlayFabMultiplayerAgentAPI.IsProcessing = true;
                 _timer = 0f;
-                PlayFabMultiplayerAgentAPI.SendHeartBeatRequest();
+                StartCoroutine(PlayFabMultiplayerAgentAPI.SendHeartBeatRequest());
             }
             else if (PlayFabMultiplayerAgentAPI.CurrentState.CurrentGameState == GameState.Terminating)
             {
                 PlayFabMultiplayerAgentAPI.CurrentState.CurrentGameState = GameState.Terminated;
                 PlayFabMultiplayerAgentAPI.IsProcessing = true;
                 _timer = 0f;
-                PlayFabMultiplayerAgentAPI.SendHeartBeatRequest();
+                StartCoroutine(PlayFabMultiplayerAgentAPI.SendHeartBeatRequest());
             }
         }
     }

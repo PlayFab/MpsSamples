@@ -1,13 +1,18 @@
-﻿namespace PlayFab
+﻿using UnityEngine.Networking;
+
+#if ENABLE_PLAYFABSERVER_API
+namespace PlayFab
 {
     using System;
+    using System.Collections;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
     using System.Text;
-    using Internal;
     using MultiplayerAgent.Model;
     using UnityEngine;
+    using MultiplayerAgent.Helpers;
 
 #pragma warning disable 414
     public class PlayFabMultiplayerAgentAPI
@@ -32,6 +37,8 @@
 
         public delegate void OnMaintenanceEvent(DateTime? NextScheduledMaintenanceUtc);
 
+        public delegate void OnSessionConfigUpdate(SessionConfig sessionConfig);
+
         public delegate void OnServerActiveEvent();
 
         public delegate void OnShutdownEventk();
@@ -43,28 +50,30 @@
         private static GSDKConfiguration _gsdkconfig;
 
         private static IDictionary<string, string> _configMap;
+        
+        private static SimpleJsonInstance _jsonInstance = new SimpleJsonInstance();
 
-        private static ISerializerPlugin _jsonWrapper;
+        private static GameObject _agentView;
 
         public static SessionConfig SessionConfig = new SessionConfig();
         public static HeartbeatRequest CurrentState = new HeartbeatRequest();
         public static ErrorStates CurrentErrorState = ErrorStates.Ok;
         public static bool IsProcessing;
-        public static bool IsDebugging = false;
+        public static bool IsDebugging = true;
         public static event OnShutdownEventk OnShutDownCallback;
         public static event OnMaintenanceEvent OnMaintenanceCallback;
         public static event OnAgentCommunicationErrorEvent OnAgentErrorCallback;
         public static event OnServerActiveEvent OnServerActiveCallback;
 
+        public static event OnSessionConfigUpdate OnSessionConfigUpdateEvent;
+
 
         public static void Start()
         {
-            _jsonWrapper = PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
-
             string fileName = Environment.GetEnvironmentVariable(GsdkConfigFileEnvVarKey);
             if (!string.IsNullOrEmpty(fileName) && File.Exists(fileName))
             {
-                _gsdkconfig = _jsonWrapper.DeserializeObject<GSDKConfiguration>(File.ReadAllText(fileName));
+                _gsdkconfig = _jsonInstance.DeserializeObject<GSDKConfiguration>(File.ReadAllText(fileName));
             }
             else
             {
@@ -87,15 +96,20 @@
                 Debug.Log(_gsdkconfig.LogFolder);
             }
 
-            //Create an agent that can talk on the main-tread and pull on an interval.
+            //Create an agent that can talk on the main-thread and pull on an interval.
             //This is a unity thing, need an object in the scene.
-            GameObject agentView = new GameObject("PlayFabAgentView");
-            agentView.AddComponent<PlayFabMultiplayerAgentView>();
+
+            if(_agentView == null)
+            {
+                _agentView = new GameObject("PlayFabAgentView");
+                _agentView.AddComponent<PlayFabMultiplayerAgentView>();
+                UnityEngine.Object.DontDestroyOnLoad(_agentView);
+            }
         }
 
         private static IDictionary<string, string> CreateConfigMap(GSDKConfiguration localConfig)
         {
-            var finalConfig = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var finalConfig = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (KeyValuePair<string, string> certEntry in localConfig.GameCertificates)
             {
@@ -152,99 +166,130 @@
             return new List<string>(SessionConfig.InitialPlayers);
         }
 
-        internal static void SendHeartBeatRequest()
+        public static IEnumerator SendHeartBeatRequest()
         {
-            string payload = _jsonWrapper.SerializeObject(CurrentState);
+            string payload = _jsonInstance.SerializeObject(CurrentState);
             if (string.IsNullOrEmpty(payload))
             {
-                return;
+                yield break;
             }
 
-            byte[] payloadBytes = Encoding.ASCII.GetBytes(payload);
+            byte[] payloadBytes = Encoding.UTF8.GetBytes(payload);
 
             if (IsDebugging)
             {
-                Debug.Log(payload);
+                Debug.Log($"state: {CurrentState}, payload: {payload}");
             }
 
-            PlayFabHttp.SimplePostCall(_baseUrl, payloadBytes, success =>
+            using (UnityWebRequest req = new UnityWebRequest(_baseUrl, UnityWebRequest.kHttpVerbPOST))
             {
-                string json = Encoding.UTF8.GetString(success);
-                Debug.Log(json);
-                if (string.IsNullOrEmpty(json))
+                req.SetRequestHeader("Accept","application/json");
+                req.SetRequestHeader("Content-Type","application/json");
+                req.downloadHandler = new DownloadHandlerBuffer();
+                req.uploadHandler = new UploadHandlerRaw(payloadBytes) {contentType = "application/json"};
+                yield return req.SendWebRequest();
+
+                if (req.isNetworkError || req.isHttpError)
                 {
-                    return;
-                }
+                    Guid guid = Guid.NewGuid();
+                    Debug.LogFormat("CurrentError: {0} - {1}", req.error, guid.ToString());
+                    //Exponential backoff for 30 minutes for retries.
+                    switch (CurrentErrorState)
+                    {
+                        case ErrorStates.Ok:
+                            CurrentErrorState = ErrorStates.Retry30S;
+                            if (IsDebugging)
+                            {
+                                Debug.Log("Retrying heartbeat in 30s");
+                            }
 
-                HeartbeatResponse hb = _jsonWrapper.DeserializeObject<HeartbeatResponse>(json);
-                if (hb != null)
+                            break;
+                        case ErrorStates.Retry30S:
+                            CurrentErrorState = ErrorStates.Retry5M;
+                            if (IsDebugging)
+                            {
+                                Debug.Log("Retrying heartbeat in 5m");
+                            }
+
+                            break;
+                        case ErrorStates.Retry5M:
+                            CurrentErrorState = ErrorStates.Retry10M;
+                            if (IsDebugging)
+                            {
+                                Debug.Log("Retrying heartbeat in 10m");
+                            }
+
+                            break;
+                        case ErrorStates.Retry10M:
+                            CurrentErrorState = ErrorStates.Retry15M;
+                            if (IsDebugging)
+                            {
+                                Debug.Log("Retrying heartbeat in 15m");
+                            }
+
+                            break;
+                        case ErrorStates.Retry15M:
+                            CurrentErrorState = ErrorStates.Cancelled;
+                            if (IsDebugging)
+                            {
+                                Debug.Log("Agent reconnection cannot be established - cancelling");
+                            }
+
+                            break;
+                    }
+
+                    if (OnAgentErrorCallback != null)
+                    {
+                        OnAgentErrorCallback.Invoke(req.error);
+                    }
+
+                    IsProcessing = false;
+                }
+                else // success path
                 {
-                    ProcessAgentResponse(hb);
+                    string json = Encoding.UTF8.GetString(req.downloadHandler.data);
+                    if (string.IsNullOrEmpty(json))
+                    {
+                        yield break;
+                    }
+
+                    HeartbeatResponse hb = _jsonInstance.DeserializeObject<HeartbeatResponse>(json);
+
+                    if (hb != null)
+                    {
+                        ProcessAgentResponse(hb);
+                    }
+
+                    CurrentErrorState = ErrorStates.Ok;
+                    IsProcessing = false;
                 }
-
-                CurrentErrorState = ErrorStates.Ok;
-                IsProcessing = false;
-            }, error =>
-            {
-                Guid guid = Guid.NewGuid();
-                Debug.LogFormat("CurrentError: {0} - {1}", error, guid.ToString());
-                //Exponential backoff for 30 minutes for retries.
-                switch (CurrentErrorState)
-                {
-                    case ErrorStates.Ok:
-                        CurrentErrorState = ErrorStates.Retry30S;
-                        if (IsDebugging)
-                        {
-                            Debug.Log("Retrying heartbeat in 30s");
-                        }
-
-                        break;
-                    case ErrorStates.Retry30S:
-                        CurrentErrorState = ErrorStates.Retry5M;
-                        if (IsDebugging)
-                        {
-                            Debug.Log("Retrying heartbeat in 5m");
-                        }
-
-                        break;
-                    case ErrorStates.Retry5M:
-                        CurrentErrorState = ErrorStates.Retry10M;
-                        if (IsDebugging)
-                        {
-                            Debug.Log("Retrying heartbeat in 10m");
-                        }
-
-                        break;
-                    case ErrorStates.Retry10M:
-                        CurrentErrorState = ErrorStates.Retry15M;
-                        if (IsDebugging)
-                        {
-                            Debug.Log("Retrying heartbeat in 15m");
-                        }
-
-                        break;
-                    case ErrorStates.Retry15M:
-                        CurrentErrorState = ErrorStates.Cancelled;
-                        if (IsDebugging)
-                        {
-                            Debug.Log("Agent reconnection cannot be established - cancelling");
-                        }
-
-                        break;
-                }
-
-                if (OnAgentErrorCallback != null)
-                {
-                    OnAgentErrorCallback.Invoke(error);
-                }
-
-                IsProcessing = false;
-            });
+            }
+         
+           
         }
-
         private static void ProcessAgentResponse(HeartbeatResponse heartBeat)
         {
+            bool updateConfig = false;
+            if (SessionConfig != heartBeat.SessionConfig)
+            {
+                updateConfig = true;
+            }
+
             SessionConfig.CopyNonNullFields(heartBeat.SessionConfig);
+            
+            try
+            {
+                if(OnSessionConfigUpdateEvent != null)
+                    OnSessionConfigUpdateEvent.Invoke(SessionConfig);
+            }
+            catch(Exception e)
+            {
+                if(IsDebugging)
+                {
+                    Debug.LogException(e);
+                }
+            }
+
 
             if (!string.IsNullOrEmpty(heartBeat.NextScheduledMaintenanceUtc))
             {
@@ -295,7 +340,7 @@
 
                     break;
                 default:
-                    Debug.LogWarning("Unknown operation received" + heartBeat.Operation);
+                    Debug.LogWarning("Unknown operation received: " + heartBeat.Operation);
                     break;
             }
 
@@ -307,3 +352,5 @@
         }
     }
 }
+
+#endif

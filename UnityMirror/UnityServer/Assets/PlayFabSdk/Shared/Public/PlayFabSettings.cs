@@ -11,8 +11,8 @@ namespace PlayFab
 #if !UNITY_2018_2_OR_NEWER // Unity has deprecated Www
         UnityWww, // High compatability Unity api calls
 #endif
-        HttpWebRequest, // High performance multi-threaded api calls
         UnityWebRequest, // Modern unity HTTP component
+        HttpWebRequest, // High performance multi-threaded api calls
         CustomHttp //If this is used, you must set the Http to an IPlayFabHttp object.
     }
 
@@ -33,25 +33,31 @@ namespace PlayFab
 
         private static PlayFabSharedSettings _playFabShared = null;
         private static PlayFabSharedSettings PlayFabSharedPrivate { get { if (_playFabShared == null) _playFabShared = GetSharedSettingsObjectPrivate(); return _playFabShared; } }
-        internal static readonly PlayFabApiSettings staticSettings = new PlayFabSettingsRedirect(() => { return PlayFabSharedPrivate; });
 
-        // This field will likely be removed someday
-        internal readonly static PlayFabAuthenticationContext staticPlayer = new PlayFabAuthenticationContext();
+        /// <summary>
+        /// Global settings used by all static API classes, and as the default for all instance API classes
+        /// </summary>
+        public static readonly PlayFabApiSettings staticSettings = new PlayFabSettingsRedirect(() => { return PlayFabSharedPrivate; });
+        /// <summary>
+        /// Global user for all static API classes
+        /// </summary>
+        public static readonly PlayFabAuthenticationContext staticPlayer = new PlayFabAuthenticationContext();
 
-        public const string SdkVersion = "2.66.190509";
+        public const string SdkVersion = "2.84.200402";
         public const string BuildIdentifier = "jbuild_unitysdk__sdk-unity-3-slave_0";
-        public const string VersionString = "UnitySDK-2.66.190509";
+        public const string VersionString = "UnitySDK-2.84.200402";
         public const string AD_TYPE_IDFA = "Idfa";
         public const string AD_TYPE_ANDROID_ID = "Adid";
 
-        internal const string DefaultPlayFabApiUrl = "playfabapi.com";
+        public const string DefaultPlayFabApiUrl = "playfabapi.com";
 
         private static PlayFabSharedSettings GetSharedSettingsObjectPrivate()
         {
             var settingsList = Resources.LoadAll<PlayFabSharedSettings>("PlayFabSharedSettings");
             if (settingsList.Length != 1)
             {
-                throw new Exception("The number of PlayFabSharedSettings objects should be 1: " + settingsList.Length);
+                Debug.LogWarning("The number of PlayFabSharedSettings objects should be 1: " + settingsList.Length);
+                Debug.LogWarning("If you are upgrading your SDK, you can ignore this warning as PlayFabSharedSettings will be imported soon. If you are not upgrading your SDK and you see this message, you should re-download the latest PlayFab source code.");
             }
             return settingsList[0];
         }
@@ -97,6 +103,7 @@ namespace PlayFab
         /// These are variables which are always singleton global
         /// </summary>
         #region PlayFabSharedSettings Redirects
+        [ObsoleteAttribute("LogLevel has been deprecated, please use UnityEngine.Debug.Log for your logging needs.")]
         public static PlayFabLogLevel LogLevel { get { return PlayFabSharedPrivate.LogLevel; } set { PlayFabSharedPrivate.LogLevel = value; } }
         public static WebRequestType RequestType { get { return PlayFabSharedPrivate.RequestType; } set { PlayFabSharedPrivate.RequestType = value; } }
         public static int RequestTimeout { get { return PlayFabSharedPrivate.RequestTimeout; } set { PlayFabSharedPrivate.RequestTimeout = value; } }
