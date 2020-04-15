@@ -186,7 +186,6 @@ namespace PlayFab
                 req.SetRequestHeader("Accept","application/json");
                 req.SetRequestHeader("Content-Type","application/json");
                 req.downloadHandler = new DownloadHandlerBuffer();
-
                 req.uploadHandler = new UploadHandlerRaw(payloadBytes) {contentType = "application/json"};
                 yield return req.SendWebRequest();
 

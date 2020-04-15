@@ -10,3 +10,10 @@ More information [here](WindowsRunnerCSharp/README.md).
 Unity Server and Client sample that utilize the GameServer SDK.
 
 More information [here](UnityMirror/README.md).
+
+## Community samples
+
+Here you can find a list of samples and utilities created by our community
+
+- [PlayFabMirrorGameExample](https://github.com/natepac/playfabmirrorgameexample) by [natepac](https://github.com/natepac): Another sample using Mirror and Unity
+- [PFAdmin](https://github.com/bphillips09/PFAdmin) by [bphilips09](https://github.com/bphillips09): An Admin API GUI application for PlayFab
