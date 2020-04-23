@@ -1,4 +1,4 @@
-#if !DISABLE_PLAYFABENTITY_API
+#if !DISABLE_PLAYFABENTITY_API && !DISABLE_PLAYFAB_STATIC_API
 
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace PlayFab
 
 
         /// <summary>
-        /// Check to See if the entity is logged in.
+        /// Verify entity login.
         /// </summary>
         public static bool IsEntityLoggedIn()
         {
@@ -41,19 +41,33 @@ namespace PlayFab
         public static void GetEntityToken(GetEntityTokenRequest request, Action<GetEntityTokenResponse> resultCallback, Action<PlayFabError> errorCallback, object customData = null, Dictionary<string, string> extraHeaders = null)
         {
             var context = (request == null ? null : request.AuthenticationContext) ?? PlayFabSettings.staticPlayer;
+            var callSettings = PlayFabSettings.staticSettings;
             AuthType authType = AuthType.None;
 #if !DISABLE_PLAYFABCLIENT_API
-            if (context.ClientSessionTicket != null) { authType = AuthType.LoginSession; }
+            if (context.IsClientLoggedIn()) { authType = AuthType.LoginSession; }
 #endif
 #if ENABLE_PLAYFABSERVER_API || ENABLE_PLAYFABADMIN_API
-            if (PlayFabSettings.staticSettings.DeveloperSecretKey != null) { authType = AuthType.DevSecretKey; } // TODO: Need to get the correct settings first
+            if (callSettings.DeveloperSecretKey != null) { authType = AuthType.DevSecretKey; }
 #endif
 #if !DISABLE_PLAYFABENTITY_API
-            if (context.EntityToken != null) { authType = AuthType.EntityToken; }
+            if (context.IsEntityLoggedIn()) { authType = AuthType.EntityToken; }
 #endif
 
 
-            PlayFabHttp.MakeApiCall("/Authentication/GetEntityToken", request, authType, resultCallback, errorCallback, customData, extraHeaders, context);
+            PlayFabHttp.MakeApiCall("/Authentication/GetEntityToken", request, authType, resultCallback, errorCallback, customData, extraHeaders, context, callSettings);
+        }
+
+        /// <summary>
+        /// Method for a server to validate a client provided EntityToken. Only callable by the title entity.
+        /// </summary>
+        public static void ValidateEntityToken(ValidateEntityTokenRequest request, Action<ValidateEntityTokenResponse> resultCallback, Action<PlayFabError> errorCallback, object customData = null, Dictionary<string, string> extraHeaders = null)
+        {
+            var context = (request == null ? null : request.AuthenticationContext) ?? PlayFabSettings.staticPlayer;
+            var callSettings = PlayFabSettings.staticSettings;
+            if (!context.IsEntityLoggedIn()) throw new PlayFabException(PlayFabExceptionCode.NotLoggedIn,"Must be logged in to call this method");
+
+
+            PlayFabHttp.MakeApiCall("/Authentication/ValidateEntityToken", request, AuthType.EntityToken, resultCallback, errorCallback, customData, extraHeaders, context, callSettings);
         }
 
 

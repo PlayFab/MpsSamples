@@ -1,6 +1,5 @@
 #if UNITY_2017_2_OR_NEWER
 
-using PlayFab.Json;
 using PlayFab.SharedModels;
 using System;
 using System.Collections;
@@ -74,7 +73,9 @@ namespace PlayFab.Internal
 
 
 #if UNITY_2017_2_OR_NEWER
+#if !UNITY_2019_1_OR_NEWER
                 request.chunkedTransfer = false; // can be removed after Unity's PUT will be more stable
+#endif
                 yield return request.SendWebRequest();
 #else
                 yield return request.Send();
