@@ -50,7 +50,7 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
     - RunContainers = `true`
     - OutputFolder = A local path with enough space on your machine. Useful data for your game will be written there.
     - LocalFilePath = Path to the zip created above of the build output for the server project. 
-    - StartGameCommand = `C:\\Assets\\UnityServer.exe -batchmode -logFile C:\\GameLogs\\UnityEditor.log`
+    - StartGameCommand = `C:\\Assets\\UnityServer.exe -nographics -batchmode -logFile C:\\GameLogs\\UnityEditor.log`
     - Within GamePort, set Number to 7777 and Protocol to TCP. Also make a note of the external port number, called NodePort
 1. In PowerShell
     - Run the LocalMultiplayerAgentSetup file in *agentfolder/setup.ps1* (you may need to open Powershell with admin permissions for this purpose). If you get a signing violation, you may need to run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process`.
