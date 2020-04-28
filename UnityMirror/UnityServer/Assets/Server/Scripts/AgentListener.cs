@@ -8,7 +8,6 @@ using PlayFab.MultiplayerAgent.Model;
 
 public class AgentListener : MonoBehaviour {
     private List<ConnectedPlayer> _connectedPlayers;
-    public UnityNetworkServer UNetServer;
     public bool Debugging = true;
     // Use this for initialization
     void Start () {
@@ -20,11 +19,10 @@ public class AgentListener : MonoBehaviour {
         PlayFabMultiplayerAgentAPI.OnServerActiveCallback += OnServerActive;
         PlayFabMultiplayerAgentAPI.OnAgentErrorCallback += OnAgentError;
 
-        UNetServer.OnPlayerAdded.AddListener(OnPlayerAdded);
-        UNetServer.OnPlayerRemoved.AddListener(OnPlayerRemoved);
+        UnityNetworkServer.Instance.OnPlayerAdded.AddListener(OnPlayerAdded);
+        UnityNetworkServer.Instance.OnPlayerRemoved.AddListener(OnPlayerRemoved);
 
         StartCoroutine(ReadyForPlayers());
-
     }
 
     IEnumerator ReadyForPlayers()
@@ -35,7 +33,7 @@ public class AgentListener : MonoBehaviour {
     
     private void OnServerActive()
     {
-        UNetServer.StartServer();
+        UnityNetworkServer.Instance.StartListen();
         Debug.Log("Server Started From Agent Activation");
     }
 
@@ -60,7 +58,7 @@ public class AgentListener : MonoBehaviour {
     private void OnShutdown()
     {
         Debug.Log("Server is shutting down");
-        foreach(var conn in UNetServer.Connections)
+        foreach(var conn in UnityNetworkServer.Instance.Connections)
         {
             conn.Connection.Send(CustomGameServerMessageTypes.ShutdownMessage, new ShutdownMessage());
         }
@@ -76,7 +74,7 @@ public class AgentListener : MonoBehaviour {
     private void OnMaintenance(DateTime? NextScheduledMaintenanceUtc)
     {
         Debug.LogFormat("Maintenance scheduled for: {0}", NextScheduledMaintenanceUtc.Value.ToLongDateString());
-        foreach (var conn in UNetServer.Connections)
+        foreach (var conn in UnityNetworkServer.Instance.Connections)
         {
             conn.Connection.Send(CustomGameServerMessageTypes.ShutdownMessage, new MaintenanceMessage() {
                 ScheduledMaintenanceUTC = (DateTime)NextScheduledMaintenanceUtc

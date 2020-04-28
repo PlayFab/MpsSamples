@@ -6,17 +6,18 @@
     using Mirror;
     using UnityEngine.Events;
 
-    public class UnityNetworkServer : MonoBehaviour
+    public class UnityNetworkServer : NetworkManager
     {
+        public static UnityNetworkServer Instance { get; private set; }
+
         public PlayerEvent OnPlayerAdded = new PlayerEvent();
         public PlayerEvent OnPlayerRemoved = new PlayerEvent();
 
         public int MaxConnections = 100;
         public int Port = 7777;
 
-        private NetworkManager _netManager;
-
-        public List<UnityNetworkConnection> Connections {
+        public List<UnityNetworkConnection> Connections
+        {
             get { return _connections; }
             private set { _connections = value; }
         }
@@ -25,23 +26,22 @@
         public class PlayerEvent : UnityEvent<string> { }
 
         // Use this for initialization
-        void Awake()
+        public override void Awake()
         {
-            _netManager = FindObjectOfType<NetworkManager>();
-            NetworkServer.RegisterHandler(MsgType.Connect, OnServerConnect);
-            NetworkServer.RegisterHandler(MsgType.Disconnect, OnServerDisconnect);
-            NetworkServer.RegisterHandler(MsgType.Error, OnServerError);
+            base.Awake();
+            Instance = this;
             NetworkServer.RegisterHandler(CustomGameServerMessageTypes.ReceiveAuthenticate, OnReceiveAuthenticate);
             //_netManager.transport.port = Port;
         }
 
-        public void StartServer()
+        public void StartListen()
         {
-            NetworkServer.Listen(Port);
+            NetworkServer.Listen(MaxConnections);
         }
-        
-        private void OnApplicationQuit()
+
+        public override void OnApplicationQuit()
         {
+            base.OnApplicationQuit();
             NetworkServer.Shutdown();
         }
 
@@ -57,29 +57,32 @@
             }
         }
 
-        private void OnServerConnect(NetworkMessage netMsg)
+        public override void OnServerConnect(NetworkConnection conn)
         {
+            base.OnServerConnect(conn);
+
             Debug.LogWarning("Client Connected");
-            var conn = _connections.Find(c => c.ConnectionId == netMsg.conn.connectionId); 
-            if(conn == null)
+            var uconn = _connections.Find(c => c.ConnectionId == conn.connectionId);
+            if (uconn == null)
             {
                 _connections.Add(new UnityNetworkConnection()
                 {
-                    Connection = netMsg.conn,
-                    ConnectionId = netMsg.conn.connectionId,
+                    Connection = conn,
+                    ConnectionId = conn.connectionId,
                     LobbyId = PlayFabMultiplayerAgentAPI.SessionConfig.SessionId
                 });
             }
         }
 
-        private void OnServerError(NetworkMessage netMsg)
+        public override void OnServerError(NetworkConnection conn, int errorCode)
         {
+            base.OnServerError(conn, errorCode);
+
             try
             {
-                var error = netMsg.ReadMessage<ErrorMessage>();
-                if (error.value != 0)
+                if (errorCode != 0)
                 {
-                    Debug.Log(string.Format("Unity Network Connection Status: code - {0}", error.value));
+                    Debug.Log(string.Format("Unity Network Connection Status: code - {0}", errorCode));
                 }
             }
             catch (Exception)
@@ -88,19 +91,20 @@
             }
         }
 
-        private void OnServerDisconnect(NetworkMessage netMsg)
+        public override void OnServerDisconnect(NetworkConnection conn)
         {
-            var conn = _connections.Find(c => c.ConnectionId == netMsg.conn.connectionId);
-            if(conn != null)
+            base.OnServerDisconnect(conn);
+
+            var uconn = _connections.Find(c => c.ConnectionId == conn.connectionId);
+            if (uconn != null)
             {
-                if (!string.IsNullOrEmpty(conn.PlayFabId))
+                if (!string.IsNullOrEmpty(uconn.PlayFabId))
                 {
-                    OnPlayerRemoved.Invoke(conn.PlayFabId);
+                    OnPlayerRemoved.Invoke(uconn.PlayFabId);
                 }
-                _connections.Remove(conn);
+                _connections.Remove(uconn);
             }
         }
-
     }
 
     [Serializable]
