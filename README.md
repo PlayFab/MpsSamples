@@ -11,6 +11,12 @@ Unity Server and Client sample that utilize the GameServer SDK.
 
 More information [here](UnityMirror/README.md).
 
+## OpenArena
+
+This sample wraps the open source [OpenArena](https://openarena.fandom.com/wiki/Main_Page) game using a .NET Core app and Linux containers.
+
+More information [here](openarena/README.md).
+
 ## Community samples
 
 Here you can find a list of samples and utilities created and supported by our community. [Let us know](https://github.com/PlayFab/gsdkSamples/issues) if you have created a sample yourself and would like to have it mentioned here.
