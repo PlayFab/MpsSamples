@@ -23,4 +23,4 @@ Here you can find a list of samples and utilities created and supported by our c
 
 - [PlayFabMirrorGameExample](https://github.com/natepac/playfabmirrorgameexample) by [natepac](https://github.com/natepac): Another sample using Mirror and Unity
 - [PFAdmin](https://github.com/bphillips09/PFAdmin) by [bphilips09](https://github.com/bphillips09): An Admin API GUI application for PlayFab
-- [PlayFab UE4 GSDK Integration](https://github.com/narthur157/playfab-gsdk-ue4) by [narthur157](https://github.com/narthur157): a plugin plugin providing a simple GSDK integration for Unreal Engine 4
+- [PlayFab UE4 GSDK Integration](https://github.com/narthur157/playfab-gsdk-ue4) by [narthur157](https://github.com/narthur157): a plugin providing a simple GSDK integration for Unreal Engine 4
