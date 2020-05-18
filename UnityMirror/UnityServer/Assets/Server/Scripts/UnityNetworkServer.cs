@@ -78,17 +78,7 @@
         {
             base.OnServerError(conn, errorCode);
 
-            try
-            {
-                if (errorCode != 0)
-                {
-                    Debug.Log(string.Format("Unity Network Connection Status: code - {0}", errorCode));
-                }
-            }
-            catch (Exception)
-            {
-                Debug.Log("Unity Network Connection Status, but we could not get the reason, check the Unity Logs for more info.");
-            }
+            Debug.Log(string.Format("Unity Network Connection Status: code - {0}", errorCode));
         }
 
         public override void OnServerDisconnect(NetworkConnection conn)
