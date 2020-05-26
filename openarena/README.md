@@ -21,6 +21,7 @@ docker login --username XXXXXX --password XXXXXXX ${ACR}
 docker build -t ${ACR}/openarena:${TAG} .
 docker push ${ACR}/openarena:${TAG}
 ```
+You can run the above script on [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/wsl2-index).
 5. Create a new MPS Build either via playfab.com or via [the CreateBuildWithCustomerContainer API call](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/createbuildwithcustomcontainer?view=playfab-rest). On this Build, select Linux VMs, the image:tag container image you uploaded and a single port for the game, 27960/UDP. 
 6. Wait for the Build to be deployed
 7. To allocate a server and get IP/port, you can use the [RequestMultiplayerServer](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/requestmultiplayerserver?view=playfab-rest) API call. For more information you can check the [documentation](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers)
