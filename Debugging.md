@@ -55,6 +55,13 @@ Once you are connected "inside" the container, you can use `netstat -ano` on Win
 
 ## Linux specific instructions
 
+### On Linux, how can I see diagnostics about my container?
+
+You can install `apt install procps` and then run:
+
+- `ps -aux` for the current running processes (observer that your main process in the container has a PID of 1. If this process dies, your container will be gone)
+- `top` for real time process information
+
 ### On Linux, how can I monitor TCP and UDP packets?
 
 You can use tcpdump utility. `apt update && apt install tcpdump` to install it. In order to use it for a specific port, you can do `tcpdump port 7777` for TCP and `tcpdump udp port 7778` for UDP. For more details, you can check [here](https://www.hugeserver.com/kb/install-use-tcpdump-capture-packets/).
