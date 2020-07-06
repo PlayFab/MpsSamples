@@ -1,12 +1,14 @@
 # Debugging your Game Servers
 
-Many debugging tasks of PlayFab Multiplayer Servers can be done locally using [LocalMultiplayerAgent](https://github.com/PlayFab/LocalMultiplayerAgent). However, sometimes the local environment does not exactly match the actual service and you would like to connect directly to debug a running server because it is marked as unhealthy or not performing as expected.
+Many debugging tasks of PlayFab Multiplayer Servers can be done locally using [LocalMultiplayerAgent](https://github.com/PlayFab/LocalMultiplayerAgent). However, sometimes the behavior of the game server can differ between  the local environment and the actual service so you would like to connect directly to debug a running server because it is marked as unhealthy or not performing as expected.
 
 In order to connect to the VM hosting your game server (either Windows or Linux), you can get RDP/SSH credentials using the "Connect" button on playfab.com web application (you can see this button on the "Virtual Machines" page on your Multiplayer Build) or using [CreateRemoteUser](https://docs.microsoft.com/en-us/rest/api/playfab/multiplayer/multiplayerserver/createremoteuser?view=playfab-rest) API call.
 
-As soon as you connect to the VM, you can use the console of the operating system to monitor your game servers. MPS service is natively using Docker containers on both Windows and Linux to spin up game server processes. To run Docker CLI commands, you'll need an admin powershell on Windows and `sudo su -` on Linux.
+As soon as you connect to the VM, you can use the console of the operating system to monitor your game servers. MPS service uses Docker containers to spin up game server processes. To run Docker CLI commands, you'll need an admin powershell on Windows and `sudo su -` on Linux.
 
-**These are advanced Docker container debugging instructions, usage of them might break your game servers. You should not use these on servers handling retail traffic until you are very familiar with docker?**.
+**These are advanced Docker container debugging instructions, usage of them might break your game servers. We do not recommend using these commands on containers running your production game servers.**.
+
+**We strongly advise you not to take any dependency on behavior or information you see while debugging the containers. Only publicly documented APIs and behavior are supported, other things can change without notice.**
 
 ## Instructions for both Windows and Linux
 
@@ -20,7 +22,7 @@ Use `docker ps`. You will see container name and hashes as well as port mapping 
 
 ### How can I see the ports used by my game servers?
 
-This information is listed on `docker ps`. For example, you might see something like that:
+This information is listed on `docker ps`. You will see something like that:
 
 ```
 980d7e80457265230a0bf   "/bin/sh -c ./cppLin…"   About a minute ago   Up About a minute   0.0.0.0:30000->3600/tcp, 0.0.0.0:30001->3601/udp  great_archimedes
@@ -55,18 +57,18 @@ Once you are connected "inside" the container, you can use `netstat -ano` on Win
 
 ## Linux specific instructions
 
-### On Linux, how can I see diagnostics about my container?
+### How can I see diagnostics about my container?
 
 You can install `apt install procps` and then run:
 
 - `ps -aux` for the current running processes (observer that your main process in the container has a PID of 1. If this process dies, your container will be gone)
 - `top` for real time process information
 
-### On Linux, how can I monitor TCP and UDP packets?
+### How can I monitor TCP and UDP packets?
 
 You can use tcpdump utility. `apt update && apt install tcpdump` to install it. In order to use it for a specific port, you can do `tcpdump port 7777` for TCP and `tcpdump udp port 7778` for UDP. For more details, you can check [here](https://www.hugeserver.com/kb/install-use-tcpdump-capture-packets/).
 
-Worth mentioning is the fact that you can use tcpdump both from inside the VM and from inside the container. However, pay attention to the port you will be monitoring, since there is a port mapping between VM ports and container ports.
+It is worth mentioning that you can use tcpdump both from inside the VM and from inside the container. However, ensure that you will be monitoring for the correct port value, since there is a port mapping between VM ports and container ports.
 
 ## Windows specific instructions
 
@@ -74,9 +76,13 @@ Worth mentioning is the fact that you can use tcpdump both from inside the VM an
 
 You can try the [Wireshark](https://www.wireshark.org/) utility.
 
-### On Windows, how can I debug a deployed multiplayer server using Visual Studio?
+### How can I debug a deployed multiplayer server using Visual Studio?
 
 We have some instructions [here](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/allocating-game-servers-and-configuring-vs-debugging-tools#debugging-a-deployed-multiplayer-server)
+
+### How can I determing the required DLLs that need to be in my asset package?
+
+You can follow the steps in [this article](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/determining-required-dlls). This article is also useful if your game server fails to start because of one or more missing DLLs.
 
 ## Can I contribute to this guide?
 
