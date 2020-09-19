@@ -17,6 +17,10 @@ This sample wraps the open source [OpenArena](https://openarena.fandom.com/wiki/
 
 More information [here](openarena/README.md).
 
+## Wrapping GSDK
+
+You could try GSDK without modifying your game server (even though we don't recommend it for production deployments). You can find instructions [here](wrappingGSDK/README.md).
+
 ## Debugging Docker containers
 
 MPS service uses Docker containers to schedule game servers. You can see some **advanced** debugging/diagnosing instructions [here](./Debugging.md).
