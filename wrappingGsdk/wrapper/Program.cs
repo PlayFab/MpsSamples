@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Playfab.Gaming.GSDK.CSharp;
 using System.IO;
 using System.Reflection;
+using System.Linq;
 
 namespace wrapper
 {
@@ -12,9 +13,9 @@ namespace wrapper
         private static Process gameProcess;
         static void Main(string[] args)
         {
-            if(args.Length <= 1 || args.Length >= 3 || args[0] != "-g")
+            if(args.Length <= 1 || args[0] != "-g")
             {
-                Console.WriteLine("Usage: wrapper.exe -g fakegame.exe");
+                Console.WriteLine("Usage: wrapper.exe -g fakegame.exe args...");
                 return;
             }
 
@@ -30,15 +31,15 @@ namespace wrapper
             LogMessage("GSDK callback registration completed");
             
             LogMessage("Attempting to start game process");
-            InitiateAndWaitForGameProcess(gameserverExe);
+            InitiateAndWaitForGameProcess(gameserverExe, args.Skip(2));
             LogMessage("Game process has exited");
         }
 
         // starts main game process and wait for it to complete
-        public static void InitiateAndWaitForGameProcess(string gameserverExe)
+        public static void InitiateAndWaitForGameProcess(string gameserverExe, IEnumerable<string> args)
         {
              // here we're starting the script that initiates the game process
-            gameProcess = StartProcess(gameserverExe);
+            gameProcess = StartProcess(gameserverExe, args);
             // as part of wrapping the main game server executable,
             // we create event handlers to process the output from the game (standard output/standard error)
             // based on this output, we will activate the server and process connected players
@@ -64,6 +65,7 @@ namespace wrapper
             {
                 // No allocation happened, the server is getting terminated (likely because there are too many already in standing by)
                 LogMessage("Server is getting terminated.");
+                gameProcess?.Kill(); // we still need to call WaitForExit https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.kill?view=netcore-3.1#remarks
             }
 
             // wait till it exits or crashes
@@ -88,20 +90,21 @@ namespace wrapper
             GameserverSDK.Start();
         }
 
-        public static Process StartProcess(string exeName)
+        public static Process StartProcess(string exeName, IEnumerable<string> args)
         {
             var process = new Process()
             {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = $"{exeName}",
+                    Arguments = string.Join(' ', args),
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
                 }
             };
-            Console.WriteLine(process.StartInfo.FileName);
+            
             process.Start();
             return process;
         }
@@ -109,7 +112,7 @@ namespace wrapper
         // runs when we received data (stdout/stderr) from our game server process
         public static void DataReceived(object sender, DataReceivedEventArgs e)
         {
-            Console.WriteLine(e.Data); // used for debug purposes only - you can use `docker logs <container_id> to see the stdout logs
+            LogMessage(e.Data); // used for debug purposes only - you can use `docker logs <container_id> to see the stdout logs
         }
 
         static void OnShutdown()

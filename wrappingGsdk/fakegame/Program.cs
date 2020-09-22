@@ -1,18 +1,37 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
 
 namespace fakegame
 {
     class Program
     {
-        async static Task Main(string[] args)
+        const int HTTP_PORT = 80;
+        static void Main(string[] args)
         {
             Console.WriteLine($"Welcome to fake game server!");
-            while(true)
+            if(args.Length > 0)
             {
-                await Task.Delay(10000);
-                Console.WriteLine($"Fake game server is alive!");
+                foreach(string arg in args)
+                {
+                    Console.WriteLine($"Argument: {arg}");
+                } 
             }
+            CreateHostBuilder(args).Build().Run();
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+                webBuilder.UseUrls($"http://*:{HTTP_PORT}");
+            });
     }
 }

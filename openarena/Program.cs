@@ -103,6 +103,7 @@ namespace openarena
                 {
                     // No allocation happened, the server is getting terminated (likely because there are too many already in standing by)
                     LogMessage("Server is getting terminated.");
+                    gameProcess?.Kill(); // we still need to call WaitForExit https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.kill?view=netcore-3.1#remarks
                 }
             }
             else if (e.Data.Contains("ClientBegin:")) // new player connected
