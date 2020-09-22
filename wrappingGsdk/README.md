@@ -71,9 +71,9 @@ You are now ready to test with `LocalMultiplayerAgent`! If you have configured i
 
 #### Deploying on MPS
 
-If you want to deploy your game on Multiplayer Servers service, you should create a new multiplayer Build on playfab.com, upload your .zip game builds use a StartGameCommand like this one:
+You can use our [public documentation](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/deploying-playfab-multiplayer-server-builds) to upload your Build on the MPS service. During the creation of your Build you should upload the zipped game assets you created and use a StartGameCommand like this one:
 
 ```
 # replace fakegame.exe with the name of your game server executable
-C:\Assets\wrapper.exe -g C:\Assets\fakegame.exe
+C:\Assets\wrapper.exe -g C:\Assets\fakegame.exe arg1 arg2
 ```
