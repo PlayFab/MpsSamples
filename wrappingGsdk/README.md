@@ -7,6 +7,8 @@ There are cases in which you want to wrap an existing game with a custom process
 
 > This sample and corresponding technique is NOT meant to be used in production but only for evaluation/development purposes. Proper integration of your game server with the GSDK is highly recommended.
 
+The samples require .NET Core 3.1 SDK, you can download it [here](https://dotnet.microsoft.com/download).
+
 ## Wrapping an existing game server using the wrapper app
 
 To get started, you can find two .NET Core projects in the current folder. 
