@@ -80,7 +80,7 @@ You can try the [Wireshark](https://www.wireshark.org/) utility.
 
 We have some instructions [here](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/allocating-game-servers-and-configuring-vs-debugging-tools#debugging-a-deployed-multiplayer-server)
 
-### How can I determing the required DLLs that need to be in my asset package?
+### How can I determine the required DLLs that need to be in my asset package?
 
 You can follow the steps in [this article](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/determining-required-dlls). This article is also useful if your game server fails to start because of one or more missing DLLs.
 
