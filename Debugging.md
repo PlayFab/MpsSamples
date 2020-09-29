@@ -99,6 +99,10 @@ Steps you can follow to debug:
 - Check if your .zip asset package contains all the required DLLs for your game (refer to the previous instruction)
 - Check Windows Event log to see if there's any useful information about Docker failures
 
+### On LocalMultiplayerAgent, I am not getting any heartbeats
+
+There might be some leftover containers from previous attempts. You can use `docker ps -a` to see all containers and `docker rm -f <containerNameOrTag>` to delete them.
+
 ### On Windows, how can I monitor TCP and UDP packets?
 
 You can try the [Wireshark](https://www.wireshark.org/) utility.
