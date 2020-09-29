@@ -96,7 +96,7 @@ info: MockPlayFabVmAgent[0]
 Steps you can follow to debug:
 
 - Check `PF_ConsoleLogs.txt` for any useful error message
-- Check if your .zip asset package contains all the required DLLs for your game (refer to the previous instruction)
+- Check if your .zip asset package contains all the required DLLs for your game (refer to the [previous instruction](#how-can-i-determine-the-required-dlls-that-need-to-be-in-my-asset-package))
 - Check Windows Event log to see if there's any useful information about Docker failures
 
 ### On LocalMultiplayerAgent, I am not getting any heartbeats
