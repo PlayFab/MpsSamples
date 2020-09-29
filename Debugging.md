@@ -72,6 +72,33 @@ It is worth mentioning that you can use tcpdump both from inside the VM and from
 
 ## Windows specific instructions
 
+### How can I determine the required DLLs that need to be in my asset package?
+
+You can follow the steps in [this article](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/determining-required-dlls). This article is also useful if your game server fails to start because of one or more missing DLLs.
+
+### LocalMultiplayerAgent is crashing and restarting my Docker container with no error messages. Help!
+
+In these cases, you might see an output similar as this:
+
+```
+info: MockPlayFabVmAgent[0]
+      Waiting for heartbeats from the game server.....
+info: MockPlayFabVmAgent[0]
+      Container 4179fa451214251a45d1a8e8338203a9ff05dc6ec1231c50e1f81f5508b3e1c8 exited with exit code 1.
+info: MockPlayFabVmAgent[0]
+      Collecting logs for container 4179fa451214251a45d1a8e8338203a9ff05dc6ec1231c50e1f81f5508b3e1c8.
+info: MockPlayFabVmAgent[0]
+      Copying log file C:\ProgramData\Docker\containers\4179fa451214251a45d1a8e8338203a9ff05dc6ec1231c50e1f81f5508b3e1c8\4179fa451214251a45d1a8e8338203a9ff05dc6ec1231c50e1f81f5508b3e1c8-json.log for container 4179fa451214251a45d1a8e8338203a9ff05dc6ec1231c50e1f81f5508b3e1c8 to D:\playfab\PlayFabVmAgentOutput\2020-09-29T01-42-01\GameLogs\032e7357-1956-4a60-9682-ca462cc3ea12\PF_ConsoleLogs.txt.
+info: MockPlayFabVmAgent[0]
+      Deleting container 4179fa451214251a45d1a8e8338203a9ff05dc6ec1231c50e1f81f5508b3e1c8.
+```
+
+Steps you can follow to debug:
+
+- Check `PF_ConsoleLogs.txt` for any useful error message
+- Check if your .zip asset package contains all the required DLLs for your game (refer to the previous instruction)
+- Check Windows Event log to see if there's any useful information about Docker failures
+
 ### On Windows, how can I monitor TCP and UDP packets?
 
 You can try the [Wireshark](https://www.wireshark.org/) utility.
@@ -79,10 +106,6 @@ You can try the [Wireshark](https://www.wireshark.org/) utility.
 ### How can I debug a deployed multiplayer server using Visual Studio?
 
 We have some instructions [here](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/allocating-game-servers-and-configuring-vs-debugging-tools#debugging-a-deployed-multiplayer-server)
-
-### How can I determine the required DLLs that need to be in my asset package?
-
-You can follow the steps in [this article](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/determining-required-dlls). This article is also useful if your game server fails to start because of one or more missing DLLs.
 
 ## Can I contribute to this guide?
 
