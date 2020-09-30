@@ -76,6 +76,7 @@ namespace WindowsRunnerCSharpClient
             Console.WriteLine();
             
             // Allocate a server
+            // You will get a unique server if you specify a unique SessionId in the call to RequestMultiplayerServers
             string sessionId = Guid.NewGuid().ToString();
             List<string> preferredRegions = qosResult.RegionResults
                 .Where(x => x.ErrorCode == (int) QosErrorCode.Success)
