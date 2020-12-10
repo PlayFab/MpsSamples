@@ -218,3 +218,4 @@ CMD ["/game/UnityServer.x86_64", "-nographics", "-batchmode"]
 ```
 
 - You're now ready to build your image! If you want to develop locally, you can use `docker build -t myregistry.io/mygame:0.1 .` to build your game and test it with [LocalMultiplayerAgent](https://github.com/PlayFab/LocalMultiplayerAgent). Or, you can get the proper PlayFab container registry credentials (using [this](https://docs.microsoft.com/en-us/rest/api/playfab/multiplayer/multiplayerserver/getcontainerregistrycredentials?view=playfab-rest) API call or from the Builds page on PlayFab web site). Once you do that, you can `docker build/tag/push` your container image to the PlayFab container registry and spin game servers running it.
+
