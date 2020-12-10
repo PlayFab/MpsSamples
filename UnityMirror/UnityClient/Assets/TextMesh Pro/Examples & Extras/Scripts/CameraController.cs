@@ -26,7 +26,9 @@ namespace TMPro.Examples
 
         public CameraModes CameraMode = CameraModes.Follow;
 
-        public bool MovementSmoothing = true;
+		public bool ConstantMouseMode = true;
+
+		public bool MovementSmoothing = true;
         public bool RotationSmoothing = false;
         private bool previousSmoothing;
 
@@ -62,6 +64,10 @@ namespace TMPro.Examples
 
             cameraTransform = transform;
             previousSmoothing = MovementSmoothing;
+			
+		#if UNITY_IOS || UNITY_ANDROID
+		ConstantMouseMode = false;
+		#endif
         }
 
 
@@ -132,22 +138,22 @@ namespace TMPro.Examples
 
             float touchCount = Input.touchCount;
 
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || touchCount > 0)
+            if (Input.mousePresent || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || touchCount > 0)
             {
                 mouseWheel *= 10;
 
-                if (Input.GetKeyDown(KeyCode.I))
-                    CameraMode = CameraModes.Isometric;
+                //if (Input.GetKeyDown(KeyCode.I))
+                //    CameraMode = CameraModes.Isometric;
 
-                if (Input.GetKeyDown(KeyCode.F))
-                    CameraMode = CameraModes.Follow;
+                //if (Input.GetKeyDown(KeyCode.F))
+                //    CameraMode = CameraModes.Follow;
 
-                if (Input.GetKeyDown(KeyCode.S))
-                    MovementSmoothing = !MovementSmoothing;
+                //if (Input.GetKeyDown(KeyCode.S))
+                //    MovementSmoothing = !MovementSmoothing;
 
 
                 // Check for right mouse button to change camera follow and elevation angle
-                if (Input.GetMouseButton(1))
+                if (Input.GetMouseButton(1) || ConstantMouseMode )
                 {
                     mouseY = Input.GetAxis("Mouse Y");
                     mouseX = Input.GetAxis("Mouse X");

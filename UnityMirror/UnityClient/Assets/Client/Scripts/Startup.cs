@@ -35,6 +35,7 @@ public class Startup : MonoBehaviour
         _messageWindow.Title.text = "Maintenance Shutdown scheduled";
         _messageWindow.Message.text = string.Format("Maintenance is scheduled for: {0}", message.ScheduledMaintenanceUTC.ToString("MM-DD-YYYY hh:mm:ss"));
         _messageWindow.gameObject.SetActive(true);
+		showCanvas = true;
     }
 
     private void OnServerShutdown(NetworkMessage netMsg)
@@ -42,6 +43,7 @@ public class Startup : MonoBehaviour
         _messageWindow.Title.text = "Shutdown In Progress";
         _messageWindow.Message.text = "Server has issued a shutdown.";
         _messageWindow.gameObject.SetActive(true);
+		showCanvas = true;
         NetworkClient.Disconnect();
     }
 
@@ -60,19 +62,41 @@ public class Startup : MonoBehaviour
         _messageWindow.Title.text = "Login Successful";
         _messageWindow.Message.text = string.Format("You logged in successfully. ID:{0}", success.PlayFabId);
         _messageWindow.gameObject.SetActive(true);
+		showCanvas = false;
 
         NetworkClient.connection.Send(CustomGameServerMessageTypes.ReceiveAuthenticate, new ReceiveAuthenticateMessage()
         {
             PlayFabId = success.PlayFabId
         });
-    }
 
-    private void OnDisconnected(int? code)
-    {
-        _messageWindow.Title.text = "Disconnected!";
+		MyMiniGame.Begin();
+	}
+
+    private void OnDisconnected(int? code) {
+		_messageWindow.Title.text = "Disconnected!";
         _messageWindow.Message.text = "You were disconnected from the server";
         _messageWindow.gameObject.SetActive(true);
+		showCanvas = true;
     }
 
+
+	bool mWaitForInput = false;
+	bool showCanvas {
+		set {
+			if( value == false ) {
+				mWaitForInput = true;
+
+			} else {
+				mWaitForInput = false;
+				_messageWindow.GetComponentInParent<Canvas>().gameObject.SetActive( true );
+			}
+		}
+	}
+	private void Update() {
+		if( mWaitForInput && Input.anyKeyDown ) {
+			mWaitForInput = false;
+			_messageWindow.GetComponentInParent<Canvas>().gameObject.SetActive( false );
+		}
+	}
 
 }

@@ -61,10 +61,11 @@ namespace Mirror
         /// </summary>
         public float lastMessageTime;
 
-        /// <summary>
-        /// Obsolete: use <see cref="identity"/> instead
-        /// </summary>
-        [Obsolete("Use NetworkConnection.identity instead")]
+#if false
+		/// <summary>
+		/// Obsolete: use <see cref="identity"/> instead
+		/// </summary>
+		[Obsolete("Use NetworkConnection.identity instead")]
         public NetworkIdentity playerController
         {
             get
@@ -76,6 +77,7 @@ namespace Mirror
                 identity = value;
             }
         }
+#endif
 
         /// <summary>
         /// The NetworkIdentity for this connection.
