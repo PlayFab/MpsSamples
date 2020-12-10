@@ -1,28 +1,52 @@
-using System.Collections.Generic;
+using System;
 
 namespace Mirror
 {
+    /// <summary>
+    /// NetworkWriter to be used with <see cref="NetworkWriterPool">NetworkWriterPool</see>
+    /// </summary>
+    public class PooledNetworkWriter : NetworkWriter, IDisposable
+    {
+        public void Dispose()
+        {
+            NetworkWriterPool.Recycle(this);
+        }
+    }
 
+    /// <summary>
+    /// Pool of NetworkWriters
+    /// <para>Use this pool instead of <see cref="NetworkWriter">NetworkWriter</see> to reduce memory allocation</para>
+    /// </summary>
     public static class NetworkWriterPool
     {
-        static readonly Stack<NetworkWriter> pool = new Stack<NetworkWriter>();
+        // reuse Pool<T>
+        // we still wrap it in NetworkWriterPool.Get/Recyle so we can reset the
+        // position before reusing.
+        // this is also more consistent with NetworkReaderPool where we need to
+        // assign the internal buffer before reusing.
+        static readonly Pool<PooledNetworkWriter> pool = new Pool<PooledNetworkWriter>(
+            () => new PooledNetworkWriter()
+        );
 
-        public static NetworkWriter GetWriter()
+        /// <summary>
+        /// Get the next writer in the pool
+        /// <para>If pool is empty, creates a new Writer</para>
+        /// </summary>
+        public static PooledNetworkWriter GetWriter()
         {
-            if (pool.Count != 0)
-            {
-                NetworkWriter writer = pool.Pop();
-                // reset cached writer length and position
-                writer.SetLength(0);
-                return writer;
-            }
-
-            return new NetworkWriter();
+            // grab from from pool & reset position
+            PooledNetworkWriter writer = pool.Take();
+            writer.Reset();
+            return writer;
         }
 
-        public static void Recycle(NetworkWriter writer)
+        /// <summary>
+        /// Puts writer back into pool
+        /// <para>When pool is full, the extra writer is left for the GC</para>
+        /// </summary>
+        public static void Recycle(PooledNetworkWriter writer)
         {
-            pool.Push(writer);
+            pool.Return(writer);
         }
     }
 }

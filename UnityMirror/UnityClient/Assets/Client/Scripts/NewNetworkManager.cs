@@ -108,28 +108,28 @@ public class CustomGameServerMessageTypes
     public const short MaintenanceMessage = 902;
 }
 
-public class ReceiveAuthenticateMessage : MessageBase
+public struct ReceiveAuthenticateMessage : NetworkMessage
 {
     public string PlayFabId;
 }
 
-public class ShutdownMessage : MessageBase { }
+public struct ShutdownMessage : NetworkMessage { }
 
 [Serializable]
-public class MaintenanceMessage : MessageBase
+public struct MaintenanceMessage : NetworkMessage
 {
     public DateTime ScheduledMaintenanceUTC;
 
-    public override void Deserialize(NetworkReader reader)
-    {
-        var json = PlayFab.PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
-        ScheduledMaintenanceUTC = json.DeserializeObject<DateTime>(reader.ReadString());
-    }
+    //public override void Deserialize(NetworkReader reader)
+    //{
+    //    var json = PlayFab.PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
+    //    ScheduledMaintenanceUTC = json.DeserializeObject<DateTime>(reader.ReadString());
+    //}
 
-    public override void Serialize(NetworkWriter writer)
-    {
-        var json = PlayFab.PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
-        var str = json.SerializeObject(ScheduledMaintenanceUTC);
-        writer.Write(str);
-    }
+    //public override void Serialize(NetworkWriter writer)
+    //{
+    //    var json = PlayFab.PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
+    //    var str = json.SerializeObject(ScheduledMaintenanceUTC);
+    //    writer.Write(str);
+    //}
 }

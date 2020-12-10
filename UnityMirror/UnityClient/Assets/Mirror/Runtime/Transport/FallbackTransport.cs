@@ -2,12 +2,11 @@
 // example: to use Apathy if on Windows/Mac/Linux and fall back to Telepathy
 //          otherwise.
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mirror
 {
-    [HelpURL("https://mirror-networking.com/docs/Transports/Fallback.html")]
+    [HelpURL("https://mirror-networking.com/docs/Articles/Transports/Fallback.html")]
     public class FallbackTransport : Transport
     {
         public Transport[] transports;
@@ -21,10 +20,18 @@ namespace Mirror
             {
                 throw new Exception("FallbackTransport requires at least 1 underlying transport");
             }
-            InitClient();
-            InitServer();
             available = GetAvailableTransport();
             Debug.Log("FallbackTransport available: " + available.GetType());
+        }
+
+        void OnEnable()
+        {
+            available.enabled = true;
+        }
+
+        void OnDisable()
+        {
+            available.enabled = false;
         }
 
         // The client just uses the first transport available
@@ -45,21 +52,12 @@ namespace Mirror
             return available.Available();
         }
 
-        // clients always pick the first transport
-        void InitClient()
-        {
-            // wire all the base transports to our events
-            foreach (Transport transport in transports)
-            {
-                transport.OnClientConnected.AddListener(OnClientConnected.Invoke);
-                transport.OnClientDataReceived.AddListener(OnClientDataReceived.Invoke);
-                transport.OnClientError.AddListener(OnClientError.Invoke);
-                transport.OnClientDisconnected.AddListener(OnClientDisconnected.Invoke);
-            }
-        }
-
         public override void ClientConnect(string address)
         {
+            available.OnClientConnected = OnClientConnected;
+            available.OnClientDataReceived = OnClientDataReceived;
+            available.OnClientError = OnClientError;
+            available.OnClientDisconnected = OnClientDisconnected;
             available.ClientConnect(address);
         }
 
@@ -93,22 +91,14 @@ namespace Mirror
             available.ClientDisconnect();
         }
 
-        public override bool ClientSend(int channelId, ArraySegment<byte> segment)
+        public override void ClientSend(int channelId, ArraySegment<byte> segment)
         {
-            return available.ClientSend(channelId, segment);
+            available.ClientSend(channelId, segment);
         }
 
-        void InitServer()
-        {
-            // wire all the base transports to our events
-            foreach (Transport transport in transports)
-            {
-                transport.OnServerConnected.AddListener(OnServerConnected.Invoke);
-                transport.OnServerDataReceived.AddListener(OnServerDataReceived.Invoke);
-                transport.OnServerError.AddListener(OnServerError.Invoke);
-                transport.OnServerDisconnected.AddListener(OnServerDisconnected.Invoke);
-            }
-        }
+        // right now this just returns the first available uri,
+        // should we return the list of all available uri?
+        public override Uri ServerUri() => available.ServerUri();
 
         public override bool ServerActive()
         {
@@ -125,13 +115,17 @@ namespace Mirror
             return available.ServerDisconnect(connectionId);
         }
 
-        public override bool ServerSend(List<int> connectionIds, int channelId, ArraySegment<byte> segment)
+        public override void ServerSend(int connectionId, int channelId, ArraySegment<byte> segment)
         {
-            return available.ServerSend(connectionIds, channelId, segment);
+            available.ServerSend(connectionId, channelId, segment);
         }
 
         public override void ServerStart()
         {
+            available.OnServerConnected = OnServerConnected;
+            available.OnServerDataReceived = OnServerDataReceived;
+            available.OnServerError = OnServerError;
+            available.OnServerDisconnected = OnServerDisconnected;
             available.ServerStart();
         }
 
@@ -171,5 +165,6 @@ namespace Mirror
         {
             return available.ToString();
         }
+
     }
 }

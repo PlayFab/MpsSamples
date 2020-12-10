@@ -1,20 +1,42 @@
-// abstract transport layer component
-// note: not all transports need a port, so add it to yours if needed.
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace Mirror
 {
-    // UnityEvent definitions
-    [Serializable] public class ClientDataReceivedEvent : UnityEvent<ArraySegment<byte>, int> { }
-    [Serializable] public class UnityEventException : UnityEvent<Exception> { }
-    [Serializable] public class UnityEventInt : UnityEvent<int> { }
-    [Serializable] public class ServerDataReceivedEvent : UnityEvent<int, ArraySegment<byte>, int> { }
-    [Serializable] public class UnityEventIntException : UnityEvent<int, Exception> { }
-
+    /// <summary>
+    /// Abstract transport layer component
+    /// </summary>
+    /// <remarks>
+    /// <h2>
+    ///   Transport Rules 
+    /// </h2>
+    /// <list type="bullet">
+    ///   <listheader><description>
+    ///     All transports should follow these rules so that they work correctly with mirror
+    ///   </description></listheader>
+    ///   <item><description>
+    ///     When Monobehaviour is disabled the Transport should not invoke callbacks
+    ///   </description></item>
+    ///   <item><description>
+    ///     Callbacks should be invoked on main thread. It is best to do this from LateUpdate
+    ///   </description></item>
+    ///   <item><description>
+    ///     Callbacks can be invoked after <see cref="ServerStop"/> or <see cref="ClientDisconnect"/> as been called
+    ///   </description></item>
+    ///   <item><description>
+    ///     <see cref="ServerStop"/> or <see cref="ClientDisconnect"/> can be called by mirror multiple times
+    ///   </description></item>
+    ///   <item><description>
+    ///     <see cref="Available"/> should check the platform and 32 vs 64 bit if the transport only works on some of them
+    ///   </description></item>
+    ///   <item><description>
+    ///     <see cref="GetMaxPacketSize"/> should return size even if transport is not running
+    ///   </description></item>
+    ///   <item><description>
+    ///     Default channel should be reliable <see cref="Channels.DefaultReliable"/>
+    ///   </description></item>
+    /// </list>
+    /// </remarks>
     public abstract class Transport : MonoBehaviour
     {
         /// <summary>
@@ -34,23 +56,27 @@ namespace Mirror
         #region Client
         /// <summary>
         /// Notify subscribers when when this client establish a successful connection to the server
+        /// <para>callback()</para>
         /// </summary>
-        [HideInInspector] public UnityEvent OnClientConnected = new UnityEvent();
+        public Action OnClientConnected = () => Debug.LogWarning("OnClientConnected called with no handler");
 
         /// <summary>
         /// Notify subscribers when this client receive data from the server
+        /// <para>callback(ArraySegment&lt;byte&gt; data, int channel)</para>
         /// </summary>
-        [HideInInspector] public ClientDataReceivedEvent OnClientDataReceived = new ClientDataReceivedEvent();
+        public Action<ArraySegment<byte>, int> OnClientDataReceived = (data, channel) => Debug.LogWarning("OnClientDataReceived called with no handler");
 
         /// <summary>
-        /// Notify subscribers when this clianet encounters an error communicating with the server
+        /// Notify subscribers when this client encounters an error communicating with the server
+        /// <para>callback(Exception e)</para>
         /// </summary>
-        [HideInInspector] public UnityEventException OnClientError = new UnityEventException();
+        public Action<Exception> OnClientError = (error) => Debug.LogWarning("OnClientError called with no handler");
 
         /// <summary>
         /// Notify subscribers when this client disconnects from the server
+        /// <para>callback()</para>
         /// </summary>
-        [HideInInspector] public UnityEvent OnClientDisconnected = new UnityEvent();
+        public Action OnClientDisconnected = () => Debug.LogWarning("OnClientDisconnected called with no handler");
 
         /// <summary>
         /// Determines if we are currently connected to the server
@@ -82,8 +108,7 @@ namespace Mirror
         /// but some transports might want to provide unreliable, encrypted, compressed, or any other feature
         /// as new channels</param>
         /// <param name="segment">The data to send to the server. Will be recycled after returning, so either use it directly or copy it internally. This allows for allocation-free sends!</param>
-        /// <returns>true if the send was successful</returns>
-        public abstract bool ClientSend(int channelId, ArraySegment<byte> segment);
+        public abstract void ClientSend(int channelId, ArraySegment<byte> segment);
 
         /// <summary>
         /// Disconnect this client from the server
@@ -94,25 +119,37 @@ namespace Mirror
 
         #region Server
 
+
+        /// <summary>
+        /// Retrieves the address of this server.
+        /// Useful for network discovery
+        /// </summary>
+        /// <returns>the url at which this server can be reached</returns>
+        public abstract Uri ServerUri();
+
         /// <summary>
         /// Notify subscribers when a client connects to this server
+        /// <para>callback(int connId)</para>
         /// </summary>
-        [HideInInspector] public UnityEventInt OnServerConnected = new UnityEventInt();
+        public Action<int> OnServerConnected = (connId) => Debug.LogWarning("OnServerConnected called with no handler");
 
         /// <summary>
         /// Notify subscribers when this server receives data from the client
+        /// <para>callback(int connId, ArraySegment&lt;byte&gt; data, int channel)</para>
         /// </summary>
-        [HideInInspector] public ServerDataReceivedEvent OnServerDataReceived = new ServerDataReceivedEvent();
+        public Action<int, ArraySegment<byte>, int> OnServerDataReceived = (connId, data, channel) => Debug.LogWarning("OnServerDataReceived called with no handler");
 
         /// <summary>
         /// Notify subscribers when this server has some problem communicating with the client
+        /// <para>callback(int connId, Exception e)</para>
         /// </summary>
-        [HideInInspector] public UnityEventIntException OnServerError = new UnityEventIntException();
+        public Action<int, Exception> OnServerError = (connId, error) => Debug.LogWarning("OnServerError called with no handler");
 
         /// <summary>
         /// Notify subscribers when a client disconnects from this server
+        /// <para>callback(int connId)</para>
         /// </summary>
-        [HideInInspector] public UnityEventInt OnServerDisconnected = new UnityEventInt();
+        public Action<int> OnServerDisconnected = (connId) => Debug.LogWarning("OnServerDisconnected called with no handler");
 
         /// <summary>
         /// Determines if the server is up and running
@@ -126,18 +163,13 @@ namespace Mirror
         public abstract void ServerStart();
 
         /// <summary>
-        /// Send data to one or multiple clients. We provide a list, so that transports can make use
-        /// of multicasting, and avoid allocations where possible.
-        ///
-        /// We don't provide a single ServerSend function to reduce complexity. Simply overwrite this
-        /// one in your Transport.
+        /// Send data to a client.
         /// </summary>
-        /// <param name="connectionIds">The list of client connection ids to send the data to</param>
+        /// <param name="connectionId">The client connection id to send the data to</param>
         /// <param name="channelId">The channel to be used.  Transports can use channels to implement
         /// other features such as unreliable, encryption, compression, etc...</param>
         /// <param name="data"></param>
-        /// <returns>true if the data was sent to all clients</returns>
-        public abstract bool ServerSend(List<int> connectionIds, int channelId, ArraySegment<byte> segment);
+        public abstract void ServerSend(int connectionId, int channelId, ArraySegment<byte> segment);
 
         /// <summary>
         /// Disconnect a client from this server.  Useful to kick people out.
@@ -145,16 +177,6 @@ namespace Mirror
         /// <param name="connectionId">the id of the client to disconnect</param>
         /// <returns>true if the client was kicked</returns>
         public abstract bool ServerDisconnect(int connectionId);
-
-        /// <summary>
-        /// Deprecated: Use ServerGetClientAddress(int connectionId) instead
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never), Obsolete("Use ServerGetClientAddress(int connectionId) instead")]
-        public virtual bool GetConnectionInfo(int connectionId, out string address)
-        {
-            address = ServerGetClientAddress(connectionId);
-            return true;
-        }
 
         /// <summary>
         /// Get the client address
@@ -171,11 +193,6 @@ namespace Mirror
         #endregion
 
         /// <summary>
-        /// Shut down the transport, both as client and server
-        /// </summary>
-        public abstract void Shutdown();
-
-        /// <summary>
         /// The maximum packet size for a given channel.  Unreliable transports
         /// usually can only deliver small packets. Reliable fragmented channels
         /// can usually deliver large ones.
@@ -188,6 +205,11 @@ namespace Mirror
         /// <param name="channelId">channel id</param>
         /// <returns>the size in bytes that can be sent via the provided channel</returns>
         public abstract int GetMaxPacketSize(int channelId = Channels.DefaultReliable);
+
+        /// <summary>
+        /// Shut down the transport, both as client and server
+        /// </summary>
+        public abstract void Shutdown();
 
         // block Update() to force Transports to use LateUpdate to avoid race
         // conditions. messages should be processed after all the game state
@@ -203,6 +225,21 @@ namespace Mirror
         //            e.g. in uSurvival Transport would apply Cmds before
         //            ShoulderRotation.LateUpdate, resulting in projectile
         //            spawns at the point before shoulder rotation.
+#pragma warning disable UNT0001 // Empty Unity message
         public void Update() { }
+#pragma warning restore UNT0001 // Empty Unity message
+
+        /// <summary>
+        /// called when quitting the application by closing the window / pressing stop in the editor
+        /// <para>virtual so that inheriting classes' OnApplicationQuit() can call base.OnApplicationQuit() too</para>
+        /// </summary>
+        public virtual void OnApplicationQuit()
+        {
+            // stop transport (e.g. to shut down threads)
+            // (when pressing Stop in the Editor, Unity keeps threads alive
+            //  until we press Start again. so if Transports use threads, we
+            //  really want them to end now and not after next start)
+            Shutdown();
+        }
     }
 }

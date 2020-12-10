@@ -15,25 +15,29 @@ public class MyMiniGame : MonoBehaviour {
 		go.AddComponent<MyMiniGame>();
 	}
 
-	class MousePosData : IMessageBase {
+	public struct MousePosData : NetworkMessage {
 		public float mX;
 		public float mY;
 
-		public void Deserialize( NetworkReader reader ) {
-			mX = reader.ReadSingle();
-			mY = reader.ReadSingle();
-		}
+		//public void Deserialize( NetworkReader reader ) {
+		//	mX = reader.ReadSingle();
+		//	mY = reader.ReadSingle();
+		//}
 
-		public void Serialize( NetworkWriter writer ) {
-			writer.WriteSingle( mX );
-			writer.WriteSingle( mY );
-		}
+		//public void Serialize( NetworkWriter writer ) {
+		//	writer.WriteSingle( mX );
+		//	writer.WriteSingle( mY );
+		//}
 	}
 
 	void Start() {
 		this.name = "MyMiniGame";
 
 		NetworkClient.RegisterHandler<MousePosData>( OnMousePosData );
+	}
+
+	void OnMousePosData( NetworkConnection conn, MousePosData message ) {
+		Debug.Log( "server cb; " + message.mX + " : " + message.mY );
 	}
 
 	// Update is called once per frame
@@ -54,9 +58,5 @@ public class MyMiniGame : MonoBehaviour {
 
 
 
-
-	private void OnMousePosData( NetworkConnection connection, MousePosData mousePosData ) {
-		Debug.Log( "server cb; " + mousePosData.mX + " : " + mousePosData.mY );
-	}
 
 }

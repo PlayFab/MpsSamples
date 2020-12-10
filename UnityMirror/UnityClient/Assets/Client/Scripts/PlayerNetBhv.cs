@@ -100,14 +100,14 @@ public class PlayerNetBhv : NetworkBehaviour {
 		base.OnStartClient();
 	}
 
-	private void SetColor( Color32 newColor ) {
+	private void SetColor( Color32 oldColor, Color32 newColor ) {
 		MeshRenderer mr = GetComponent<MeshRenderer>();
 		if( mr != null ) {
 			mr.material.SetColor( "_Color", newColor );
 		}
 	}
 
-	private void SetHp( int newHp ) {
+	private void SetHp( int oldHp, int newHp ) {
 		if( base.isLocalPlayer ) {
 			name = "*hp: " + newHp;
 		} else {
