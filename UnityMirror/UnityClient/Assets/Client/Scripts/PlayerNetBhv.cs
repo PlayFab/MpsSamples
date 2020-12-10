@@ -71,7 +71,7 @@ public class PlayerNetBhv : NetworkBehaviour {
 		base.OnStartServer();
 		StartCoroutine( _RandomizeColor() );
 
-		_health = 100;
+		_health = 30;
 	}
 
 	public override void OnStartClient() {
@@ -158,6 +158,10 @@ public class PlayerNetBhv : NetworkBehaviour {
 	}
 
 	private void Update() {
+		if( mDbgTxt != null && Camera.main != null ) {
+			mDbgTxt.transform.rotation = Quaternion.LookRotation( mDbgTxt.transform.position - Camera.main.transform.position );
+		}
+
 		if( base.hasAuthority && base.isLocalPlayer ) {
 			if( mCamController != null ) {
 

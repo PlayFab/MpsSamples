@@ -88,14 +88,24 @@ public class Startup : MonoBehaviour
 
 			} else {
 				mWaitForInput = false;
-				_messageWindow.GetComponentInParent<Canvas>().gameObject.SetActive( true );
+				if( _messageWindow != null ) {
+					Canvas c = _messageWindow.GetComponentInParent<Canvas>();
+					if( c != null ) {
+						c.gameObject.SetActive( true );
+					}
+				}
 			}
 		}
 	}
 	private void Update() {
 		if( mWaitForInput && Input.anyKeyDown ) {
 			mWaitForInput = false;
-			_messageWindow.GetComponentInParent<Canvas>().gameObject.SetActive( false );
+			if( _messageWindow != null ) {
+				Canvas c = _messageWindow.GetComponentInParent<Canvas>();
+				if( c != null ) {
+					c.gameObject.SetActive( false );
+				}
+			}
 		}
 	}
 
