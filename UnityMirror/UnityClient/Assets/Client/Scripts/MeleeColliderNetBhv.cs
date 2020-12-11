@@ -11,7 +11,7 @@ public class MeleeColliderNetBhv : NetworkBehaviour {
 		if( other.gameObject != mOwner ) {
 			PlayerNetBhv pnb = other.gameObject.GetComponent<PlayerNetBhv>();
 			if( pnb != null ) {
-				pnb.TakeDamage( 3, true );
+				pnb.OnTakenDamage( 3, transform.position, 40f );
 			}
 		}
 	}

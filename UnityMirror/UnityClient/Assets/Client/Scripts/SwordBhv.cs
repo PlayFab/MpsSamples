@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Ext;
 
 public class SwordBhv : MonoBehaviour {
 	Vector3 mInitLocPos;
@@ -28,12 +29,6 @@ public class SwordBhv : MonoBehaviour {
 		mDir = !mDir;
 	}
 
-	public static float EaseInOutQuad( float t, float b, float c, float d ) {
-		if( (t /= d / 2) < 1 )
-			return ((c / 2) * (t * t)) + b;
-		return -c / 2 * (((t - 2) * (--t)) - 1) + b;
-	}
-
 	private void Update() {
 		if( mMeleeTimer < Time.time ) {
 			mMeleeTimer = float.MaxValue;
@@ -41,7 +36,7 @@ public class SwordBhv : MonoBehaviour {
 			transform.localRotation = mInitLocRot;
 
 		} else if( mMeleeTimer != float.MaxValue ) {
-			transform.localRotation = Quaternion.Euler( 0, EaseInOutQuad( mMeleeTimer - Time.time, 0f, (mDir ? 540 : -540), mDuration ), -90 );
+			transform.localRotation = Quaternion.Euler( 0, Ease.InOutQuad( mMeleeTimer - Time.time, 0f, (mDir ? 540 : -540), mDuration ), -90 );
 		}
 	}
 }
