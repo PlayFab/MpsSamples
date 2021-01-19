@@ -33,4 +33,4 @@ Here you can find a list of samples and utilities created and supported by our c
 - [PFAdmin](https://github.com/bphillips09/PFAdmin) by [bphilips09](https://github.com/bphillips09): An Admin API GUI application for PlayFab
 - [PlayFab UE4 GSDK Integration](https://github.com/narthur157/playfab-gsdk-ue4) by [narthur157](https://github.com/narthur157): a plugin providing a simple GSDK integration for Unreal Engine 4
 - [Integrating Photon with PlayFab Multiplayer Servers](https://doc.photonengine.com/en-us/bolt/current/demos-and-tutorials/playfab-integration/overview)
-- [Unity Multiplayer - Top to Bottom](https://dev.to/robodoig/unity-multiplayer-bottom-to-top-46cj)
+- [Unity Multiplayer - Top to Bottom](https://dev.to/robodoig/unity-multiplayer-bottom-to-top-46cj) A blog post that shows how to use Unity with DarkRift and Multiplayer Servers
