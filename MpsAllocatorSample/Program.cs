@@ -12,23 +12,28 @@ namespace MpsAllocator
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Welcome to the MpsAllocatorSample!\nThis sample allows you to easily call frequently used APIs on your MPS Build");
+            Console.WriteLine("Welcome to the MpsAllocatorSample! This sample allows you to easily call frequently used APIs on your MPS Build");
             Console.WriteLine("Enter TitleID");
             PlayFabSettings.staticSettings.TitleId = Console.ReadLine();
             
+            // this can be modified to access an environment variable (more secure)
             Console.WriteLine("Enter developer secret key");
             PlayFabSettings.staticSettings.DeveloperSecretKey = Console.ReadLine();
 
             var req = new PlayFab.AuthenticationModels.GetEntityTokenRequest();
 
-            var res = await  PlayFabAuthenticationAPI.GetEntityTokenAsync(req);
+            var res = await PlayFabAuthenticationAPI.GetEntityTokenAsync(req);
 
-            while (true)
+            bool exitRequested = false;
+            while (!exitRequested)
             {
                 int option = PrintOptions();
 
                 switch (option)
                 {
+                    case 0:
+                        exitRequested = true;
+                        break;
                     case 1:
                         await RequestMultiplayerServer();
                         break;
@@ -54,10 +59,11 @@ namespace MpsAllocator
 
         static int PrintOptions()
         {
-            string errorMsg = "Please enter a valid option (1-5)";
+            string errorMsg = "Please enter a valid option (0-5)";
             while (true)
             {
                 Console.WriteLine("----------------------------------");
+                Console.WriteLine("0 to exit the app");
                 Console.WriteLine("1 for RequestMultiplayerServer");
                 Console.WriteLine("2 for ListBuildSummaries");
                 Console.WriteLine("3 for GetBuild");
@@ -67,7 +73,7 @@ namespace MpsAllocator
                 var optionStr = Console.ReadLine();
                 if (int.TryParse(optionStr, out var option))
                 {
-                    if (option < 1 || option > 5)
+                    if (option < 0 || option > 5)
                     {
                         Console.WriteLine(errorMsg);
                         continue;
