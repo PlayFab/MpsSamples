@@ -1,12 +1,14 @@
-# gsdkSamples
-This repository contains samples that show how to use PlayFab's Gameserver SDK
+# MpsSamples
+This repository contains samples that show how to use Azure PlayFab Multiplayer Servers Gameserver SDK (GSDK) as well as additional resources.
 
 ## WindowsRunnerCSharp
+
 Simple executable that integrates with PlayFab's Gameserver SDK (GSDK). It starts an http server that will respond to GET requests with a json file containing whatever configuration values it read from the GSDK.
 
 More information [here](WindowsRunnerCSharp/README.md).
 
 ## UnityMirror
+
 Unity Server and Client sample that utilize the GameServer SDK.
 
 More information [here](UnityMirror/README.md).
@@ -20,6 +22,10 @@ More information [here](openarena/README.md).
 ## Wrapping GSDK
 
 You could try GSDK without modifying your game server (even though we don't recommend it for production deployments). You can find instructions [here](wrappingGSDK/README.md).
+
+## MpsAllocatorSample
+
+This is a simple .NET Core console app that lets use easily see your MPS Builds/Game Servers/VMs plus allocate a game server (uses the RequestMultiplayerServer API call).
 
 ## Debugging Docker containers
 
