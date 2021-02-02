@@ -13,12 +13,23 @@ namespace MpsAllocator
         static async Task Main(string[] args)
         {
             Console.WriteLine("Welcome to the MpsAllocatorSample! This sample allows you to easily call frequently used APIs on your MPS Build");
-            Console.WriteLine("Enter TitleID");
-            PlayFabSettings.staticSettings.TitleId = Console.ReadLine();
-            
-            // this can be modified to access an environment variable (more secure)
-            Console.WriteLine("Enter developer secret key");
-            PlayFabSettings.staticSettings.DeveloperSecretKey = Console.ReadLine();
+            string titleId = Environment.GetEnvironmentVariable("PF_TITLEID");
+            if (string.IsNullOrEmpty(titleId))
+            {
+                Console.WriteLine("Enter TitleID");
+                titleId = Console.ReadLine();
+            }
+
+            PlayFabSettings.staticSettings.TitleId = titleId;
+
+            string secret = Environment.GetEnvironmentVariable("PF_SECRET");
+            if (string.IsNullOrEmpty(secret))
+            {
+                Console.WriteLine("Enter developer secret key");
+                secret = Console.ReadLine();
+            }
+
+            PlayFabSettings.staticSettings.DeveloperSecretKey = secret;
 
             var req = new PlayFab.AuthenticationModels.GetEntityTokenRequest();
 
