@@ -60,6 +60,9 @@ namespace MpsAllocator
                     case 5: 
                         await ListVirtualMachineSummaries();
                         break;
+                    case 6: 
+                        await GetMultiplayerServerDetails();
+                        break;
                     default:
                         Console.WriteLine("Please enter a valid option");
                         continue;
@@ -70,7 +73,7 @@ namespace MpsAllocator
 
         static int PrintOptions()
         {
-            string errorMsg = "Please enter a valid option (0-5)";
+            string errorMsg = "Please enter a valid option (0-6)";
             while (true)
             {
                 Console.WriteLine("----------------------------------");
@@ -80,11 +83,12 @@ namespace MpsAllocator
                 Console.WriteLine("3 for GetBuild");
                 Console.WriteLine("4 for ListMultiplayerServers");
                 Console.WriteLine("5 for ListVirtualMachineSummaries");
+                Console.WriteLine("6 for GetMultiplayerServerDetails");
                 Console.WriteLine("----------------------------------");
                 var optionStr = Console.ReadLine();
                 if (int.TryParse(optionStr, out var option))
                 {
-                    if (option < 0 || option > 5)
+                    if (option < 0 || option > 6)
                     {
                         Console.WriteLine(errorMsg);
                         continue;
@@ -140,6 +144,29 @@ namespace MpsAllocator
             req.Region = region;
             req.BuildId = buildID;
             var res = await PlayFabMultiplayerAPI.ListVirtualMachineSummariesAsync(req);
+            if (res.Error != null)
+            {
+                Console.WriteLine(res.Error.ErrorMessage);
+            }
+            else
+            {
+                PrettyPrintJson(res.Result); 
+            }
+        }
+        
+        static async Task GetMultiplayerServerDetails()
+        {
+            var req = new PlayFab.MultiplayerModels.GetMultiplayerServerDetailsRequest();
+            string buildID = ReadBuildIDFromInput();
+            var regions = await GetRegions(buildID);
+            Console.WriteLine($"Enter region (options are {string.Join(",", regions)})");
+            string region = Console.ReadLine();
+            Console.WriteLine("Enter sessionId");
+            string sessionID = Console.ReadLine();
+            req.Region = region;
+            req.BuildId = buildID;
+            req.SessionId = sessionID;
+            var res = await PlayFabMultiplayerAPI.GetMultiplayerServerDetailsAsync(req);
             if (res.Error != null)
             {
                 Console.WriteLine(res.Error.ErrorMessage);
