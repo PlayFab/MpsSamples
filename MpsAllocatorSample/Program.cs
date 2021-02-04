@@ -203,6 +203,24 @@ namespace MpsAllocator
             string region = Console.ReadLine();
             req2.PreferredRegions = new List<string>() {region};
             req2.SessionId = Guid.NewGuid().ToString();
+            // InitialPlayers is the list of the initial players of the game
+            // they might or might not end up connecting to the game
+            Console.WriteLine("Type initial players ID, Enter to confirm. Empty string when you're done");
+            string id = Console.ReadLine();
+            while(true)
+            {
+                if (!string.IsNullOrEmpty(id))
+                {
+                    req2.InitialPlayers ??= new List<string>();
+                    req2.InitialPlayers.Add(id.Trim());
+                    Console.WriteLine($"player with ID {id} was recorded, type the next one. Empty string when you're done");
+                    id = Console.ReadLine();
+                }
+                else
+                {
+                    break;
+                }
+            } 
             var res = await PlayFabMultiplayerAPI.RequestMultiplayerServerAsync(req2);
             if (res.Error != null)
             {
