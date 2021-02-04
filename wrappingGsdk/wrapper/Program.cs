@@ -56,6 +56,16 @@ namespace wrapper
                 // After allocation, we can grab the session cookie from the config
                 IDictionary<string, string> activeConfig = GameserverSDK.getConfigSettings();
 
+                var connectedPlayers = new List<ConnectedPlayer>();
+                // initial players includes the list of the players that are allowed to connect to the game
+                // they might or might not end up connecting
+                // in this sample we're nevertheless adding them to the list 
+                foreach (var player in GameserverSDK.GetInitialPlayers())
+                {
+                    connectedPlayers.Add(new ConnectedPlayer(player));
+                }
+                GameserverSDK.UpdateConnectedPlayers(connectedPlayers);
+                
                 if (activeConfig.TryGetValue(GameserverSDK.SessionCookieKey, out string sessionCookie))
                 {
                     LogMessage($"The session cookie from the allocation call is: {sessionCookie}");

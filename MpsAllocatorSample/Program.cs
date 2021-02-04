@@ -203,6 +203,17 @@ namespace MpsAllocator
             string region = Console.ReadLine();
             req2.PreferredRegions = new List<string>() {region};
             req2.SessionId = Guid.NewGuid().ToString();
+            // Initial list of players (potentially matchmade) allowed to connect to the game.
+            // This list is passed to the game server when requested (via GSDK) and can be used to validate players connecting to it.
+            Console.WriteLine("Type initial players ID, Enter to confirm. Empty string when you're done");
+            string id = Console.ReadLine();
+            while(!string.IsNullOrEmpty(id))
+            {
+                req2.InitialPlayers ??= new List<string>();
+                req2.InitialPlayers.Add(id.Trim());
+                Console.WriteLine($"player with ID {id} was recorded, type the next one. Empty string when you're done");
+                id = Console.ReadLine();
+            } 
             var res = await PlayFabMultiplayerAPI.RequestMultiplayerServerAsync(req2);
             if (res.Error != null)
             {
