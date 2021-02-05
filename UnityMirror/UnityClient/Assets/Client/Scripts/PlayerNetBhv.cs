@@ -31,20 +31,49 @@ using NetworkRigidbody = Mirror.Experimental.NetworkRigidbody;
 
 public class PlayerNetBhv : NetworkBehaviour {
 
-	[SyncVar( hook = nameof( SetColor ) )]
-	public Color32 _color = Color.red;
 
-	[SyncVar( hook = nameof( SetHp ) )]
+
+	[Command]	// client to server
+	void SetColor( Color clr ) {
+		_color = clr;
+	}
+
+	[SyncVar( hook = nameof( Receiver_SetColor ) )]
+	public Color32 _color = Color.gray;
+	Color mCachedColor = Color.white;
+
+	void Receiver_SetColor( Color32 oldColor, Color32 newColor ) {
+		MeshRenderer mr = GetComponent<MeshRenderer>();
+		if( mr != null ) {
+			mr.material.SetColor( "_Color", newColor );
+		}
+		if( mCachedColor == Color.white ) {
+			mCachedColor = newColor;
+		}
+	}
+
+
+
+
+
+	[SyncVar( hook = nameof( Receiver_SetHp ) )]
 	public int _health = 100;   // todo: not really need to syn in release build
 
-	[SyncVar( hook = nameof( SetCnt ) )]
+	[SyncVar( hook = nameof( Receiver_SetCnt ) )]
 	int aktCnt = 0;
 
-#if USE_RIGID
+
+
+	int stepCnt = 0;
+	int _stepCnt = 0;
+
+
+
+	#if USE_RIGID
 	[SyncVar( hook = nameof( SetIsRigidbody ) )]
 	public bool _isRigidbody = false;   // todo: not really need to syn in release build
 	Rigidbody mRigidbody;
-#endif
+	#endif
 
 	//[SyncVar( hook = nameof( SetStuntTime ) )]
 	double mServerStuntTime = double.MaxValue;
@@ -114,7 +143,7 @@ public class PlayerNetBhv : NetworkBehaviour {
 		Debug.Log( "OnStartServer: " + (ni == null ? "null" : ni.netId.ToString()) );
 
 		base.OnStartServer();
-		StartCoroutine( _RandomizeColor() );
+		StartCoroutine( OnStartServer_RandomizeColor() );
 
 		_health = 30;
 
@@ -153,36 +182,22 @@ public class PlayerNetBhv : NetworkBehaviour {
 		base.OnStartClient();
 	}
 
-	private void SetColor( Color32 oldColor, Color32 newColor ) {
-		MeshRenderer mr = GetComponent<MeshRenderer>();
-		if( mr != null ) {
-			mr.material.SetColor( "_Color", newColor );
-		}
-	}
-
-	private void SetHp( int oldHp, int newHp ) {
+	private void Receiver_SetHp( int oldHp, int newHp ) {
 		if( base.isLocalPlayer ) {
-			name = "*hp: " + newHp;
+			name = "loc.hp: " + newHp;
 		} else {
 			name = "hp: " + newHp;
 		}
-
-		if( mDbgTxt != null ) {
-			if( base.isLocalPlayer ) {
-				mDbgTxt.text = "*hp: " + newHp + "; " + aktCnt;
-			} else {
-				mDbgTxt.text = "hp: " + newHp + "; " + aktCnt;
-			}
-		}
+		UpdateDbgTxt();
 	}
 
-	private void SetCnt( int oldCnt, int newCnt ) {
+	private void Receiver_SetCnt( int oldCnt, int newCnt ) {
+		UpdateDbgTxt();
+	}
+
+	void UpdateDbgTxt() {
 		if( mDbgTxt != null ) {
-			if( base.isLocalPlayer ) {
-				mDbgTxt.text = "*hp: " + _health + "; " + newCnt;
-			} else {
-				mDbgTxt.text = "hp: " + _health + "; " + newCnt;
-			}
+			mDbgTxt.text = "hp: " + _health + "; " + aktCnt + "/" + stepCnt;
 		}
 	}
 
@@ -220,7 +235,8 @@ public class PlayerNetBhv : NetworkBehaviour {
 
 
 
-		private IEnumerator _RandomizeColor() {
+	// called by server
+	private IEnumerator OnStartServer_RandomizeColor() {
 		WaitForSeconds wait = new WaitForSeconds( 2f );
 		//while( true ) {
 		yield return wait;
@@ -302,7 +318,21 @@ public class PlayerNetBhv : NetworkBehaviour {
 		}
 	}
 
+	bool isK = false;
 	private void Update() {
+		if( stepCnt != _stepCnt ) {
+			_stepCnt = stepCnt;
+			UpdateDbgTxt();
+		}
+
+		if( mRigController != null ) {
+			if( isK != mRigController._kinematic ) {
+				isK = mRigController._kinematic;
+				SetColor( isK ? mCachedColor : Color.gray );
+				stepCnt++;
+			}
+		}
+
 		if( mDbgTxt != null && Camera.main != null ) {
 			mDbgTxt.transform.rotation = Quaternion.LookRotation( mDbgTxt.transform.position - Camera.main.transform.position );
 		}
@@ -331,8 +361,6 @@ public class PlayerNetBhv : NetworkBehaviour {
 
 			// melee button
 			if( exeMelee ) {
-				aktCnt++;
-
 				if( mSwordBhv.isReady ) {
 					CmdMeleeAtk();
 					MeleeAtk();
@@ -497,53 +525,66 @@ public class PlayerNetBhv : NetworkBehaviour {
 	}
 
 	// called by server collider
-	[Server]
 	public void OnTakenDamage( int damage, Vector3? impactSource = null, float impactHorzStrength = 0f ) {
+		if( !isServer )
+			return;
+
 		_health -= damage;
 
 		if( impactSource != null && 0f < impactHorzStrength ) {
-
-			if( mRigController != null ) {
-				Vector3 force = (transform.position - impactSource.Value).Y( 0f ).normalized;
-				mRigController.KnockBack( force );
-			}
-
-			if( mCharaController != null ) {
-				mServerStuntTime = NetworkTime.time + 3f;	// set server stunt time
-
-				// create horizontal impact force
-				Vector3 force = ( transform.position - impactSource.Value ).Y(0f).normalized * impactHorzStrength;
-
-				RpcLockControl( true, force );
-				#if USE_RIGID
-				_isRigidbody = true;
-				#endif
-			}
-
+			RcpTakeDamage( damage, impactSource.Value, impactHorzStrength );
 		}
 	}
 
+	[ClientRpc]
+	void RcpTakeDamage( int damage, Vector3 impactSource, float impactHorzStrength ) {
+		if( mRigController != null ) {
+			Vector3 force = (transform.position - impactSource).Y( 0f ).normalized;
+			mRigController.KnockBack( force );
+		}
+
+		if( mCharaController != null ) {
+			mServerStuntTime = NetworkTime.time + 3f;   // set server stunt time
+
+			// create horizontal impact force
+			Vector3 force = (transform.position - impactSource).Y( 0f ).normalized * impactHorzStrength;
+
+			RpcLockControl( true, force );
+			#if USE_RIGID
+				_isRigidbody = true;
+			#endif
+		}
+
+	}
+
+
 	// called by server collider
-	[Server]
 	public void OnBlownAway( BombColliderNetBhv bombCollider, int damage, Vector3? impactSource = null ) {
+		if( !isServer )
+			return;
+
 		_health -= damage;
 
 		if( impactSource != null ) {
-			if( mRigController != null ) {
+			float force, radius, upMod, reverseDist;
+			Dbg( this.transform, bombCollider.transform, out radius, out reverseDist, out force, out upMod );
 
-				float radius, reverseDist, force, upMod;
-
-				Dbg( this.transform, bombCollider.transform, out radius, out reverseDist, out force, out upMod );
-
-				mRigController.BlowAway(
-					blastOrigin: impactSource.Value,
-					force: force,
-					radius: radius,
-					upwardsModifier: upMod
-				);
-			}
+			RpcOnBlownAway( force, radius, upMod, impactSource.Value );
 		}
 	}
+
+	[ClientRpc]
+	void RpcOnBlownAway( float force, float radius, float upMod, Vector3 impactSource ) {
+		if( mRigController != null ) {
+			mRigController.BlowAway(
+				blastOrigin: impactSource,
+				force: force,
+				radius: radius,
+				upwardsModifier: upMod
+			);
+		}
+	}
+
 	public void Dbg( Transform ccTran, Transform bombTran, out float blastRadius, out float reverseDist, out float force, out float upMod ) {
 		blastRadius = bombTran.localScale.z * .5f;  //bombTran.GetComponent<SphereCollider>().radius;
 		MeshRenderer bombCollider = bombTran.GetComponent<MeshRenderer>();

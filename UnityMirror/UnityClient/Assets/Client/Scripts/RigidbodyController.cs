@@ -8,7 +8,7 @@ using NetworkRigidbody = Mirror.Experimental.NetworkRigidbody;
 [RequireComponent( typeof( Rigidbody ) )]
 [RequireComponent( typeof( CapsuleCollider ) )]
 
-public class RigidbodyController : MonoBehaviour {
+public class RigidbodyController : NetworkBehaviour /*MonoBehaviour*/ {
 	public bool mAutoUserControl = false;
 	public float speed = 10.0f;
 	public float gravity = 25.0f;
@@ -48,7 +48,24 @@ public class RigidbodyController : MonoBehaviour {
 		return Current + DeltaMove;
 	}
 
-	bool kinematic {
+
+
+
+	[Command]	// client to server
+	public void SetKinematic( bool val ) {
+		kinematic = val;
+	}
+
+	// won't sync if it's assigned from client side
+	[SyncVar( hook = nameof( Receiver_SetKinematic ) )]
+	public bool kinematic = false;
+
+	// server to all clients
+	void Receiver_SetKinematic( bool oldVal, bool newVal ) {
+		_kinematic = newVal;
+	}
+
+	public bool _kinematic {
 		set {
 			if( value ) {	// (faking) no physics
 				//mRigidbody.freezeRotation = true;
@@ -69,11 +86,17 @@ public class RigidbodyController : MonoBehaviour {
 		}
 	}
 
+
+
+
 	void Awake() {
 		mRigidbody = this.GetComponent<Rigidbody>();
 		mNetworkRigidbody = this.GetComponent<NetworkRigidbody>();
 
-		kinematic = true;
+		//kinematic = true;
+	}
+	public override void OnStartClient() {
+		SetKinematic( true );
 	}
 
 	public float torque = 1f;
@@ -166,7 +189,8 @@ public class RigidbodyController : MonoBehaviour {
 						mISJumpKeyPressed = false;
 
 						if( !kinematic ) {
-							kinematic = true;
+							SetKinematic( true );
+							_kinematic = true;
 							mState = State.Reviving;
 							mRigidbody.AddForce( new Vector3( 0, 10, 0 ), ForceMode.Impulse );
 							mReviveTime = NetworkTime.time + mReviveTotalTime;
@@ -315,7 +339,8 @@ public class RigidbodyController : MonoBehaviour {
 	}
 
 	public void BlowAway( Vector3 blastOrigin, float force, float radius, float upwardsModifier ) {
-		kinematic = false;
+		SetKinematic( false );
+		_kinematic = false;
 		mState = State.BlownAway;
 		mRigidbody.velocity = Vector3.zero;
 		mRigidbody.AddExplosionForce( force, blastOrigin, radius, upwardsModifier, ForceMode.Impulse );

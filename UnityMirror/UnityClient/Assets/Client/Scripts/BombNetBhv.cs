@@ -11,7 +11,6 @@ public class BombNetBhv : NetworkBehaviour {
 		mColliderNetBhv.mOwner = gameObject;
 	}
 
-	[Server]
 	public void Damaged() {
 		mColliderNetBhv.Fire( .1f );
 	}

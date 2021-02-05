@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MeleeColliderNetBhv : MonoBehaviour/*NetworkBehaviour*/ {
+public class MeleeColliderNetBhv : MonoBehaviour {
 	public GameObject mOwner;
 	double mTimer = double.MaxValue;
 
