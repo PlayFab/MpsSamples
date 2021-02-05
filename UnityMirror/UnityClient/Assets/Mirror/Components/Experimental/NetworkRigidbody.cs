@@ -29,10 +29,10 @@ namespace Mirror.Experimental
         [Header("Angular Velocity")]
 
         [Tooltip("Syncs AngularVelocity every SyncInterval")]
-        [SerializeField] bool syncAngularVelocity = true;
+        public bool syncAngularVelocity = true;
 
         [Tooltip("Set angularVelocity to 0 each frame (only works if syncAngularVelocity is false")]
-        [SerializeField] bool clearAngularVelocity = false;
+		public bool clearAngularVelocity = false;
 
         [Tooltip("Only Syncs Value if distance between previous and current is great than sensitivity")]
         [SerializeField] float angularVelocitySensitivity = 0.1f;

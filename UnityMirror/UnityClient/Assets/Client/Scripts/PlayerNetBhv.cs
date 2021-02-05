@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using CameraController = TMPro.Examples.CameraController;
 using Ext;
+using NetworkRigidbody = Mirror.Experimental.NetworkRigidbody;
 
 //https://mirror-networking.com/docs/Articles/Guides/NetworkBehaviour.html isServer, isClient, isLocalPlayer, hasAuthority, etc
 
@@ -36,11 +37,14 @@ public class PlayerNetBhv : NetworkBehaviour {
 	[SyncVar( hook = nameof( SetHp ) )]
 	public int _health = 100;   // todo: not really need to syn in release build
 
-	#if USE_RIGID
+	[SyncVar( hook = nameof( SetCnt ) )]
+	int aktCnt = 0;
+
+#if USE_RIGID
 	[SyncVar( hook = nameof( SetIsRigidbody ) )]
 	public bool _isRigidbody = false;   // todo: not really need to syn in release build
 	Rigidbody mRigidbody;
-	#endif
+#endif
 
 	//[SyncVar( hook = nameof( SetStuntTime ) )]
 	double mServerStuntTime = double.MaxValue;
@@ -61,15 +65,31 @@ public class PlayerNetBhv : NetworkBehaviour {
 	bool mMeleeCmdEstablished = false;
 
 	CharacterController mCharaController;
+	RigidbodyController mRigController;
 	CameraController mCamController;
 	Vector3 mFwdLerp;
 	MeleeColliderNetBhv mMeleeColliderNetBhv;
 
 	TextMesh mDbgTxt;
 
+	enum AIMode {
+		None,
+		Patrol,
+		MadAttack,
+	}
+
+	AIMode mAIMode = AIMode.None;
+
 	// constructor
 	void Awake() {
 		mCharaController = GetComponent<CharacterController>();
+		mRigController = GetComponent<RigidbodyController>();
+
+		if( mRigController != null ) {
+			mRigController.mAutoUserControl = false;
+			NetworkRigidbody nrb = GetComponent<NetworkRigidbody>();
+		}
+
 		mFwdLerp = this.transform.forward;
 
 		mMeleeColliderNetBhv = mMeleeCollider.GetComponent<MeleeColliderNetBhv>();
@@ -84,6 +104,8 @@ public class PlayerNetBhv : NetworkBehaviour {
 			_isRigidbody = false;
 		}
 		#endif
+
+		Physics.IgnoreCollision( mSwordBhv.GetComponent<Collider>(), GetComponent<Collider>() );
 	}
 
 	// need rebuild to reflect the changes
@@ -147,9 +169,19 @@ public class PlayerNetBhv : NetworkBehaviour {
 
 		if( mDbgTxt != null ) {
 			if( base.isLocalPlayer ) {
-				mDbgTxt.text = "*hp: " + newHp;
+				mDbgTxt.text = "*hp: " + newHp + "; " + aktCnt;
 			} else {
-				mDbgTxt.text = "hp: " + newHp;
+				mDbgTxt.text = "hp: " + newHp + "; " + aktCnt;
+			}
+		}
+	}
+
+	private void SetCnt( int oldCnt, int newCnt ) {
+		if( mDbgTxt != null ) {
+			if( base.isLocalPlayer ) {
+				mDbgTxt.text = "*hp: " + _health + "; " + newCnt;
+			} else {
+				mDbgTxt.text = "hp: " + _health + "; " + newCnt;
 			}
 		}
 	}
@@ -260,85 +292,137 @@ public class PlayerNetBhv : NetworkBehaviour {
 		}
 	}
 
+	private void FixedUpdate() {
+		if( !isLocalPlayer || !base.hasAuthority ) {
+			return;
+		}
+
+		if( mRigController != null && !mRigController.mAutoUserControl ) {
+			mRigController.UserControl();
+		}
+	}
+
 	private void Update() {
 		if( mDbgTxt != null && Camera.main != null ) {
 			mDbgTxt.transform.rotation = Quaternion.LookRotation( mDbgTxt.transform.position - Camera.main.transform.position );
 		}
 
-		if( isServer ) {	// server me update
-			if( mServerStuntTime < NetworkTime.time ) {
-				mServerStuntTime = double.MaxValue;
+		if( mRigController != null && !mRigController.mAutoUserControl ) {
 
-				RpcLockControl( false, Vector3.zero );	// release client lock
+			if( !isLocalPlayer || !base.hasAuthority ) {
+				return;
+			}
+
+			if( Input.GetKeyDown( KeyCode.Alpha1 ) ) {
+				mAIMode = AIMode.None;
+			}
+			if( Input.GetKeyDown( KeyCode.Alpha2 ) ) {
+				mAIMode = AIMode.Patrol;
+			}
+			if( Input.GetKeyDown( KeyCode.Alpha3 ) ) {
+				mAIMode = AIMode.MadAttack;
+			}
+
+			bool exeMelee = Input.GetKeyDown( KeyCode.Mouse0 ) || Input.GetKeyDown( KeyCode.E );
+
+			if( mAIMode == AIMode.MadAttack ) {
+				exeMelee = true;
+			}
+
+			// melee button
+			if( exeMelee ) {
+				aktCnt++;
+
+				if( mSwordBhv.isReady ) {
+					CmdMeleeAtk();
+					MeleeAtk();
+				}
 			}
 		}
 
 
-		// todo: not a controllable player but as long as it's moving...
-		//PlayMoveSound();
 
 
-		if( !isLocalPlayer || !base.hasAuthority ) {
-			return;
-		}
 
-		bool exeJump = Input.GetButtonDown( "Jump" );
-		bool exeMelee = Input.GetKeyDown( KeyCode.Mouse0 ) || Input.GetKeyDown( KeyCode.E ) || mMeleeCmdEstablished;
 
-		#if USE_RIGID
-		bool isSentflying = _isRigidbody;
-		#else
-		bool isSentflying = mClientControlLock;
-		#endif
+
+
+		if( false && mCharaController != null ) {
+			if( isServer ) {    // server me update
+				if( mServerStuntTime < NetworkTime.time ) {
+					mServerStuntTime = double.MaxValue;
+
+					RpcLockControl( false, Vector3.zero );  // release client lock
+				}
+			}
+
+
+			// todo: not a controllable player but as long as it's moving...
+			//PlayMoveSound();
+
+
+			if( !isLocalPlayer || !base.hasAuthority ) {
+				return;
+			}
+
+
+
+
+			bool exeJump = Input.GetButtonDown( "Jump" );
+			bool exeMelee = Input.GetKeyDown( KeyCode.Mouse0 ) || Input.GetKeyDown( KeyCode.E ) || mMeleeCmdEstablished;
+
+			#if USE_RIGID
+			bool isSentflying = _isRigidbody;
+			#else
+			bool isSentflying = mClientControlLock;
+			#endif
 		
 
 
 
 
-		Vector3 forward;
-		Vector3 desiredMoveVel = DesiredMoveVel( out forward );
-		desiredMoveVel.y = mYmomentum;
-		if( mIsOnGround_canJump ) {
-			mYmomentum = Physics.gravity.y * Time.deltaTime;
-		} else {
-			mYmomentum += Physics.gravity.y * Time.deltaTime * mMass;
-		}
+			Vector3 forward;
+			Vector3 desiredMoveVel = DesiredMoveVel( out forward );
+			desiredMoveVel.y = mYmomentum;
+			if( mIsOnGround_canJump ) {
+				mYmomentum = Physics.gravity.y * Time.deltaTime;
+			} else {
+				mYmomentum += Physics.gravity.y * Time.deltaTime * mMass;
+			}
 
 
 
 
 
-		if( mClientControlLock ) {
-			//exeMelee = false;	// atk? allow for now
-			exeJump = false;
-			// https://medium.com/ironequal/unity-character-controller-vs-rigidbody-a1e243591483
+			if( mClientControlLock ) {
+				//exeMelee = false;	// atk? allow for now
+				exeJump = false;
+				// https://medium.com/ironequal/unity-character-controller-vs-rigidbody-a1e243591483
 
-			//public float GroundDistance = 0.2f;
-			//public float DashDistance = 5f;
-			//public LayerMask Ground;
+				//public float GroundDistance = 0.2f;
+				//public float DashDistance = 5f;
+				//public LayerMask Ground;
 
-			//private bool _isGrounded = true;
-			//private Transform _groundChecker;
+				//private bool _isGrounded = true;
+				//private Transform _groundChecker;
 
-			//mCharaController.enabled = false;
+				//mCharaController.enabled = false;
 
-			//_isGrounded = true;//Physics.CheckSphere( _groundChecker.position, GroundDistance, Ground, QueryTriggerInteraction.Ignore );
+				//_isGrounded = true;//Physics.CheckSphere( _groundChecker.position, GroundDistance, Ground, QueryTriggerInteraction.Ignore );
 
-			//if( exeJump && _isGrounded ) {
-			//	mRigidbody.AddForce( Vector3.up * Mathf.Sqrt( JumpHeight * -2f * Physics.gravity.y ), ForceMode.VelocityChange );
-			//}
-			////if( Input.GetButtonDown( "Dash" ) ) {
-			////	Vector3 dashVelocity = Vector3.Scale( transform.forward, DashDistance * new Vector3( (Mathf.Log( 1f / (Time.deltaTime * mRigidbody.drag + 1) ) / -Time.deltaTime), 0, (Mathf.Log( 1f / (Time.deltaTime * mRigidbody.drag + 1) ) / -Time.deltaTime) ) );
-			////	mRigidbody.AddForce( dashVelocity, ForceMode.VelocityChange );
-			////}
+				//if( exeJump && _isGrounded ) {
+				//	mRigidbody.AddForce( Vector3.up * Mathf.Sqrt( JumpHeight * -2f * Physics.gravity.y ), ForceMode.VelocityChange );
+				//}
+				////if( Input.GetButtonDown( "Dash" ) ) {
+				////	Vector3 dashVelocity = Vector3.Scale( transform.forward, DashDistance * new Vector3( (Mathf.Log( 1f / (Time.deltaTime * mRigidbody.drag + 1) ) / -Time.deltaTime), 0, (Mathf.Log( 1f / (Time.deltaTime * mRigidbody.drag + 1) ) / -Time.deltaTime) ) );
+				////	mRigidbody.AddForce( dashVelocity, ForceMode.VelocityChange );
+				////}
 
-			//desiredMoveVel += Physics.gravity;
-			//desiredMoveVel *= mRigidbody.drag;
+				//desiredMoveVel += Physics.gravity;
+				//desiredMoveVel *= mRigidbody.drag;
 
-			//mRigidbody.AddForce( desiredMoveVel, ForceMode.VelocityChange );
-		}
-
-		if( mCharaController != null ) {
+				//mRigidbody.AddForce( desiredMoveVel, ForceMode.VelocityChange );
+			}
 
 			// melee button
 			if( exeMelee ) {
@@ -418,17 +502,76 @@ public class PlayerNetBhv : NetworkBehaviour {
 		_health -= damage;
 
 		if( impactSource != null && 0f < impactHorzStrength ) {
-			mServerStuntTime = NetworkTime.time + 3f;	// set server stunt time
 
-			// create horizontal impact force
-			Vector3 force = ( transform.position - impactSource.Value ).Y(0f).normalized * impactHorzStrength;
+			if( mRigController != null ) {
+				Vector3 force = (transform.position - impactSource.Value).Y( 0f ).normalized;
+				mRigController.KnockBack( force );
+			}
 
-			RpcLockControl( true, force );
-			#if USE_RIGID
-			_isRigidbody = true;
-			#endif
+			if( mCharaController != null ) {
+				mServerStuntTime = NetworkTime.time + 3f;	// set server stunt time
+
+				// create horizontal impact force
+				Vector3 force = ( transform.position - impactSource.Value ).Y(0f).normalized * impactHorzStrength;
+
+				RpcLockControl( true, force );
+				#if USE_RIGID
+				_isRigidbody = true;
+				#endif
+			}
+
 		}
 	}
+
+	// called by server collider
+	[Server]
+	public void OnBlownAway( BombColliderNetBhv bombCollider, int damage, Vector3? impactSource = null ) {
+		_health -= damage;
+
+		if( impactSource != null ) {
+			if( mRigController != null ) {
+
+				float radius, reverseDist, force, upMod;
+
+				Dbg( this.transform, bombCollider.transform, out radius, out reverseDist, out force, out upMod );
+
+				mRigController.BlowAway(
+					blastOrigin: impactSource.Value,
+					force: force,
+					radius: radius,
+					upwardsModifier: upMod
+				);
+			}
+		}
+	}
+	public void Dbg( Transform ccTran, Transform bombTran, out float blastRadius, out float reverseDist, out float force, out float upMod ) {
+		blastRadius = bombTran.localScale.z * .5f;  //bombTran.GetComponent<SphereCollider>().radius;
+		MeshRenderer bombCollider = bombTran.GetComponent<MeshRenderer>();
+		if( bombCollider != null ) {
+			blastRadius = Mathf.Max( bombCollider.bounds.size.x, Mathf.Max( bombCollider.bounds.size.x, bombCollider.bounds.size.z ) );
+		}
+
+		Vector3 tagLoc = ccTran.position;
+		tagLoc.y = bombTran.position.y;
+
+		float ccRadius = 0f;
+		CapsuleCollider cc = ccTran.GetComponent<CapsuleCollider>();
+		if( cc != null ) {
+			ccRadius = cc.radius;
+		}
+
+		float dist = Mathf.Clamp( (Vector3.Distance( bombTran.position, tagLoc ) - ccRadius - blastRadius * .25f) / blastRadius, 0f, 1f );
+		reverseDist = 1f - dist;
+
+		force = CustomEase.EaseFunc.QuintIn( reverseDist, 30f/*further*/, 20f/*closer*/ - 30f, 1f );
+		upMod = CustomEase.EaseFunc.QuintIn( reverseDist, 2f/*further*/, 1f/*closer*/ - 2f, 1f );
+
+		//force = 70f;
+		//upMod = 1f;
+
+		Debug.Log( $"ccRadius{ccRadius}; blastRadius({blastRadius.ToString( "F2" )}); dist({dist.ToString( "F2" )}), revDist({reverseDist.ToString( "F2" )}), upMod({upMod.ToString( "F2" )}), force({force})" );
+	}
+
 
 	// server me to client me
 	[TargetRpc]

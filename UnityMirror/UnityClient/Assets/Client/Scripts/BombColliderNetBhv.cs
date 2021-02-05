@@ -1,17 +1,21 @@
-﻿using Mirror;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class MeleeColliderNetBhv : MonoBehaviour/*NetworkBehaviour*/ {
+public class BombColliderNetBhv : MonoBehaviour {
 	public GameObject mOwner;
 	double mTimer = double.MaxValue;
+
+	void Awake() {
+		gameObject.SetActive( false );
+	}
 
 	private void OnTriggerEnter( Collider other ) {
 		if( other.gameObject != mOwner ) {
 			PlayerNetBhv pnb = other.gameObject.GetComponent<PlayerNetBhv>();
 			if( pnb != null ) {
-				pnb.OnTakenDamage( 3, transform.position, 40f );
+				pnb.OnBlownAway( this, 10, transform.position );
 			}
 			BombNetBhv bombnb = other.gameObject.GetComponent<BombNetBhv>();
 			if( bombnb != null ) {
