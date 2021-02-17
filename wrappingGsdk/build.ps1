@@ -6,3 +6,6 @@ dotnet publish $scriptRoot\wrapper\wrapper.csproj -c release -o $dropDir\w10x64 
 dotnet publish $scriptRoot\fakegame\fakegame.csproj -c release -o $dropDir\w10x64 --runtime win10-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true
 Compress-Archive -Path $dropDir\w10x64\* -DestinationPath $dropDir\gameassets.zip -Force
 echo "game assets successfully zipped at $dropDir\gameassets.zip"
+
+# open folder
+Invoke-Item $PSScriptRoot\drop
