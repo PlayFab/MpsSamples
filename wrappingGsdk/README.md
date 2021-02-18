@@ -83,3 +83,7 @@ If you are using [LocalMultiplayerAgent](https://github.com/PlayFab/LocalMultipl
 ```
 
 You are now ready to test with `LocalMultiplayerAgent`! If you have configured it correctly, as soon as `LocalMultiplayerAgent` launches your game server, you can connect to it via `curl http://localhost:56100/Hello`.
+
+### Next steps
+
+You should run the [MpsAllocatorSample](../MpsAllocatorSample/README.md) to allocate/list/view Builds and game servers.
