@@ -8,7 +8,7 @@
 * PlayFab Title with Matchmaking enabled
 
 ## Overview
-MatchmakeSample is a sample executable that integrates with PlayFab's Matchmaking system. It logs in a configurable number of clients and attempts to matchmake them together, following the steps described in the (Single user ticket matchmaking)[https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/matchmaking/quickstart#single-user-ticket-matchmaking] sample
+MatchmakeSample is a sample executable that integrates with PlayFab's Matchmaking system. It logs in a configurable number of clients and attempts to matchmake them together, following the steps described in the [Single user ticket matchmaking](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/matchmaking/quickstart#single-user-ticket-matchmaking) sample
 
 ## Getting Started Guide
 
