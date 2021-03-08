@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31005.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatchmakeSample", "MatchmakeSample\MatchmakeSample.csproj", "{C14085C7-84CC-45E8-BEE3-8B34E9B46BFC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C14085C7-84CC-45E8-BEE3-8B34E9B46BFC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C14085C7-84CC-45E8-BEE3-8B34E9B46BFC}.Debug|x64.Build.0 = Debug|Any CPU
+		{C14085C7-84CC-45E8-BEE3-8B34E9B46BFC}.Release|x64.ActiveCfg = Release|Any CPU
+		{C14085C7-84CC-45E8-BEE3-8B34E9B46BFC}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E2B21EE1-796D-4248-A686-420CC9475203}
+	EndGlobalSection
+EndGlobal
