@@ -48,9 +48,8 @@ Usage:
   WindowsRunnerCSharpClient [options]
 
 Options:
-  --titleId <titleid>      Your PlayFab titleId (Hex)
-  --playerId <playerid>    Optional player id, if not specified a GUID will be used
-  --buildId <buildid>      Build id, if not specified a GUID will be used
-  --verbose                When passed, print verbose results
-  --version                Display version information
+  --titleId <titleid>          Your PlayFab titleId (Hex)
+  --buildId <buildid>          Host build id (in Game Manager)
+  --verbose                    When present, print verbose results
+  --version                    Display version information
 ```

@@ -10,7 +10,7 @@ namespace WindowsRunnerCSharpClient
     /// </summary>
     public static class RootCommandConfiguration
     {
-        public static RootCommand GenerateCommand(Func<string, string, string, bool, Task> onInvoke)
+        public static RootCommand GenerateCommand(Func<string, string, bool, Task> onInvoke)
         {
             var rootCommand = new RootCommand()
             {
@@ -20,22 +20,16 @@ namespace WindowsRunnerCSharpClient
                     Argument = new Argument<string>(),
                     Required = true
                 },
-                new Option("--playerId",
-                    "Optional player id, if not specified a GUID will be used")
-                {
-                    Argument = new Argument<string>(defaultValue: () => Guid.NewGuid().ToString())
-                },
                 new Option("--buildId",
-                    "Build id (GUID)")
+                    "Host build id (in Game Manager)")
                 {
                     Argument = new Argument<string>(),
                     Required = true
                 },
                 new Option("--verbose",
-                    "When passed, print verbose results")
+                    "When present, print verbose results")
                 {
-                    Argument = new Argument<bool>(),
-                    Required = false
+                    Argument = new Argument<bool>()
                 },
             };
 
