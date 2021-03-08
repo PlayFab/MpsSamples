@@ -33,7 +33,7 @@ MPS service uses Docker containers to schedule game servers. You can see some **
 
 ## Matchmake Sample
 
-The Matchmake sample logs in a configurable number of clients and attempts to matchmake them together, following the steps described in the [Single user ticket matchmaking](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/matchmaking/quickstart#single-user-ticket-matchmaking) sample.
+The Matchmake sample logs in a configurable number of clients and attempts to matchmake them together, following the steps described in the [Single user ticket matchmaking](https://docs.microsoft.com/gaming/playfab/features/multiplayer/matchmaking/quickstart#single-user-ticket-matchmaking) sample.
 
 ## Community samples
 
