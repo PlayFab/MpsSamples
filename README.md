@@ -31,6 +31,10 @@ This is a simple .NET Core console app that lets use easily see your MPS Builds/
 
 MPS service uses Docker containers to schedule game servers. You can see some **advanced** debugging/diagnosing instructions [here](./Debugging.md).
 
+## Matchmake Sample
+
+The Matchmake sample logs in a configurable number of clients and attempts to matchmake them together, following the steps described in the [Single user ticket matchmaking](https://docs.microsoft.com/gaming/playfab/features/multiplayer/matchmaking/quickstart#single-user-ticket-matchmaking) sample.
+
 ## Community samples
 
 Here you can find a list of samples and utilities created and supported by our community. [Let us know](https://github.com/PlayFab/gsdkSamples/issues) if you have created a sample yourself and would like to have it mentioned here.
