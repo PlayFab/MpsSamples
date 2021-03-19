@@ -81,15 +81,15 @@ You can follow the steps in [this article](https://docs.microsoft.com/en-us/gami
 In these cases, you might see an output similar as this:
 
 ```
-info: MockPlayFabVmAgent[0]
+info: PlayfabMultiplayerAgent[0]
       Waiting for heartbeats from the game server.....
-info: MockPlayFabVmAgent[0]
+info: PlayfabMultiplayerAgent[0]
       Container 4179fa451214251a45d1a8e8338203a9ff05dc6ec1231c50e1f81f5508b3e1c8 exited with exit code 1.
-info: MockPlayFabVmAgent[0]
+info: PlayfabMultiplayerAgent[0]
       Collecting logs for container 4179fa451214251a45d1a8e8338203a9ff05dc6ec1231c50e1f81f5508b3e1c8.
-info: MockPlayFabVmAgent[0]
+info: PlayfabMultiplayerAgent[0]
       Copying log file C:\ProgramData\Docker\containers\4179fa451214251a45d1a8e8338203a9ff05dc6ec1231c50e1f81f5508b3e1c8\4179fa451214251a45d1a8e8338203a9ff05dc6ec1231c50e1f81f5508b3e1c8-json.log for container 4179fa451214251a45d1a8e8338203a9ff05dc6ec1231c50e1f81f5508b3e1c8 to D:\playfab\PlayFabVmAgentOutput\2020-09-29T01-42-01\GameLogs\032e7357-1956-4a60-9682-ca462cc3ea12\PF_ConsoleLogs.txt.
-info: MockPlayFabVmAgent[0]
+info: PlayfabMultiplayerAgent[0]
       Deleting container 4179fa451214251a45d1a8e8338203a9ff05dc6ec1231c50e1f81f5508b3e1c8.
 ```
 
