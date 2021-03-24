@@ -54,8 +54,8 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
     - Within GamePort, set Number to 7777 and Protocol to TCP. Also make a note of the external port number, called NodePort
 1. In PowerShell
     - Run the LocalMultiplayerAgentSetup file in *agentfolder/setup.ps1* (you may need to open Powershell with admin permissions for this purpose). If you get a signing violation, you may need to run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process`.
-    - Run the Local Multiplayer Agent located in *agentfolder/MockVmAgent.exe*.
-1. You will see the mock agent report state. Wait for reports to go from `Waiting for heartbeats from the game server.....` to `CurrentGameState: StandingBy` to `CurrentGameState: Active` then proceed to the next step
+    - Run the Local Multiplayer Agent located in *agentfolder/PlayfabMultiplayerAgent.exe*.
+1. You will see the PlayfabMultiplayerAgent report state. Wait for reports to go from `Waiting for heartbeats from the game server.....` to `CurrentGameState: StandingBy` to `CurrentGameState: Active` then proceed to the next step
 
 ### Running the client
 1. With the server running, open the UnityClient project in the Unity IDE.
