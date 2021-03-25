@@ -305,6 +305,7 @@ GameObject:
   - component: {fileID: 1913350486916351889}
   - component: {fileID: 5522037712905761863}
   - component: {fileID: 883912486487970671}
+  - component: {fileID: 3824603481836516808}
   m_Layer: 11
   m_Name: RigidPlayer
   m_TagString: Untagged
@@ -431,6 +432,9 @@ MonoBehaviour:
   mMass: 0.5
   mSwordBhv: {fileID: 7637334836741111919}
   mMeleeCollider: {fileID: 7075940998780586540}
+  mBombPrefab: {fileID: 2773405484387521607, guid: 4abeec7b33b329a42b66396e26e0f104,
+    type: 3}
+  mDustStormPrefab: {fileID: 100000, guid: 1f7aa4d40edff6e48b549003cad031e1, type: 3}
 --- !u!54 &1902263927461572358
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -521,14 +525,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfa9e9a3c4df9b143800b58565fbd823, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   mAutoUserControl: 0
   speed: 10
   gravity: 25
   maxVelocityChange: 10
   canJump: 1
   jumpHeight: 2
+  grounded: 0
+  kinematic: 0
   torque: 1
   mState: 0
+--- !u!114 &3824603481836516808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6466063141048506544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1731d8de2d0c84333b08ebe1e79f4118, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  visRange: 40
+  visUpdateInterval: 1
+  forceHidden: 0
 --- !u!1001 &2405142494531167838
 PrefabInstance:
   m_ObjectHideFlags: 0

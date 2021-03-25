@@ -69,7 +69,7 @@ public class Startup : MonoBehaviour
             PlayFabId = success.PlayFabId
         });
 
-		MyMiniGame.Begin();
+		//MyMiniGame.Begin();
 	}
 
     private void OnDisconnected(int? code) {

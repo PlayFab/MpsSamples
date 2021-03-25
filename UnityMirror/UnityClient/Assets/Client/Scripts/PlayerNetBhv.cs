@@ -56,14 +56,40 @@ public class PlayerNetBhv : NetworkBehaviour {
 
 
 
-	[SyncVar( hook = nameof( Receiver_SetHp ) )]
-	public int _health = 100;   // todo: not really need to syn in release build
+	[Command]   // client to server
+	void Server_SetHealth( int value ) {
+		_health = value;
+	}
 
-	[SyncVar( hook = nameof( Receiver_SetCnt ) )]
+	[SyncVar( hook = nameof( Client_ReceiveHp ) )]
+	public int _health = 100;	// todo: not really need to syn in release build
+
+	private void Client_ReceiveHp( int oldHp, int newHp ) {
+		if( base.isLocalPlayer ) {
+			name = "loc.hp: " + newHp;
+		} else {
+			name = "hp: " + newHp;
+		}
+		UpdateDbgTxt();
+	}
+
+
+
+
+
+
+	[SyncVar( hook = nameof( Client_ReceiveAtkCnt ) )]
 	int aktCnt = 0;
 
+	private void Client_ReceiveAtkCnt( int oldCnt, int newCnt ) {
+		UpdateDbgTxt();
+	}
 
 
+
+
+
+	// to check if server and client are align
 	int stepCnt = 0;
 	int _stepCnt = 0;
 
@@ -101,10 +127,18 @@ public class PlayerNetBhv : NetworkBehaviour {
 
 	TextMesh mDbgTxt;
 
+	[SerializeField] GameObject mBombPrefab;
+	double mBombCoolDn = 0f;
+
+	[SerializeField] GameObject mDustStormPrefab;
+	Transform mDustTran;
+
+
 	enum AIMode {
 		None,
 		Patrol,
 		MadAttack,
+		God,
 	}
 
 	AIMode mAIMode = AIMode.None;
@@ -148,6 +182,8 @@ public class PlayerNetBhv : NetworkBehaviour {
 		_health = 30;
 
 		//InvokeRepeating( nameof( UpdateData ), 1, 1 );
+
+		mAIMode = AIMode.God;
 	}
 
 	// This only runs on the server, called from OnStartServer via InvokeRepeating
@@ -161,6 +197,13 @@ public class PlayerNetBhv : NetworkBehaviour {
 		Debug.Log( "OnStartClient: " + (ni == null ? "null" : ni.netId.ToString()) );
 
 		if( base.isLocalPlayer ) {	// controlled player
+			GameObject dustGo = GameObject.Instantiate<GameObject>( mDustStormPrefab, transform.root, false );
+			dustGo.transform.localPosition = Vector3.zero;
+			var p = dustGo.GetComponent<ParticleSystem>();
+			ParticleSystem.MainModule m = p.main;
+			m.simulationSpeed = .3f;
+			mDustTran = dustGo.transform;
+
 			Camera cam = Camera.main;
 			if( cam == null ) {
 				cam = Camera.current;
@@ -182,22 +225,13 @@ public class PlayerNetBhv : NetworkBehaviour {
 		base.OnStartClient();
 	}
 
-	private void Receiver_SetHp( int oldHp, int newHp ) {
-		if( base.isLocalPlayer ) {
-			name = "loc.hp: " + newHp;
-		} else {
-			name = "hp: " + newHp;
-		}
-		UpdateDbgTxt();
-	}
-
-	private void Receiver_SetCnt( int oldCnt, int newCnt ) {
-		UpdateDbgTxt();
-	}
-
 	void UpdateDbgTxt() {
 		if( mDbgTxt != null ) {
-			mDbgTxt.text = "hp: " + _health + "; " + aktCnt + "/" + stepCnt;
+			if( isServer ) {
+				mDbgTxt.text = "god: -";
+			} else {
+				mDbgTxt.text = "hp: " + _health + "; " + aktCnt + "/" + stepCnt;
+			}
 		}
 	}
 
@@ -237,7 +271,7 @@ public class PlayerNetBhv : NetworkBehaviour {
 
 	// called by server
 	private IEnumerator OnStartServer_RandomizeColor() {
-		WaitForSeconds wait = new WaitForSeconds( 2f );
+		WaitForSeconds wait = new WaitForSeconds( .1f );
 		//while( true ) {
 		yield return wait;
 		_color = Random.ColorHSV( 0f, 1f, 1f, 1f, 0f, 1f, 1f, 1f );
@@ -326,11 +360,19 @@ public class PlayerNetBhv : NetworkBehaviour {
 		}
 
 		if( mRigController != null ) {
-			if( isK != mRigController._kinematic ) {
-				isK = mRigController._kinematic;
-				SetColor( isK ? mCachedColor : Color.gray );
-				stepCnt++;
+			if( !isLocalPlayer || !base.hasAuthority ) {
+			} else {
+				if( isK != mRigController._kinematic ) {
+					isK = mRigController._kinematic;
+					SetColor( isK ? mCachedColor : Color.gray );
+					stepCnt++;
+				}
 			}
+		}
+
+		var proxi = GetComponent<NetworkProximityChecker>();
+		if( proxi != null ) {
+			HiroExtensions.HiroVlogExt.DrawWiredSphere( transform.position, proxi.visRange, Color.red );
 		}
 
 		if( mDbgTxt != null && Camera.main != null ) {
@@ -353,18 +395,38 @@ public class PlayerNetBhv : NetworkBehaviour {
 				mAIMode = AIMode.MadAttack;
 			}
 
-			bool exeMelee = Input.GetKeyDown( KeyCode.Mouse0 ) || Input.GetKeyDown( KeyCode.E );
+			if( mRigController.mState == RigidbodyController.State.None ) {
+				bool exeMelee = Input.GetKeyDown( KeyCode.Mouse0 ) || Input.GetKeyDown( KeyCode.E );
 
-			if( mAIMode == AIMode.MadAttack ) {
-				exeMelee = true;
+				bool exeBomb = Input.GetKeyDown( KeyCode.Mouse1 ) || Input.GetKeyDown( KeyCode.R );
+
+				if( mAIMode == AIMode.MadAttack ) {
+					exeMelee = true;
+
+				} else if( mAIMode == AIMode.God ) {
+					Vector3 diff = (new Vector3( 550f, 369f, -15f ) - transform.position).Y( 0f );
+					if( .5f < diff.magnitude ) {
+						mRigController.mAiWalkVec = diff.normalized;
+					}
+				}
+
+				// melee button
+				if( exeMelee ) {
+					if( mSwordBhv.isReady ) {
+						CmdMeleeAtk();
+						MeleeAtk();
+					}
+				}
+				if( exeBomb ) {
+					if( mBombCoolDn < NetworkTime.time ) {
+						mBombCoolDn = NetworkTime.time + .5f;
+						CmdBomb();
+					}
+				}
 			}
 
-			// melee button
-			if( exeMelee ) {
-				if( mSwordBhv.isReady ) {
-					CmdMeleeAtk();
-					MeleeAtk();
-				}
+			if( mDustTran != null ) {
+				mDustTran.rotation = Quaternion.identity;
 			}
 		}
 
@@ -495,6 +557,16 @@ public class PlayerNetBhv : NetworkBehaviour {
 
 
 
+	// me to server me
+	[Command]
+	void CmdBomb() {
+		Vector3 SpawnPos = (mMeleeCollider.transform.position + transform.position) / 2f;
+		GameObject bombClone = GameObject.Instantiate<GameObject>( mBombPrefab, SpawnPos, Quaternion.identity );
+		NetworkServer.Spawn( bombClone );
+		bombClone.GetComponent<Rigidbody>().velocity = transform.forward * 10f + new Vector3( 0, 4, 0 );
+	}
+
+
 
 
 	//https://mirror-networking.com/docs/Articles/Guides/Communications/RemoteActions.html
@@ -565,7 +637,7 @@ public class PlayerNetBhv : NetworkBehaviour {
 
 		_health -= damage;
 
-		if( impactSource != null ) {
+		if( mAIMode != AIMode.God && impactSource != null ) {
 			float force, radius, upMod, reverseDist;
 			Dbg( this.transform, bombCollider.transform, out radius, out reverseDist, out force, out upMod );
 
@@ -575,7 +647,7 @@ public class PlayerNetBhv : NetworkBehaviour {
 
 	[ClientRpc]
 	void RpcOnBlownAway( float force, float radius, float upMod, Vector3 impactSource ) {
-		if( mRigController != null ) {
+		if( mAIMode != AIMode.God && mRigController != null ) {
 			mRigController.BlowAway(
 				blastOrigin: impactSource,
 				force: force,

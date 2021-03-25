@@ -15,7 +15,7 @@ public class RigidbodyController : NetworkBehaviour /*MonoBehaviour*/ {
 	public float maxVelocityChange = 10.0f;
 	public bool canJump = true;
 	public float jumpHeight = 2.0f;
-	bool grounded = false;
+	public bool grounded = false;
 
 	double mStunTime = 0f;
 
@@ -27,6 +27,10 @@ public class RigidbodyController : NetworkBehaviour /*MonoBehaviour*/ {
 	Rigidbody mRigidbody;
 	NetworkRigidbody mNetworkRigidbody;
 
+	float mCapsuleH;
+	float mCapsuleRadius;
+
+	public Vector3? mAiWalkVec = null;
 
 	float FInterpTo( float Current, float Target, float DeltaTime, float InterpSpeed ) {
 		// If no interp speed, jump to target value
@@ -92,7 +96,9 @@ public class RigidbodyController : NetworkBehaviour /*MonoBehaviour*/ {
 	void Awake() {
 		mRigidbody = this.GetComponent<Rigidbody>();
 		mNetworkRigidbody = this.GetComponent<NetworkRigidbody>();
-
+		var cc = transform.GetComponent<CapsuleCollider>();
+		mCapsuleH = cc.height;
+		mCapsuleRadius = cc.radius;
 		//kinematic = true;
 	}
 	public override void OnStartClient() {
@@ -126,6 +132,7 @@ public class RigidbodyController : NetworkBehaviour /*MonoBehaviour*/ {
 							// Calculate how fast we should be moving
 
 							Vector3 targetVelocity;
+
 							if( false ) {
 								targetVelocity = Camera.main.transform.TransformDirection( new Vector3( Input.GetAxis( "Horizontal" ), 0, Input.GetAxis( "Vertical" ) ) );
 
@@ -136,13 +143,18 @@ public class RigidbodyController : NetworkBehaviour /*MonoBehaviour*/ {
 								Vector3 camRgt = Camera.main.transform.right.Y( 0f ).normalized;
 								targetVelocity = (camForward * verticalAxis + camRgt * horizontalAxis);
 							}
+							if( mAiWalkVec != null ) {
+								targetVelocity = mAiWalkVec.Value;
+								mAiWalkVec = null;
+							}
+
 							targetVelocity *= speed;
 
 							SetForce( ref targetVelocity, 0f, maxVelocityChange );
 
 							// Jump
-							if( mISJumpKeyPressed ) {
-								mISJumpKeyPressed = false;
+							if( iSJumpKeyPressed ) {
+								iSJumpKeyPressed = false;
 								if( canJump ) {
 									mRigidbody.velocity = mRigidbody.velocity.Y( CalculateJumpVerticalSpeed() );
 								}
@@ -168,7 +180,7 @@ public class RigidbodyController : NetworkBehaviour /*MonoBehaviour*/ {
 				break;
 
 			case State.KnockedBack: {
-					if( grounded ) {    // landed
+					if( grounded ) {	// landed
 						mStunTime = NetworkTime.time + 1f; // a lilo more
 						mState = State.KnockBackLanded;
 					}
@@ -185,23 +197,25 @@ public class RigidbodyController : NetworkBehaviour /*MonoBehaviour*/ {
 
 			case State.BlownAway: {
 					// Jump
-					if( mISJumpKeyPressed ) {
-						mISJumpKeyPressed = false;
+					if( mReviveTimer < NetworkTime.time ) {
+						if( iSJumpKeyPressed ) {
+							iSJumpKeyPressed = false;
 
-						if( !kinematic ) {
-							SetKinematic( true );
-							_kinematic = true;
-							mState = State.Reviving;
-							mRigidbody.AddForce( new Vector3( 0, 10, 0 ), ForceMode.Impulse );
-							mReviveTime = NetworkTime.time + mReviveTotalTime;
+							if( !kinematic ) {
+								SetKinematic( true );
+								_kinematic = true;
+								mState = State.Reviving;
+								mRigidbody.AddForce( new Vector3( 0, 10, 0 ), ForceMode.Impulse );
+								mReviveTime = NetworkTime.time + mReviveTotalTime;
 
-							mReviveStartQuat = transform.rotation;
+								mReviveStartQuat = transform.rotation;
 
-							Vector3 tag = transform.rotation.eulerAngles;
-							tag.z = 0f;
-							tag.x = 0f;
+								Vector3 tag = transform.rotation.eulerAngles;
+								tag.z = 0f;
+								tag.x = 0f;
 
-							mReviveEndQuat = Quaternion.Euler( tag );
+								mReviveEndQuat = Quaternion.Euler( tag );
+							}
 						}
 					}
 				}
@@ -209,8 +223,8 @@ public class RigidbodyController : NetworkBehaviour /*MonoBehaviour*/ {
 
 			case State.Reviving: {
 					// for dbg
-					if( mISJumpKeyPressed ) {
-						mISJumpKeyPressed = false;
+					if( false && iSJumpKeyPressed ) {
+						iSJumpKeyPressed = false;
 
 						mRigidbody.velocity = Vector3.zero;
 						transform.position = new Vector3( 568f, 360f, 2f );
@@ -301,13 +315,6 @@ public class RigidbodyController : NetworkBehaviour /*MonoBehaviour*/ {
 		grounded = false;
 	}
 
-	bool mISJumpKeyPressed = false;
-	void Update() {
-		if( Input.GetButtonDown( "Jump" ) ) {
-			mISJumpKeyPressed = true;
-		}
-	}
-
 	//void FixedUpdate() {
 	//	if( mAutoUserControl ) {
 	//		UserControl();
@@ -329,6 +336,10 @@ public class RigidbodyController : NetworkBehaviour /*MonoBehaviour*/ {
 
 
 	public void KnockBack( Vector3 normalizedDir ) {
+		if( mState == State.BlownAway ) {
+			// got beat down or sent flying
+			return;
+		}
 		mStunTime = NetworkTime.time + 3f;
 		mState = State.KnockedBack;
 
@@ -342,16 +353,54 @@ public class RigidbodyController : NetworkBehaviour /*MonoBehaviour*/ {
 		SetKinematic( false );
 		_kinematic = false;
 		mState = State.BlownAway;
+		mReviveTimer = NetworkTime.time + 3f;
 		mRigidbody.velocity = Vector3.zero;
 		mRigidbody.AddExplosionForce( force, blastOrigin, radius, upwardsModifier, ForceMode.Impulse );
 		mRigidbody.drag = 5f;
 	}
 
+	float mISJumpKeyPressed = 0f;
+	bool iSJumpKeyPressed {
+		get {
+			if( 0f < mISJumpKeyPressed && Time.time < mISJumpKeyPressed ) {
+				return true;
+			}
+			return false;
+		}
+		set {
+			mISJumpKeyPressed = value ? Time.time + .05f : 0f;
+		}
+	}
+	double mReviveTimer = 0f;
+	void Update() {
+		if( Input.GetButtonDown( "Jump" ) ) {
+			iSJumpKeyPressed = true;
+		}
+	}
 
+	void OnCollisionEnter( Collision collisionInfo ) {
+		//OnCollisionEnter( collisionInfo );
+	}
 
-	void OnCollisionStay() {
+	void OnCollisionStay( Collision collisionInfo ) {
+		//if( 0f < mRigidbody.velocity.y ) { return; }
+		//for( int i = 0, len = collisionInfo.contacts.Length; i < len; i++ ) {
+		//	Vector3 bottom = transform.position - new Vector3( 0, mCapsuleH / 2f - mCapsuleRadius, 0 );
+		//	Vector3 diff = collisionInfo.contacts[i].point - bottom;
+		//	float dot = Vector3.Dot( diff, -transform.up );
+
+		//	if( 0f < dot /*&& diff.HorizontalDistance() <= mCapsuleRadius * 2f */) {
+		//		//Debug.Log( collisionInfo.collider.name + ", dot: " + dot );
+
+		//	}
+		//}
 		grounded = true;
 	}
+	//void OnDrawGizmos() {
+	//	Vector3 bottom = transform.position - new Vector3( 0, mCapsuleH / 2f - mCapsuleRadius, 0 );
+	//	Gizmos.color = Color.red;
+	//	Gizmos.DrawCube( bottom, new Vector3( mCapsuleRadius * 2f, .1f, mCapsuleRadius * 2f ) );
+	//}
 
 	float CalculateJumpVerticalSpeed() {
 		// From the jump height and gravity we deduce the upwards speed 

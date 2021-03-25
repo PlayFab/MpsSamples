@@ -6,13 +6,13 @@ using Ext;
 public class SwordBhv : MonoBehaviour {
 	Vector3 mInitLocPos;
 	Quaternion mInitLocRot;
-	float mMeleeTimer = float.MaxValue;
+	float mMeleeCd = float.MaxValue;
 	float mDuration = 0f;
 	bool mDir = false;
 
 	public bool isReady {
 		get {
-			return mMeleeTimer == float.MaxValue;
+			return mMeleeCd == float.MaxValue;
 		}
 	}
 
@@ -23,20 +23,20 @@ public class SwordBhv : MonoBehaviour {
 
 	public void Fire( float duration ) {
 		mDuration = duration;
-		mMeleeTimer = Time.time + duration;
+		mMeleeCd = Time.time + duration;
 		transform.localPosition = new Vector3( 0.08398438f, 0.2120056f, 1.58f );
 		transform.localRotation = Quaternion.Euler( 0, 0f, -90 );
 		mDir = !mDir;
 	}
 
 	private void Update() {
-		if( mMeleeTimer < Time.time ) {
-			mMeleeTimer = float.MaxValue;
+		if( mMeleeCd < Time.time ) {
+			mMeleeCd = float.MaxValue;
 			transform.localPosition = mInitLocPos;
 			transform.localRotation = mInitLocRot;
 
-		} else if( mMeleeTimer != float.MaxValue ) {
-			transform.localRotation = Quaternion.Euler( 0, Ease.InOutQuad( mMeleeTimer - Time.time, 0f, (mDir ? 540 : -540), mDuration ), -90 );
+		} else if( mMeleeCd != float.MaxValue ) {
+			transform.localRotation = Quaternion.Euler( 0, Ease.InOutQuad( mMeleeCd - Time.time, 0f, (mDir ? 540 : -540), mDuration ), -90 );
 		}
 	}
 }

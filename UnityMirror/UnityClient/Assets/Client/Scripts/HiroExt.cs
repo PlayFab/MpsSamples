@@ -239,6 +239,27 @@ namespace HiroExtensions {
 
 
 
+		class Sphere: BaseVLog {
+			public Vector3 mDir;
+			public float mRadius;
+
+			override public bool Draw( int i ) {
+				Gizmos.color = mClr;
+
+				Gizmos.DrawSphere( mPos, mRadius );
+
+				Gizmos.color = Color.gray;
+				return mDuration <= Time.time;
+			}
+		}
+		public static void DrawSphere( Vector3 pos, float radius, Color color, float duration = 0f ) {
+			Init();
+			mVlogs.Add( new SphereCast() { mPos = pos, mRadius = radius, mClr = color, mDuration = Time.time + duration } );
+		}
+
+
+
+
 		class GzmBounds : BaseVLog {
 			public Bounds mBounds;
 			public bool mDrawMinMax = false;
