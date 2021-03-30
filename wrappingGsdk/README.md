@@ -50,7 +50,29 @@ C:\Assets\wrapper.exe -g C:\Assets\fakegame.exe arg1 arg2
 
 You should use `port 80 TCP` in the Build configuration. Bear in mind that during the allocation (i.e. usage of RequestMultiplayerServer API) the port you will get to connect will be different than 80. This is becase MPS service will create a mapping between the Azure Load Balancer (that exposes your ports to the Public internet) to the game servers running on the Azure Virtual Machines.
 
-### Running the wrapper using the LocalMultiplayerAgent
+### Using a Linux Build 
+
+You can run the `wrapper` and the `fakegame` executable on a Linux Build, using Linux containers. 
+
+1. Make sure you have an account on [playfab.com](https://www.playfab.com) and have enabled Multiplayer Servers
+2. Git clone this repo. You should have installed [Docker](https://docs.docker.com/get-docker/) 
+3. On the PlayFab developer portal, you can create a new Linux Build to get the Azure Container Registry information. It will be appear in the Multiplayer page like `docker login --username customervz4l34rmt7rnk --password XXXXXXX customervz4l34rmt7rnk.azurecr.io`. You can also use [the GetContainerRegistryCredentials API call](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/getcontainerregistrycredentials?view=playfab-rest) to get the ACR credentials
+4. Replace the *TAG* and the *ACR* variables with your values
+```bash
+TAG="0.1"
+ACR="customervz4l34rmt7rnk.azurecr.io"
+docker login --username XXXXXX --password XXXXXXX ${ACR}
+docker build -t ${ACR}/wrapper:${TAG} .
+docker push ${ACR}/wrapper:${TAG}
+```
+You can run the above script on [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/wsl2-index).
+5. Create a new MPS Build either via playfab.com or via [the CreateBuildWithCustomerContainer API call](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/createbuildwithcustomcontainer?view=playfab-rest). On this Build, select Linux VMs, the image:tag container image you uploaded and a single port for the game. If you are using the `fakegame`, you should pick 80/TCP. 
+6. Wait for the Build to be deployed
+7. To allocate a server and get IP/port, you can use the [MpsAllocator sample](../MpsAllocatorSample/README.md) or use [RequestMultiplayerServer](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/requestmultiplayerserver?view=playfab-rest) API call. For more information you can check the [documentation](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers)
+
+> Of course, you can still replace `fakegame` with your game server. If you choose to do so, you'll need to modify the [Dockerfile](./Dockerfile) appropriately.
+
+### Running the wrapper locally using the LocalMultiplayerAgent
 
 > Using LocalMultiplayerAgent is highly recommended if you want to test GSDK integration on your custom game servers.
 

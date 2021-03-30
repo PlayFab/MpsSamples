@@ -25,7 +25,7 @@ You can run the above script on [Windows Subsystem for Linux](https://docs.micro
 
 5. Create a new MPS Build either via playfab.com or via [the CreateBuildWithCustomerContainer API call](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/createbuildwithcustomcontainer?view=playfab-rest). On this Build, select Linux VMs, the image:tag container image you uploaded and a single port for the game, 27960/UDP. 
 6. Wait for the Build to be deployed
-7. To allocate a server and get IP/port, you can use the [RequestMultiplayerServer](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/requestmultiplayerserver?view=playfab-rest) API call. For more information you can check the [documentation](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers)
+7. To allocate a server and get IP/port, you can use the [MpsAllocator sample](../MpsAllocatorSample/README.md) or use the [RequestMultiplayerServer](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/requestmultiplayerserver?view=playfab-rest) API call. For more information you can check the [documentation](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers)
 8. Download [OpenArena client](https://openarena.fandom.com/wiki/Main_Page), open the game executable for your platform and connect to your server. Enjoy!
 
 ### Is this the recommended way I should use GSDK?
