@@ -4,7 +4,7 @@ This repository contains samples that show how to use Azure PlayFab Multiplayer 
 
 ## Wrapping GSDK
 
-You could try GSDK without modifying your game server (even though we don't recommend it for production deployments). You can find instructions [here](wrappingGSDK/README.md).
+You could try GSDK without modifying your game server (even though we don't recommend it for production deployments). This sample also contains a sample fake game server you can try in order to familiarize with the Multiplayer Servers service. You can find instructions [here](wrappingGsdk/README.md).
 
 ## MpsAllocatorSample
 
@@ -36,7 +36,7 @@ Simple executable that integrates with PlayFab's Gameserver SDK (GSDK). It start
 
 ## Questions
 
-If you have any questions, feel free to engage in the repo's discussions [here](https://github.com/PlayFab/MpsSamples/discussions)or find us in Discord [here](https://discord.com/invite/gamestack)
+If you have any questions, feel free to engage in the repo's discussions [here](https://github.com/PlayFab/MpsSamples/discussions) or find us in Discord [here](https://discord.com/invite/gamestack)
 
 ## Community samples
 
