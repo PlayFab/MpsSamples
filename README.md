@@ -1,11 +1,14 @@
 # MpsSamples
+
 This repository contains samples that show how to use Azure PlayFab Multiplayer Servers Gameserver SDK (GSDK) as well as additional resources.
 
-## WindowsRunnerCSharp
+## Wrapping GSDK
 
-Simple executable that integrates with PlayFab's Gameserver SDK (GSDK). It starts an http server that will respond to GET requests with a json file containing whatever configuration values it read from the GSDK.
+You could try GSDK without modifying your game server (even though we don't recommend it for production deployments). You can find instructions [here](wrappingGSDK/README.md).
 
-More information [here](WindowsRunnerCSharp/README.md).
+## MpsAllocatorSample
+
+This is a simple .NET Core console app that lets use easily see your MPS Builds/Game Servers/VMs plus allocate a game server (uses the RequestMultiplayerServer API call). More information [here](MpsAllocatorSample/README.md).
 
 ## UnityMirror
 
@@ -19,14 +22,6 @@ This sample wraps the open source [OpenArena](https://openarena.fandom.com/wiki/
 
 More information [here](openarena/README.md).
 
-## Wrapping GSDK
-
-You could try GSDK without modifying your game server (even though we don't recommend it for production deployments). You can find instructions [here](wrappingGSDK/README.md).
-
-## MpsAllocatorSample
-
-This is a simple .NET Core console app that lets use easily see your MPS Builds/Game Servers/VMs plus allocate a game server (uses the RequestMultiplayerServer API call).
-
 ## Debugging Docker containers
 
 MPS service uses Docker containers to schedule game servers. You can see some **advanced** debugging/diagnosing instructions [here](./Debugging.md).
@@ -34,6 +29,14 @@ MPS service uses Docker containers to schedule game servers. You can see some **
 ## Matchmake Sample
 
 The Matchmake sample logs in a configurable number of clients and attempts to matchmake them together, following the steps described in the [Single user ticket matchmaking](https://docs.microsoft.com/gaming/playfab/features/multiplayer/matchmaking/quickstart#single-user-ticket-matchmaking) sample.
+
+## WindowsRunnerCSharp
+
+Simple executable that integrates with PlayFab's Gameserver SDK (GSDK). It starts an http server that will respond to GET requests with a json file containing whatever configuration values it read from the GSDK. More information [here](WindowsRunnerCSharp/README.md).
+
+## Questions
+
+If you have any questions, feel free to engage in the repo's discussions [here](https://github.com/PlayFab/MpsSamples/discussions)or find us in Discord [here](https://discord.com/invite/gamestack)
 
 ## Community samples
 
