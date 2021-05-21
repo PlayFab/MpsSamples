@@ -30,7 +30,7 @@
         {
             base.Awake();
             Instance = this;
-            NetworkServer.RegisterHandler(CustomGameServerMessageTypes.ReceiveAuthenticate, OnReceiveAuthenticate);
+            NetworkServer.RegisterHandler<ReceiveAuthenticateMessage>(OnReceiveAuthenticate);
             //_netManager.transport.port = Port;
         }
 
@@ -45,12 +45,11 @@
             NetworkServer.Shutdown();
         }
 
-        private void OnReceiveAuthenticate(NetworkMessage netMsg)
+        private void OnReceiveAuthenticate(NetworkConnection nconn, ReceiveAuthenticateMessage message)
         {
-            var conn = _connections.Find(c => c.ConnectionId == netMsg.conn.connectionId);
+            var conn = _connections.Find(c => c.ConnectionId == nconn.connectionId);
             if(conn != null)
             {
-                var message = netMsg.ReadMessage<ReceiveAuthenticateMessage>();
                 conn.PlayFabId = message.PlayFabId;
                 conn.IsAuthenticated = true;
                 OnPlayerAdded.Invoke(message.PlayFabId);
@@ -114,28 +113,35 @@
         public const short MaintenanceMessage = 902;
     }
 
-    public class ReceiveAuthenticateMessage : MessageBase
+    public struct ReceiveAuthenticateMessage : NetworkMessage
     {
         public string PlayFabId;
     }
 
-    public class ShutdownMessage : MessageBase {}
+    public struct ShutdownMessage : NetworkMessage {}
 
     [Serializable]
-    public class MaintenanceMessage : MessageBase
+    public struct MaintenanceMessage : NetworkMessage
     {
         public DateTime ScheduledMaintenanceUTC;
+    }
 
-        public override void Deserialize(NetworkReader reader)
+    public static class MaintenanceMessageFunctions
+    {
+        public static MaintenanceMessage Deserialize(this NetworkReader reader)
         {
+            MaintenanceMessage msg = new MaintenanceMessage();
+            
             var json = PlayFab.PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
-            ScheduledMaintenanceUTC = json.DeserializeObject<DateTime>(reader.ReadString());
+            msg.ScheduledMaintenanceUTC = json.DeserializeObject<DateTime>(reader.ReadString());
+
+            return msg;
         }
 
-        public override void Serialize(NetworkWriter writer)
+        public static void Serialize(this NetworkWriter writer, MaintenanceMessage value)
         {
             var json = PlayFab.PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
-            var str = json.SerializeObject(ScheduledMaintenanceUTC);
+            var str = json.SerializeObject(value.ScheduledMaintenanceUTC);
             writer.Write(str);
         }
     }
