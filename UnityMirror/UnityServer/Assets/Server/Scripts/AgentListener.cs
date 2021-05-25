@@ -60,7 +60,7 @@ public class AgentListener : MonoBehaviour {
         Debug.Log("Server is shutting down");
         foreach(var conn in UnityNetworkServer.Instance.Connections)
         {
-            conn.Connection.Send(CustomGameServerMessageTypes.ShutdownMessage, new ShutdownMessage());
+            conn.Connection.Send<ShutdownMessage>(new ShutdownMessage());
         }
         StartCoroutine(Shutdown());
     }
@@ -76,7 +76,7 @@ public class AgentListener : MonoBehaviour {
         Debug.LogFormat("Maintenance scheduled for: {0}", NextScheduledMaintenanceUtc.Value.ToLongDateString());
         foreach (var conn in UnityNetworkServer.Instance.Connections)
         {
-            conn.Connection.Send(CustomGameServerMessageTypes.ShutdownMessage, new MaintenanceMessage() {
+            conn.Connection.Send<MaintenanceMessage>(new MaintenanceMessage() {
                 ScheduledMaintenanceUTC = (DateTime)NextScheduledMaintenanceUtc
             });
         }

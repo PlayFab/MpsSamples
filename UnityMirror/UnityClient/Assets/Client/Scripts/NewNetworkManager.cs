@@ -108,28 +108,35 @@ public class CustomGameServerMessageTypes
     public const short MaintenanceMessage = 902;
 }
 
-public class ReceiveAuthenticateMessage : MessageBase
+public struct ReceiveAuthenticateMessage : NetworkMessage
 {
     public string PlayFabId;
 }
 
-public class ShutdownMessage : MessageBase { }
+public struct ShutdownMessage : NetworkMessage { }
 
 [Serializable]
-public class MaintenanceMessage : MessageBase
+public struct MaintenanceMessage : NetworkMessage
 {
     public DateTime ScheduledMaintenanceUTC;
+}
 
-    public override void Deserialize(NetworkReader reader)
+public static class MaintenanceMessageFunctions
+{
+    public static MaintenanceMessage Deserialize(this NetworkReader reader)
     {
+        MaintenanceMessage msg = new MaintenanceMessage();
+            
         var json = PlayFab.PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
-        ScheduledMaintenanceUTC = json.DeserializeObject<DateTime>(reader.ReadString());
+        msg.ScheduledMaintenanceUTC = json.DeserializeObject<DateTime>(reader.ReadString());
+
+        return msg;
     }
 
-    public override void Serialize(NetworkWriter writer)
+    public static void Serialize(this NetworkWriter writer, MaintenanceMessage value)
     {
         var json = PlayFab.PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
-        var str = json.SerializeObject(ScheduledMaintenanceUTC);
+        var str = json.SerializeObject(value.ScheduledMaintenanceUTC);
         writer.Write(str);
     }
 }

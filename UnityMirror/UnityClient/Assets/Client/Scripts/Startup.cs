@@ -23,21 +23,21 @@ public class Startup : MonoBehaviour
         _nm = NewNetworkManager.Instance;
         _nm.OnDisconnected.AddListener(OnDisconnected);
         _nm.OnConnected.AddListener(OnConnected);
-        NetworkClient.RegisterHandler(CustomGameServerMessageTypes.ShutdownMessage, OnServerShutdown);
-        NetworkClient.RegisterHandler(CustomGameServerMessageTypes.MaintenanceMessage, OnMaintenanceMessage);
+        NetworkClient.RegisterHandler<ShutdownMessage>(OnServerShutdown);
+        NetworkClient.RegisterHandler<MaintenanceMessage>(OnMaintenanceMessage);
 
         _messageWindow = MessageWindow.Instance;
     }
 
-    private void OnMaintenanceMessage(NetworkMessage netMsg)
+    private void OnMaintenanceMessage(MaintenanceMessage msg)
     {
-        var message = netMsg.ReadMessage<MaintenanceMessage>();
+        var message = msg;
         _messageWindow.Title.text = "Maintenance Shutdown scheduled";
         _messageWindow.Message.text = string.Format("Maintenance is scheduled for: {0}", message.ScheduledMaintenanceUTC.ToString("MM-DD-YYYY hh:mm:ss"));
         _messageWindow.gameObject.SetActive(true);
     }
 
-    private void OnServerShutdown(NetworkMessage netMsg)
+    private void OnServerShutdown(ShutdownMessage msg)
     {
         _messageWindow.Title.text = "Shutdown In Progress";
         _messageWindow.Message.text = "Server has issued a shutdown.";
@@ -61,7 +61,7 @@ public class Startup : MonoBehaviour
         _messageWindow.Message.text = string.Format("You logged in successfully. ID:{0}", success.PlayFabId);
         _messageWindow.gameObject.SetActive(true);
 
-        NetworkClient.connection.Send(CustomGameServerMessageTypes.ReceiveAuthenticate, new ReceiveAuthenticateMessage()
+        NetworkClient.connection.Send<ReceiveAuthenticateMessage>(new ReceiveAuthenticateMessage()
         {
             PlayFabId = success.PlayFabId
         });
