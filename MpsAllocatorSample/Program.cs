@@ -63,6 +63,9 @@ namespace MpsAllocator
                     case 6: 
                         await GetMultiplayerServerDetails();
                         break;
+                    case 7:
+                        await PrintServerStateInVM();
+                        break;
                     default:
                         Console.WriteLine("Please enter a valid option");
                         continue;
@@ -73,7 +76,7 @@ namespace MpsAllocator
 
         static int PrintOptions()
         {
-            string errorMsg = "Please enter a valid option (0-6)";
+            string errorMsg = "Please enter a valid option (0-7)";
             while (true)
             {
                 Console.WriteLine("----------------------------------");
@@ -84,11 +87,12 @@ namespace MpsAllocator
                 Console.WriteLine("4 for ListMultiplayerServers");
                 Console.WriteLine("5 for ListVirtualMachineSummaries");
                 Console.WriteLine("6 for GetMultiplayerServerDetails");
+                Console.WriteLine("7 to see server allocation status");
                 Console.WriteLine("----------------------------------");
                 var optionStr = Console.ReadLine();
                 if (int.TryParse(optionStr, out var option))
                 {
-                    if (option < 0 || option > 6)
+                    if (option < 0 || option > 7)
                     {
                         Console.WriteLine(errorMsg);
                         continue;
@@ -222,6 +226,50 @@ namespace MpsAllocator
             else
             {
                 PrettyPrintJson(res.Result); 
+            }
+        }
+
+        static async Task PrintServerStateInVM()
+        {
+            var req = new PlayFab.MultiplayerModels.ListMultiplayerServersRequest();
+            string buildID = ReadBuildIDFromInput();
+            var regions = await GetRegions(buildID);
+            Console.WriteLine($"Enter region (options are {string.Join(",", regions)})");
+            string region = Console.ReadLine();
+            req.Region = region;
+            req.BuildId = buildID;
+            var res = await PlayFabMultiplayerAPI.ListMultiplayerServersAsync(req);
+            if (res.Error != null)
+            {
+                Console.WriteLine(res.Error.ErrorMessage);
+            }
+            else
+            {
+                Dictionary<string,Dictionary<string,int>> vmIDsWithStates = new Dictionary<string, Dictionary<string,int>>();
+                foreach(var server in res.Result.MultiplayerServerSummaries)
+                {
+                    if(!vmIDsWithStates.ContainsKey(server.VmId))
+                    {    
+                        vmIDsWithStates.Add(server.VmId, new Dictionary<string, int>());
+                    }
+
+                    var statesForVm = vmIDsWithStates[server.VmId];
+                    if (!statesForVm.ContainsKey(server.State))
+                    {
+                        statesForVm.Add(server.State, 0);
+                    }
+
+                    statesForVm[server.State]++;
+                }
+
+                foreach (var vm in vmIDsWithStates)
+                {
+                    Console.WriteLine($"- VM with ID:{vm.Key}");
+                    foreach (var vmStates in vm.Value)
+                    {
+                        Console.WriteLine($"    - State:{vmStates.Key}, Count:{vmStates.Value}");
+                    }
+                }
             }
         }
 
