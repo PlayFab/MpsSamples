@@ -78,7 +78,7 @@ Then choose whichever regions you would like and create the new build.
 
 Give the build a few minutes to be deployed.
 
-Once your build is deployed, you are done with handling the "server" portion of the sample, and the next steps will allow us to use the game client.
+Once your build is deployed, you are done with handling the "server" portion of the sample, and the next steps will allow us to test using the game client.
 
 First, make sure that you have the MpsSamples repository cloned on your desktop. 
 
