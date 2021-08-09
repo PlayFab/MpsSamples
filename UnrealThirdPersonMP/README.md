@@ -9,12 +9,13 @@
 - A developer.playfab.com account
 
 OPTIONAL:
-- Clone the [MpsSamples repository](https://github.com/PlayFab/MpsSamples)
+- Clone the [MpsSamples repository](https://github.com/PlayFab/MpsSamples) in order to test server allocation by using the MpsAllocatorSample
 	- In order to use it, you need to have installed [.NET Core](https://dotnet.microsoft.com/download/dotnet-core)
 
 ## Getting Started
 
 #### Create a multiplayer game
+
 First, you need to start by creating a multiplayer game with a dedicated server! Thankfully, Unreal has a tutorial to help you 
 make a [third person multiplayer game from scratch](https://docs.unrealengine.com/4.26/en-US/InteractiveExperiences/Networking/QuickStart/).
 
@@ -24,6 +25,7 @@ Once you have created your game, you can set up a dedicated server by following 
 (https://docs.unrealengine.com/4.26/en-US/InteractiveExperiences/Networking/HowTo/DedicatedServers/) from Unreal's documentation.
 
 #### Integrate the Playfab GSDK plugin
+
 Once you've followed this tutorial and created your third person multiplayer game, then you can integrate the Unreal Playfab GSDK Plugin
 [using these instructions](https://github.com/PlayFab/gsdk/blob/master/UnrealPlugin/README.md).
 
@@ -62,6 +64,8 @@ would mean that you are running your game client executable, GameClient.exe, to 
 
 With your [developer.playfab.com](developer.playfab.com) account, create a new TitleID or use an existing one.
 
+[This documentation from MPS outlines the process to start deploying VMs for your game server more in depth.](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/deploying-playfab-multiplayer-server-builds).
+
 Click on this new TitleID, and go the Multiplayer tab under the Build section.
 
 ![Screenshot of what the Multiplayer Server tab looks like](images/MultiplayerServersTab.png)
@@ -74,7 +78,9 @@ Then choose whichever regions you would like and create the new build.
 
 Give the build a few minutes to be deployed.
 
-Once your build is deployed, make sure that you have the MpsSamples repository cloned on your desktop. 
+Once your build is deployed, you are done with handling the "server" portion of the sample, and the next steps will allow us to use the game client.
+
+First, make sure that you have the MpsSamples repository cloned on your desktop. 
 
 Navigate to MpsSamples\MpsAllocatorSample and use the command:
 
@@ -96,4 +102,4 @@ Using the port and IP address from this server, your players can now run your ga
 
 #### For more Information about MpsAllocatorSample
 
-In order to understand how the MpsAllocatorSample works an a more in-depth manner, you can [watch this video]( https://www.youtube.com/watch?v=kj2TcMlvWgk) that is an introductory level overview of Azure PlayFab Multiplayer Servers, with guided steps to help developers successfully build & deploy a sample game server on PlayFab.
+In order to understand how the MpsAllocatorSample works an a more in-depth manner, you can [watch this video](https://www.youtube.com/watch?v=kj2TcMlvWgk) that is an introductory level overview of Azure PlayFab Multiplayer Servers, with guided steps to help developers successfully build & deploy a sample game server on PlayFab.
