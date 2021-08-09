@@ -6,7 +6,9 @@
 - Download the [Unreal PlayfabGSDK Plugin folder](https://github.com/PlayFab/gsdk/tree/master/UnrealPlugin)
 - Download Visual Studio (the [community version is free](https://visualstudio.microsoft.com/vs/community/))
 - When running locally you must have a copy of [Local Multiplayer Agent](https://github.com/PlayFab/MpsAgent/releases)
-- A developer.playfab.com account (which you can create for free)
+- A developer.playfab.com account
+
+OPTIONAL:
 - Clone the [MpsSamples repository](https://github.com/PlayFab/MpsSamples)
 	- In order to use it, you need to have installed [.NET Core](https://dotnet.microsoft.com/download/dotnet-core)
 
@@ -28,15 +30,12 @@ Once you've followed this tutorial and created your third person multiplayer gam
 
 ## How to use the packaged server and client
 
-Now that you have a packaged game server, you can also package your game client. Open your Unreal Engine Editor and go to
-
-To get the game client using the Unreal Editor, click on File -> Package Project -> Build Target -> [game name] and then go to File -> Package Project -> Windows (64-bit), and choose
+Now that you have a packaged game server, you can also package your game client. Open your Unreal Engine Editor and go to File -> Package Project -> Build Target -> [game name] and then go to File -> Package Project -> Windows (64-bit), and choose
 what folder you want this file to be saved to. 
 
 ![showing the way to set the build target to the project and package the game client](images/PackageGame.png)
 
 The packaged game client will be in a folder called "WindowsNoEditor".
-
 
 ### Testing Locally using LocalMultiplayerAgent
 
@@ -53,7 +52,6 @@ Then when your game server is running through LocalMultiPlayerAgent and has a st
 ```
 
 would mean that you are running your game client executable, GameClient.exe, to connect to your game server that is on 127.0.0.1 (i.e. local host) through port 30000. You can learn more about [command line arguments here](https://docs.unrealengine.com/4.26/en-US/ProductionPipelines/CommandLineArguments/).
-
 
 ### Testing using Playfab MPSAllocatorSample
 
@@ -73,7 +71,7 @@ Give the build a few minutes to be deployed.
 
 Once your build is deployed, make sure that you have the MpsSamples repository cloned on your desktop. 
 
-In your terminal, navigate to the MpsSamples\wrappingGSDK folder and run the build.ps1 script. Then navigate to MpsSamples\MpsAllocatorSample and use the command 
+Navigate to MpsSamples\MpsAllocatorSample and use the command:
 
 ```
 dotnet run
