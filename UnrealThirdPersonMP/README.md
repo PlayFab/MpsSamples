@@ -20,8 +20,7 @@ make a [third person multiplayer game from scratch](https://docs.unrealengine.co
 
 #### Setting up a dedicated server
 
-Once you have created your game, you can set up a dedicated server. A dedicated server is one that is dedicated to only hosting the game 
-and no local players play on the machine because everyone connected is a client. You can do this by following [these instructions]
+Once you have created your game, you can set up a dedicated server by following [these instructions]
 (https://docs.unrealengine.com/4.26/en-US/InteractiveExperiences/Networking/HowTo/DedicatedServers/) from Unreal's documentation.
 
 #### Integrate the Playfab GSDK plugin
