@@ -33,7 +33,7 @@ Now that you have a packaged game server, you can also package your game client.
 To get the game client using the Unreal Editor, click on File -> Package Project -> Build Target -> [game name] and then go to File -> Package Project -> Windows (64-bit), and choose
 what folder you want this file to be saved to. 
 
-![showing the way to set the build target to the project and package the game client](/images/PackageGame.png)
+![showing the way to set the build target to the project and package the game client](images/PackageGame.png)
 
 The packaged game client will be in a folder called "WindowsNoEditor".
 
@@ -61,7 +61,7 @@ With your [developer.playfab.com](developer.playfab.com) account, create a new T
 
 Click on this new TitleID, and go the Multiplayer tab under the Build section.
 
-![Screenshot of what the Multiplayer Server tab looks like](/images/MultiplayerServersTab.png)
+![Screenshot of what the Multiplayer Server tab looks like](images/MultiplayerServersTab.png)
 
 Create a new build and make sure that the Server type is "Container". Upload your zipped up game server along with all of the DLLs (the same one you used with LocalMultiplayerAgent) and make sure the mount path and start command are correct.
 
@@ -81,13 +81,13 @@ dotnet run
 
 which will launch the MpsAllocatorSample, where you can choose from a menu of 7 API options to call that are frequently used.
 
-![Screenshot of what the MpsAllocatorSample menu looks like](/images/MpsAllocatorSample.png)
+![Screenshot of what the MpsAllocatorSample menu looks like](images/MpsAllocatorSample.png)
 
 To see your build summaries, choose option 2.
 
 To request a new multiplayer server, choose option 1 and make sure you have your BuildID, regions, and players. After entering this information, you should have an active game server. 
 
-![Screenshot of what a requested server response would be](/images/ActiveServer.png)
+![Screenshot of what a requested server response would be](images/ActiveServer.png)
 
 Using the port and IP address from this server, your players can now run your game client from the command line!
 
