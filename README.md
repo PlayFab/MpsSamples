@@ -16,6 +16,12 @@ Unity Server and Client sample that utilize the GameServer SDK.
 
 More information [here](UnityMirror/README.md).
 
+## UnrealThirdPersonMP
+
+Unreal Server and Client sample that utilize the GameServer SDK which is integrated through an Unreal plugin.
+
+More information [here](UnrealThirdPersonMP/README.md).
+
 ## OpenArena
 
 This sample wraps the open source [OpenArena](https://openarena.fandom.com/wiki/Main_Page) game using a .NET Core app and Linux containers.
