@@ -8,7 +8,7 @@ You could try GSDK without modifying your game server (even though we don't reco
 
 ## MpsAllocatorSample
 
-This is a simple .NET Core console app that lets use easily see your MPS Builds/Game Servers/VMs plus allocate a game server (uses the RequestMultiplayerServer API call). More information [here](MpsAllocatorSample/README.md).
+This is a simple .NET Core console app that lets you easily see your MPS Builds/Game Servers/VMs plus allocate a game server (uses the RequestMultiplayerServer API call). More information [here](MpsAllocatorSample/README.md).
 
 ## UnityMirror
 
