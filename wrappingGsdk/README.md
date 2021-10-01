@@ -33,7 +33,7 @@ As mentioned, if you're just evaluating the platform or don't have a game server
 
 You can use the zipped file that was created from `build.ps1` script during your creation of a new MPS Build.
 
-> If PowerShell throws up an error message – <b>File cannot be loaded because running scripts is disabled on this system</b>, then you need to enable the `build.ps1` script to run on your Windows 10 computer.  You can enable this by running the folloiwng PowerShell command in advance of running `build.ps1`:
+> If PowerShell throws up an error message – <b>File cannot be loaded because running scripts is disabled on this system</b>, then you need to enable the `build.ps1` script to run on your Windows computer.  You can enable this by running the following PowerShell command in Administrative mode in advance of running `build.ps1`:
 
 ```
 Set-ExecutionPolicy Unrestricted
