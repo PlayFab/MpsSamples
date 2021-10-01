@@ -33,6 +33,12 @@ As mentioned, if you're just evaluating the platform or don't have a game server
 
 You can use the zipped file that was created from `build.ps1` script during your creation of a new MPS Build.
 
+> If PowerShell throws up an error message – <b>File cannot be loaded because running scripts is disabled on this system</b>, then you need to enable the `build.ps1` script to run on your Windows computer.  You can enable this by running the following PowerShell command in Administrative mode in advance of running `build.ps1`:
+
+```
+Set-ExecutionPolicy Unrestricted
+```
+
 #### If you are using your own game server
 
 You should copy all your game server build files from wherever your `wrapper` executable is located (if you used the aforementioned `dotnet publish` command, files should be on `wrapper\bin\Debug\netcoreapp3.1\win-x64\publish` directory). You would need to zip the contents of this folder along with the files necessary to run your game server. This is the zip file that you will use with `LocalMultiplayerAgent` (if you are doing local development) and/or upload onto the MPS Service (if you need to deploy your game server on MPS service).
@@ -66,6 +72,7 @@ docker build -t ${ACR}/wrapper:${TAG} .
 docker push ${ACR}/wrapper:${TAG}
 ```
 You can run the above script on [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/wsl2-index).
+
 5. Create a new MPS Build either via playfab.com or via [the CreateBuildWithCustomerContainer API call](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/createbuildwithcustomcontainer?view=playfab-rest). On this Build, select Linux VMs, the image:tag container image you uploaded and a single port for the game. If you are using the `fakegame`, you should pick 80/TCP. 
 6. Wait for the Build to be deployed
 7. To allocate a server and get IP/port, you can use the [MpsAllocator sample](../MpsAllocatorSample/README.md) or use [RequestMultiplayerServer](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/requestmultiplayerserver?view=playfab-rest) API call. For more information you can check the [documentation](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers)
