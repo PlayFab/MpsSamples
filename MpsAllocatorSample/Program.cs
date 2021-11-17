@@ -54,13 +54,13 @@ namespace MpsAllocator
                     case 3:
                         await GetBuild();
                         break;
-                    case 4: 
+                    case 4:
                         await ListMultiplayerServers();
                         break;
-                    case 5: 
+                    case 5:
                         await ListVirtualMachineSummaries();
                         break;
-                    case 6: 
+                    case 6:
                         await GetMultiplayerServerDetails();
                         break;
                     case 7:
@@ -114,17 +114,21 @@ namespace MpsAllocator
             }
             else
             {
-                PrettyPrintJson(res.Result); 
+                PrettyPrintJson(res.Result);
             }
         }
-        
+
         static async Task ListMultiplayerServers()
         {
             var req = new PlayFab.MultiplayerModels.ListMultiplayerServersRequest();
             string buildID = ReadBuildIDFromInput();
             var regions = await GetRegions(buildID);
-            Console.WriteLine($"Enter region (options are {string.Join(",", regions)})");
-            string region = Console.ReadLine();
+            string region = regions.FirstOrDefault();
+            if (regions.Count() > 1)
+            {
+                Console.WriteLine($"Enter region (options are {string.Join(",", regions)})");
+                region = Console.ReadLine();
+            }
             req.Region = region;
             req.BuildId = buildID;
             var res = await PlayFabMultiplayerAPI.ListMultiplayerServersAsync(req);
@@ -134,10 +138,10 @@ namespace MpsAllocator
             }
             else
             {
-                PrettyPrintJson(res.Result); 
+                PrettyPrintJson(res.Result);
             }
         }
-        
+
         static async Task ListVirtualMachineSummaries()
         {
             var req = new PlayFab.MultiplayerModels.ListVirtualMachineSummariesRequest();
@@ -154,10 +158,10 @@ namespace MpsAllocator
             }
             else
             {
-                PrettyPrintJson(res.Result); 
+                PrettyPrintJson(res.Result);
             }
         }
-        
+
         static async Task GetMultiplayerServerDetails()
         {
             var req = new PlayFab.MultiplayerModels.GetMultiplayerServerDetailsRequest();
@@ -177,10 +181,10 @@ namespace MpsAllocator
             }
             else
             {
-                PrettyPrintJson(res.Result); 
+                PrettyPrintJson(res.Result);
             }
         }
-        
+
         static async Task GetBuild()
         {
             var req = new PlayFab.MultiplayerModels.GetBuildRequest();
@@ -194,7 +198,7 @@ namespace MpsAllocator
             }
             else
             {
-                PrettyPrintJson(res.Result); 
+                PrettyPrintJson(res.Result);
             }
         }
 
@@ -205,19 +209,19 @@ namespace MpsAllocator
             var regions = await GetRegions(req2.BuildId);
             Console.WriteLine($"Enter region (options are {string.Join(",", regions)})");
             string region = Console.ReadLine();
-            req2.PreferredRegions = new List<string>() {region};
+            req2.PreferredRegions = new List<string>() { region };
             req2.SessionId = Guid.NewGuid().ToString();
             // Initial list of players (potentially matchmade) allowed to connect to the game.
             // This list is passed to the game server when requested (via GSDK) and can be used to validate players connecting to it.
             Console.WriteLine("Type initial players ID, Enter to confirm. Empty string when you're done");
             string id = Console.ReadLine();
-            while(!string.IsNullOrEmpty(id))
+            while (!string.IsNullOrEmpty(id))
             {
                 req2.InitialPlayers ??= new List<string>();
                 req2.InitialPlayers.Add(id.Trim());
                 Console.WriteLine($"player with ID {id} was recorded, type the next one. Empty string when you're done");
                 id = Console.ReadLine();
-            } 
+            }
             var res = await PlayFabMultiplayerAPI.RequestMultiplayerServerAsync(req2);
             if (res.Error != null)
             {
@@ -225,7 +229,7 @@ namespace MpsAllocator
             }
             else
             {
-                PrettyPrintJson(res.Result); 
+                PrettyPrintJson(res.Result);
             }
         }
 
@@ -245,11 +249,11 @@ namespace MpsAllocator
             }
             else
             {
-                Dictionary<string,Dictionary<string,int>> vmIDsWithStates = new Dictionary<string, Dictionary<string,int>>();
-                foreach(var server in res.Result.MultiplayerServerSummaries)
+                Dictionary<string, Dictionary<string, int>> vmIDsWithStates = new Dictionary<string, Dictionary<string, int>>();
+                foreach (var server in res.Result.MultiplayerServerSummaries)
                 {
-                    if(!vmIDsWithStates.ContainsKey(server.VmId))
-                    {    
+                    if (!vmIDsWithStates.ContainsKey(server.VmId))
+                    {
                         vmIDsWithStates.Add(server.VmId, new Dictionary<string, int>());
                     }
 
@@ -276,7 +280,7 @@ namespace MpsAllocator
         static void PrettyPrintJson(object obj)
         {
             string msg = JsonConvert.SerializeObject(obj, Formatting.Indented,
-                new JsonConverter[] {new StringEnumConverter()});
+                new JsonConverter[] { new StringEnumConverter() });
             Console.WriteLine(msg);
         }
 
