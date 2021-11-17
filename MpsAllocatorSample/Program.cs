@@ -123,13 +123,7 @@ namespace MpsAllocator
             var req = new PlayFab.MultiplayerModels.ListMultiplayerServersRequest();
             string buildID = ReadBuildIDFromInput();
             var regions = await GetRegions(buildID);
-            string region = regions.FirstOrDefault();
-            if (regions.Count() > 1)
-            {
-                Console.WriteLine($"Enter region (options are {string.Join(",", regions)})");
-                region = Console.ReadLine();
-            }
-            req.Region = region;
+            req.Region = ReadRegionFromInput(regions);
             req.BuildId = buildID;
             var res = await PlayFabMultiplayerAPI.ListMultiplayerServersAsync(req);
             if (res.Error != null)
@@ -147,9 +141,7 @@ namespace MpsAllocator
             var req = new PlayFab.MultiplayerModels.ListVirtualMachineSummariesRequest();
             string buildID = ReadBuildIDFromInput();
             var regions = await GetRegions(buildID);
-            Console.WriteLine($"Enter region (options are {string.Join(",", regions)})");
-            string region = Console.ReadLine();
-            req.Region = region;
+            req.Region = ReadRegionFromInput(regions);
             req.BuildId = buildID;
             var res = await PlayFabMultiplayerAPI.ListVirtualMachineSummariesAsync(req);
             if (res.Error != null)
@@ -167,8 +159,7 @@ namespace MpsAllocator
             var req = new PlayFab.MultiplayerModels.GetMultiplayerServerDetailsRequest();
             string buildID = ReadBuildIDFromInput();
             var regions = await GetRegions(buildID);
-            Console.WriteLine($"Enter region (options are {string.Join(",", regions)})");
-            string region = Console.ReadLine();
+            string region = ReadRegionFromInput(regions);
             Console.WriteLine("Enter sessionId");
             string sessionID = Console.ReadLine();
             req.Region = region;
@@ -207,8 +198,7 @@ namespace MpsAllocator
             var req2 = new PlayFab.MultiplayerModels.RequestMultiplayerServerRequest();
             req2.BuildId = ReadBuildIDFromInput();
             var regions = await GetRegions(req2.BuildId);
-            Console.WriteLine($"Enter region (options are {string.Join(",", regions)})");
-            string region = Console.ReadLine();
+            string region = ReadRegionFromInput(regions);
             req2.PreferredRegions = new List<string>() { region };
             req2.SessionId = Guid.NewGuid().ToString();
             // Initial list of players (potentially matchmade) allowed to connect to the game.
@@ -238,9 +228,7 @@ namespace MpsAllocator
             var req = new PlayFab.MultiplayerModels.ListMultiplayerServersRequest();
             string buildID = ReadBuildIDFromInput();
             var regions = await GetRegions(buildID);
-            Console.WriteLine($"Enter region (options are {string.Join(",", regions)})");
-            string region = Console.ReadLine();
-            req.Region = region;
+            req.Region = ReadRegionFromInput(regions);
             req.BuildId = buildID;
             var res = await PlayFabMultiplayerAPI.ListMultiplayerServersAsync(req);
             if (res.Error != null)
@@ -298,6 +286,18 @@ namespace MpsAllocator
 
                 return buildIDStr;
             }
+        }
+
+        static string ReadRegionFromInput(IEnumerable<string> regions)
+        {
+            string region = regions.FirstOrDefault();
+            if (regions.Count() > 1)
+            {
+                Console.WriteLine($"Enter region (options are {string.Join(",", regions)})");
+                region = Console.ReadLine();
+            }
+            Console.WriteLine($"Using region: {region}");
+            return region;
         }
 
         static async Task<IEnumerable<string>> GetRegions(string buildID)
