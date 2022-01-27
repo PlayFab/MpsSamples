@@ -27,4 +27,4 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: build and push Docker images
-        run: ./wrappingGsdk/wrapper/dockerbuildpush.sh
+        run: chmod +x ./wrappingGsdk/wrapper/dockerbuildpush.sh && ./wrappingGsdk/wrapper/dockerbuildpush.sh
