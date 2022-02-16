@@ -1,6 +1,6 @@
 In this documentation, we will cover 
 1. How to build the wrapper game sample.
-2. How to create zipped achieve easily with the script.
+2. How to create zipped archive easily with the script.
 3. How to create and deploy Linux Conainer wrapper game sample to Multiplayer Servers(MPS)
 4. How to use LocalMultiplayer Agent with Linux Container Wrapper sample.
 
