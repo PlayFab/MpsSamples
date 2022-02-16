@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 
 namespace fakegame
@@ -23,6 +18,11 @@ namespace fakegame
                     Console.WriteLine($"Argument: {arg}");
                 } 
             }
+
+            HTTP_PORT = int.Parse(args[2]);
+
+            Console.WriteLine($"Starting fake game server listening on {HTTP_PORT}");
+
             CreateHostBuilder(args).Build().Run();
         }
 
