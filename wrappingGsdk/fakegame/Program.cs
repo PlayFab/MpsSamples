@@ -7,7 +7,7 @@ namespace fakegame
 {
     class Program
     {
-        const int HTTP_PORT = 80;
+        static int HTTP_PORT = 80;
         static void Main(string[] args)
         {
             Console.WriteLine($"Welcome to fake game server!");
