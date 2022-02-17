@@ -19,6 +19,9 @@ namespace fakegame
                 } 
             }
 
+            // Port Number is passed from Wrapper.
+            // When game server is running as process, Port Number will be mapped internally ( users don't need to specify a number). 
+            // When game server is running in a container, Port Number is already set as it must be defined in build configuration. 
             HTTP_PORT = int.Parse(args[2]);
 
             Console.WriteLine($"Starting fake game server listening on {HTTP_PORT}");
