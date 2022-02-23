@@ -234,7 +234,7 @@ namespace wrapper
 
                 // get processID from the token
                 int processID = 0;
-                if (!int.Parse(stringTokens[4].Trim(), out processID))
+                if (!int.TryParse(stringTokens[4].Trim(), out processID))
                 {
                     return null;
                 }
