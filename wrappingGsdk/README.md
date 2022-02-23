@@ -86,7 +86,7 @@ if (activeConfig.TryGetValue(portName, out string listeningPortString))
 }
 else
 ```
-If you replace port name in wrapper sample, make sure to specify updated port name in Build Configuration.
+If you replace port name in wrapper sample, make sure to change the value of **portName** variable above and specify updated port name in Build Configuration.
 
 ### Create a Linux Build and Deploy on MPS
 
