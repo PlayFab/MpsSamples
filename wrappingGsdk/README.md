@@ -29,7 +29,7 @@ As mentioned, if you're just evaluating the platform or don't have a game server
 
 ### Creating the zipped game assets archive
 
-#### - If you are using build.ps1 script
+#### If you are using build.ps1 script
 
 You can use the zipped file that was created from `build.ps1` script during your creation of a new MPS Build.
 
@@ -39,7 +39,7 @@ You can use the zipped file that was created from `build.ps1` script during your
 Set-ExecutionPolicy Unrestricted
 ```
 
-#### - If you are using your own game server
+#### If you are using your own game server
 
 You should copy all your game server build files from wherever your `wrapper` executable is located (if you used the aforementioned `dotnet publish` command, files should be on `wrapper\bin\Debug\netcoreapp3.1\win-x64\publish` directory). You would need to zip the contents of this folder along with the files necessary to run your game server. This is the zip file that you will use with `LocalMultiplayerAgent` (if you are doing local development) and/or upload onto the MPS Service (if you need to deploy your game server on MPS service).
 
@@ -47,36 +47,31 @@ You should copy all your game server build files from wherever your `wrapper` ex
 
 ### Deploying on MPS
 
-Once you create game asset archive, next step is to creat a Build to deploy the game asset.
+Once you create game asset archive, next step is to create a Build to deploy the game asset.
 
 You can refer to our [public documentation](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/deploying-playfab-multiplayer-server-builds) to upload your Build on the MPS service. 
 
 During the creation of your Build, you should upload the zipped game assets and specify build configuration such as StartGameCommand, Port, and Virtual Machine Type as bellow:
 
-#### Build Configuration Example 1: Deploy Wrapper sample as Windows Container on Windows VM.  
-
+#### Build Configuration Example 1: Deploy Wrapper sample as Windows Container on Windows VM.
 - Virtual Machine OS : Windows  
 - Game Serer Type : Container  
 - GameStartCommand : 
 C:\Assets\wrapper.exe -g C:\Assets\fakegame.exe arg1 arg2  
- ( Replace fakegame.exe with the name of your game server executable
+ ( Replace fakegame.exe with the name of your game server executable )
 - Port Name: game_port
 - Port Type: TCP
-- Port Number: 80
-
-
- 
+- Port Number: 80  
+  
 > Bear in mind that during the allocation (i.e. usage of RequestMultiplayerServer API) the port you will get to connect will be different than 80. 
-This is becase MPS service will create a mapping between the Azure Load Balancer (that exposes your ports to the Public internet) to the game servers running on the Azure Virtual Machines.   
- 
-    
+This is because MPS service will create a mapping between the Azure Load Balancer (that exposes your ports to the Public internet) to the game servers running on the Azure Virtual Machines.   
+  
 #### Build Configuration Example 2: Deploy Wrapper sample as Process on Windows VM.
 - Virtual Machine OS: Windows
 - Game Serer Type : Process  
 - GameStartCommand : wrapper.exe -g fakegame.exe arg1 arg2
 - Port Name: game_port
 - Port Type: TCP
-
 
 In this example, you don't need to specify Port Number. Once game server is running, port number will be assigned dynamically by MPS.  
 This is how to grab a port number via GSDK in wrapper sample.  
@@ -91,7 +86,7 @@ if (activeConfig.TryGetValue(portName, out string listeningPortString))
 }
 else
 ```
-If you replace port name in wrapper sample, make sure specify updated port name in Build Configuration.
+If you replace port name in wrapper sample, make sure to specify updated port name in Build Configuration.
 
 ### Create a Linux Build and Deploy on MPS
 

@@ -214,12 +214,14 @@ namespace wrapper
                     return null;
                 }
 
+                // stringTokens example: [Protocal, host:port, 0.0.0.0:0, LISTENING, PID]
                 var stringTokens = commandOut.Split(default(Char[]), StringSplitOptions.RemoveEmptyEntries);
 
                 // split host:port
                 var hostPortTokens = stringTokens[1].Split(new char[] { ':' });
                 int portFromHostPortToken = 0;
 
+                // check if the format of host:port is not valid
                 if (hostPortTokens.Length < 2 || !int.TryParse(hostPortTokens[1], out portFromHostPortToken))
                 {
                     return null;
@@ -230,7 +232,12 @@ namespace wrapper
                     return null;
                 }
 
-                int processID = int.Parse(stringTokens[4].Trim());
+                // get processID from the token
+                int processID = 0;
+                if (!int.Parse(stringTokens[4].Trim(), out processID))
+                {
+                    return null;
+                }
 
                 process = Process.GetProcessById(processID);
             }
