@@ -214,7 +214,7 @@ namespace wrapper
                     return null;
                 }
 
-                // stringTokens example: [Protocal, host:port, 0.0.0.0:0, LISTENING, PID]
+                // stringTokens example: [Protocol, host:port, Foreign Address, LISTENING, PID]
                 var stringTokens = commandOut.Split(default(Char[]), StringSplitOptions.RemoveEmptyEntries);
 
                 // split host:port
