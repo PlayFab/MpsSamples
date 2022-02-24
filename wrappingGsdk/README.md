@@ -45,20 +45,52 @@ You should copy all your game server build files from wherever your `wrapper` ex
 
 > A common mistake new users do is that they compress the `publish` directory. This may create issues if you use incorrect mapping, so we highly recommend you zip the **files** of the `publish` folder instead.
 
-#### Deploying on MPS
+### Deploying on MPS
 
-You can use our [public documentation](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/deploying-playfab-multiplayer-server-builds) to upload your Build on the MPS service. During the creation of your Build you should upload the zipped game assets you created and use a StartGameCommand like this one:
+Once you create game asset archive, next step is to create a Build to deploy the game asset.
 
+You can refer to our [public documentation](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/deploying-playfab-multiplayer-server-builds) to upload your Build on the MPS service. 
+
+During the creation of your Build, you should upload the zipped game assets and specify build configuration such as StartGameCommand, Port, and Virtual Machine Type as below:
+
+#### Build Configuration Example 1: Deploy Wrapper sample as Windows Container on Windows VM.
+- Virtual Machine OS : Windows  
+- Game Serer Type : Container  
+- GameStartCommand : 
+C:\Assets\wrapper.exe -g C:\Assets\fakegame.exe arg1 arg2  
+ ( Replace fakegame.exe with the name of your game server executable )
+- Port Name: game_port
+- Port Type: TCP
+- Port Number: 80  
+  
+> Bear in mind that during the allocation (i.e. usage of RequestMultiplayerServer API) the port you will get to connect will be different than 80. 
+This is because MPS service will create a mapping between the Azure Load Balancer (that exposes your ports to the Public internet) to the game servers running on the Azure Virtual Machines.   
+  
+#### Build Configuration Example 2: Deploy Wrapper sample as Process on Windows VM.
+- Virtual Machine OS: Windows
+- Game Serer Type : Process  
+- GameStartCommand : wrapper.exe -g fakegame.exe arg1 arg2
+- Port Name: game_port
+- Port Type: TCP
+
+In this example, you don't need to specify Port Number. Once game server is running, port number will be assigned dynamically by MPS.  
+This is how to grab a port number via GSDK in wrapper sample.  
+  
+```bash
+activeConfig = GameserverSDK.getConfigSettings();
+portName = "game_port" 
+
+if (activeConfig.TryGetValue(portName, out string listeningPortString))
+{
+    // ... more code here
+}
+else
 ```
-# replace fakegame.exe with the name of your game server executable
-C:\Assets\wrapper.exe -g C:\Assets\fakegame.exe arg1 arg2
-```
+If you replace port name in wrapper sample, make sure to change the value of **portName** variable above and specify updated port name in Build Configuration.
 
-You should use `port 80 TCP` in the Build configuration. Bear in mind that during the allocation (i.e. usage of RequestMultiplayerServer API) the port you will get to connect will be different than 80. This is becase MPS service will create a mapping between the Azure Load Balancer (that exposes your ports to the Public internet) to the game servers running on the Azure Virtual Machines.
+### Create a Linux Build and Deploy on MPS
 
-### Using a Linux Build 
-
-You can run the `wrapper` and the `fakegame` executable on a Linux Build, using Linux containers. 
+You can run the `wrapper` and the `fakegame` executable on a Linux Build, using Linux containers. In this case, you need to create a Linux Build and Upload it  it to Azure Container Registry (ACR).
 
 1. Make sure you have an account on [playfab.com](https://www.playfab.com) and have enabled Multiplayer Servers
 2. Git clone this repo. You should have installed [Docker](https://docs.docker.com/get-docker/) 
@@ -79,11 +111,22 @@ You can run the above script on [Windows Subsystem for Linux](https://docs.micro
 
 > Of course, you can still replace `fakegame` with your game server. If you choose to do so, you'll need to modify the [Dockerfile](./Dockerfile) appropriately.
 
-### Running the wrapper locally using the LocalMultiplayerAgent
+#### Build Configuration Example 3: Deploy Wrapper sample as Container on Linux VM.
+- Virtual Machine OS: Linux
+- Game Serer Type : Container  
+- Port Name: game_port
+- Port Type: TCP
+- Port Number: 80
 
-> Using LocalMultiplayerAgent is highly recommended if you want to test GSDK integration on your custom game servers.
 
+### Running the Wrapper locally using the LocalMultiplayerAgent
+
+> Using LocalMultiplayerAgent is highly recommended if you want to test GSDK integration on your custom game servers.  
+>  Without any cloud connection, you can test and run your game servers quickly on your local machine.
+> 
 If you are using [LocalMultiplayerAgent](https://github.com/PlayFab/LocalMultiplayerAgent) with Windows Containers you need to properly configure `MultiplayerSettings.json` file. You can find an example below, pay special attention to the values of `LocalFilePath` and `StartGameCommand`. Don't forget to replace `fakegame.exe` with the name of your game server executable.
+
+#### MultiplayerSettings.json Example 1 - Running Wrapper [Windows Container] using LocalMultiplayer Agent.
 
 ```json
 ...
@@ -94,9 +137,35 @@ If you are using [LocalMultiplayerAgent](https://github.com/PlayFab/LocalMultipl
         "LocalFilePath": "C:\\projects\\gsdkSamples\\wrappingGsdk\\drop\\gameassets.zip"
     }
 ],
-"StartGameCommand": "C:\\Assets\\wrapper.exe -g C:\\Assets\\fakegame.exe",
+"StartGameCommand": "C:\\Assets\\wrapper.exe -g C:\\Assets\\fakegame.exe arg1 arg2",
 ...
-// if you are using fakegameserver you should also configure port mapping for port 80
+"PortMappingsList": [
+            [
+                {
+                    "NodePort": 56100,
+                    "GamePort": {
+                        "Name": "game_port",
+                        "Number": 80,
+                        "Protocol": "TCP"
+                    }
+                }
+            ]
+        ]
+```
+  
+#### MultiplayerSettings.json Example 2 - Running Wrapper [Process] using LocalMultiplayer Agent.
+
+```json
+...
+"AssetDetails": [
+    {
+        "MountPath": "" // not require when you are running Wrapper as Process,
+        "SasTokens": null,
+        "LocalFilePath": "C:\\projects\\gsdkSamples\\wrappingGsdk\\drop\\gameassets.zip"
+    }
+],
+"StartGameCommand": "wrapper.exe -g fakegame.exe arg1 arg2",
+...
 "PortMappingsList": [
             [
                 {
@@ -111,6 +180,8 @@ If you are using [LocalMultiplayerAgent](https://github.com/PlayFab/LocalMultipl
         ]
 ```
 
+  
+  
 You are now ready to test with `LocalMultiplayerAgent`! If you have configured it correctly, as soon as `LocalMultiplayerAgent` launches your game server, you can connect to it via `curl http://localhost:56100/Hello`.
 
 ### Next steps

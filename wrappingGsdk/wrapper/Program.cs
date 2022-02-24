@@ -5,15 +5,22 @@ using Microsoft.Playfab.Gaming.GSDK.CSharp;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace wrapper
 {
     class Program
     {
         private static Process gameProcess;
+        private static IDictionary<string, string> activeConfig;
+        private const string portName = "game_port";
+        private const string commandExe = "cmd";
+        private static string _listeningPort = null;
+
+
         static void Main(string[] args)
         {
-            if(args.Length <= 1 || args[0] != "-g")
+            if (args.Length <= 1 || args[0] != "-g")
             {
                 Console.WriteLine("Usage: wrapper.exe -g fakegame.exe args...");
                 return;
@@ -38,8 +45,31 @@ namespace wrapper
         // starts main game process and wait for it to complete
         public static void InitiateAndWaitForGameProcess(string gameserverExe, IEnumerable<string> args)
         {
-             // here we're starting the script that initiates the game process
-            gameProcess = StartProcess(gameserverExe, args);
+            // Here we're starting the script that initiates the game process
+
+            activeConfig = GameserverSDK.getConfigSettings();
+
+            // When Wrapper is running in a container, Port Information (Port Name, Port Number, and Protocol) is already set as build configuration.
+            // For example, if you already set port number as 80 in container build configuration, activeConfig will return 80 as port number.
+            // But if Wrapper is running as a process, port will be mapped internally by MPS, so different number will be dynamically assigned. 
+            if (activeConfig.TryGetValue(portName, out string listeningPortString))
+            {
+                GameserverSDK.LogMessage($"{portName}:{listeningPortString} was found in GSDK Config Settings.");
+                _listeningPort = listeningPortString;
+            }
+            else
+            {
+                LogMessage($"Cannot find {portName} in GSDK Config Settings. Please make sure the LocalMultiplayerAgent is running " +
+                             $"and that the MultiplayerSettings.json file includes correct {portName} as a GamePort Name.");
+                return;
+            }
+
+            // Check if there is any process already using the port (_listeningPort). This will only work for Windows.
+            if (CheckIfPortIsUsed(gameserverExe)) { return; };
+
+            // We pass port number as a 3rd argument when we start fakegame.exe 
+            // Port number is grabbed via GSDK and will be passed to fake game as a listening port.
+            gameProcess = StartProcess(gameserverExe, string.Join(' ', args.Append(_listeningPort)));
             // as part of wrapping the main game server executable,
             // we create event handlers to process the output from the game (standard output/standard error)
             // based on this output, we will activate the server and process connected players
@@ -54,7 +84,7 @@ namespace wrapper
             if(GameserverSDK.ReadyForPlayers())
             {
                 // After allocation, we can grab the session cookie from the config
-                IDictionary<string, string> activeConfig = GameserverSDK.getConfigSettings();
+                activeConfig = GameserverSDK.getConfigSettings();
 
                 var connectedPlayers = new List<ConnectedPlayer>();
                 // initial players includes the list of the players that are allowed to connect to the game
@@ -100,14 +130,14 @@ namespace wrapper
             GameserverSDK.Start();
         }
 
-        public static Process StartProcess(string exeName, IEnumerable<string> args)
+        public static Process StartProcess(string exeName, string args)
         {
             var process = new Process()
             {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = $"{exeName}",
-                    Arguments = string.Join(' ', args),
+                    Arguments = args,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
@@ -151,5 +181,90 @@ namespace wrapper
             GameserverSDK.LogMessage(message);
         }
 
+        private static string ExecuteCommandAndCaptureOutput(string commandName, string arguments)
+        {
+            Process process = StartProcess(commandName, arguments);
+            string commandOut = process.StandardOutput.ReadToEnd();
+
+            try
+            {
+                process.WaitForExit(TimeSpan.FromSeconds(2).Milliseconds);
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine(exp.ToString());
+            }
+            return commandOut;
+        }
+
+        public static Process GetProcessPortInUse()
+        {
+            Process process = null;
+
+            // GetProcessPortInUse() works only for Windows as it executes netstat command. 
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // execute netstat command for the given port
+                string commandArgument = string.Format("/c netstat -an -o -p tcp|findstr \":{0}.*LISTENING\"", _listeningPort);
+
+                string commandOut = ExecuteCommandAndCaptureOutput(commandExe, commandArgument);
+                if (string.IsNullOrEmpty(commandOut))
+                {
+                    // port is not in use
+                    return null;
+                }
+
+                // stringTokens example: [Protocol, host:port, Foreign Address, LISTENING, PID]
+                var stringTokens = commandOut.Split(default(Char[]), StringSplitOptions.RemoveEmptyEntries);
+
+                // split host:port
+                var hostPortTokens = stringTokens[1].Split(new char[] { ':' });
+                int portFromHostPortToken = 0;
+
+                // check if the format of host:port is not valid
+                if (hostPortTokens.Length < 2 || !int.TryParse(hostPortTokens[1], out portFromHostPortToken))
+                {
+                    return null;
+                }
+
+                if (portFromHostPortToken != int.Parse(_listeningPort))
+                {
+                    return null;
+                }
+
+                // get processID from the token
+                int processID = 0;
+                if (!int.TryParse(stringTokens[4].Trim(), out processID))
+                {
+                    return null;
+                }
+
+                process = Process.GetProcessById(processID);
+            }
+
+            return process;
+        }
+
+        public static bool CheckIfPortIsUsed(string gameserverExe)
+        {
+            Process process = GetProcessPortInUse();
+
+            if (process != null)
+            {
+                string fakeGameProcessName = gameserverExe.Split(".")[0];
+                if (process.ProcessName == fakeGameProcessName)
+                {
+                    Console.WriteLine($"fake game already exists. Port:{_listeningPort} is already in use.");
+                }
+                else
+                {
+                    Console.WriteLine($"Port:{_listeningPort} is already in use. Please set the correct Port number");
+                }
+
+                return true;
+            }
+
+            return false;
+        }
     }
 }
