@@ -51,7 +51,7 @@ Once you create game asset archive, next step is to create a Build to deploy the
 
 You can refer to our [public documentation](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/deploying-playfab-multiplayer-server-builds) to upload your Build on the MPS service. 
 
-During the creation of your Build, you should upload the zipped game assets and specify build configuration such as StartGameCommand, Port, and Virtual Machine Type as bellow:
+During the creation of your Build, you should upload the zipped game assets and specify build configuration such as StartGameCommand, Port, and Virtual Machine Type as below:
 
 #### Build Configuration Example 1: Deploy Wrapper sample as Windows Container on Windows VM.
 - Virtual Machine OS : Windows  
