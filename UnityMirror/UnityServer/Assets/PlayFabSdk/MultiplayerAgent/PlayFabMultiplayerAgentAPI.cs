@@ -85,6 +85,7 @@ namespace PlayFab
             CurrentState.CurrentGameState = GameState.Initializing;
             CurrentErrorState = ErrorStates.Ok;
             CurrentState.CurrentPlayers = new List<ConnectedPlayer>();
+            CurrentState.CurrentGameHealth = "Healthy";
             if (_configMap == null)
             {
                 _configMap = CreateConfigMap(_gsdkconfig);
@@ -189,7 +190,7 @@ namespace PlayFab
                 req.uploadHandler = new UploadHandlerRaw(payloadBytes) {contentType = "application/json"};
                 yield return req.SendWebRequest();
 
-                if (req.isNetworkError || req.isHttpError)
+                if (req.result == UnityWebRequest.Result.ConnectionError || req.result == UnityWebRequest.Result.ProtocolError)
                 {
                     Guid guid = Guid.NewGuid();
                     Debug.LogFormat("CurrentError: {0} - {1}", req.error, guid.ToString());
@@ -269,12 +270,6 @@ namespace PlayFab
         }
         private static void ProcessAgentResponse(HeartbeatResponse heartBeat)
         {
-            bool updateConfig = false;
-            if (SessionConfig != heartBeat.SessionConfig)
-            {
-                updateConfig = true;
-            }
-
             SessionConfig.CopyNonNullFields(heartBeat.SessionConfig);
             
             try

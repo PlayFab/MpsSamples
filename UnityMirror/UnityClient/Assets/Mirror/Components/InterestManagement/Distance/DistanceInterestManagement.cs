@@ -6,21 +6,36 @@ namespace Mirror
 {
     public class DistanceInterestManagement : InterestManagement
     {
-        [Tooltip("The maximum range that objects will be visible at.")]
+        [Tooltip("The maximum range that objects will be visible at. Add DistanceInterestManagementCustomRange onto NetworkIdentities for custom ranges.")]
         public int visRange = 10;
 
         [Tooltip("Rebuild all every 'rebuildInterval' seconds.")]
         public float rebuildInterval = 1;
         double lastRebuildTime;
 
+        // helper function to get vis range for a given object, or default.
+        int GetVisRange(NetworkIdentity identity)
+        {
+            DistanceInterestManagementCustomRange custom = identity.GetComponent<DistanceInterestManagementCustomRange>();
+            return custom != null ? custom.visRange : visRange;
+        }
+
+        [ServerCallback]
+        public override void Reset()
+        {
+            lastRebuildTime = 0D;
+        }
+
         public override bool OnCheckObserver(NetworkIdentity identity, NetworkConnection newObserver)
         {
-            return Vector3.Distance(identity.transform.position, newObserver.identity.transform.position) <= visRange;
+            int range = GetVisRange(identity);
+            return Vector3.Distance(identity.transform.position, newObserver.identity.transform.position) < range;
         }
 
         public override void OnRebuildObservers(NetworkIdentity identity, HashSet<NetworkConnection> newObservers, bool initialize)
         {
-            // 'transform.' calls GetComponent, only do it once
+            // cache range and .transform because both call GetComponent.
+            int range = GetVisRange(identity);
             Vector3 position = identity.transform.position;
 
             // brute force distance check
@@ -36,7 +51,7 @@ namespace Mirror
                 if (conn != null && conn.isAuthenticated && conn.identity != null)
                 {
                     // check distance
-                    if (Vector3.Distance(conn.identity.transform.position, position) < visRange)
+                    if (Vector3.Distance(conn.identity.transform.position, position) < range)
                     {
                         newObservers.Add(conn);
                     }
@@ -44,16 +59,15 @@ namespace Mirror
             }
         }
 
-        void Update()
+        // internal so we can update from tests
+        [ServerCallback]
+        internal void Update()
         {
-            // only on server
-            if (!NetworkServer.active) return;
-
             // rebuild all spawned NetworkIdentity's observers every interval
-            if (NetworkTime.time >= lastRebuildTime + rebuildInterval)
+            if (NetworkTime.localTime >= lastRebuildTime + rebuildInterval)
             {
                 RebuildAll();
-                lastRebuildTime = NetworkTime.time;
+                lastRebuildTime = NetworkTime.localTime;
             }
         }
     }

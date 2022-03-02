@@ -3,7 +3,6 @@ using UnityEngine.SceneManagement;
 using Mirror;
 using UnityEngine.Events;
 using System;
-using PlayFab;
 
 /*
 	Documentation: https://mirror-networking.com/docs/Components/NetworkManager.html
@@ -34,34 +33,33 @@ public class NewNetworkManager : NetworkManager
     }
 
 
-    public override void OnClientConnect(NetworkConnection conn)
+    public override void OnClientConnect()
     {
-        base.OnClientConnect(conn);
-        Debug.Log("connected");
+        base.OnClientConnect();
+        Debug.Log("client connected");
         OnConnected.Invoke();
     }
 
 
-    public override void OnClientDisconnect(NetworkConnection conn)
+    public override void OnClientDisconnect()
     {
-        base.OnClientDisconnect(conn);
-        Debug.Log("disconnected");
+        base.OnClientDisconnect();
+        Debug.Log("client disconnected");
         OnDisconnected.Invoke(null);
     }
 
     /// <summary>
     /// Called on clients when a network error occurs.
     /// </summary>
-    /// <param name="conn">Connection to a server.</param>
     /// <param name="errorCode">Error code.</param>
-    public override void OnClientError(NetworkConnection conn, int errorCode) { }
+    public override void OnClientError(Exception ex) { }
 
     /// <summary>
     /// Called on clients when a servers tells the client it is no longer ready.
     /// <para>This is commonly used when switching scenes.</para>
     /// </summary>
     /// <param name="conn">Connection to the server.</param>
-    public override void OnClientNotReady(NetworkConnection conn) { }
+    public override void OnClientNotReady() { }
 
     /// <summary>
     /// Called from ClientChangeScene immediately before SceneManager.LoadSceneAsync is executed
@@ -76,10 +74,9 @@ public class NewNetworkManager : NetworkManager
     /// Called on clients when a scene has completed loaded, when the scene load was initiated by the server.
     /// <para>Scene changes can cause player objects to be destroyed. The default implementation of OnClientSceneChanged in the NetworkManager is to add a player object for the connection if no player object exists.</para>
     /// </summary>
-    /// <param name="conn">The network connection that the scene change message arrived on.</param>
-    public override void OnClientSceneChanged(NetworkConnection conn)
+    public override void OnClientSceneChanged()
     {
-        base.OnClientSceneChanged(conn);
+        base.OnClientSceneChanged();
     }
 
 
@@ -119,24 +116,4 @@ public struct ShutdownMessage : NetworkMessage { }
 public struct MaintenanceMessage : NetworkMessage
 {
     public DateTime ScheduledMaintenanceUTC;
-}
-
-public static class MaintenanceMessageFunctions
-{
-    public static MaintenanceMessage Deserialize(this NetworkReader reader)
-    {
-        MaintenanceMessage msg = new MaintenanceMessage();
-            
-        var json = PlayFab.PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
-        msg.ScheduledMaintenanceUTC = json.DeserializeObject<DateTime>(reader.ReadString());
-
-        return msg;
-    }
-
-    public static void Serialize(this NetworkWriter writer, MaintenanceMessage value)
-    {
-        var json = PlayFab.PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
-        var str = json.SerializeObject(value.ScheduledMaintenanceUTC);
-        writer.Write(str);
-    }
 }

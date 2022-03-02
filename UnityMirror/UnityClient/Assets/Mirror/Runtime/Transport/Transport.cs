@@ -64,16 +64,7 @@ namespace Mirror
 
         /// <summary>Sends a message to the server over the given channel.</summary>
         // The ArraySegment is only valid until returning. Copy if needed.
-        // TODO make second version abstract after removing the obsolete version
-        [Obsolete("Use ClientSend(segment, channelId) instead. channelId is now the last parameter.")]
-        public virtual void ClientSend(int channelId, ArraySegment<byte> segment) {}
-        public virtual void ClientSend(ArraySegment<byte> segment, int channelId)
-        {
-            // defaults to obsolete version to not force break transports.
-#pragma warning disable 618
-            ClientSend(channelId, segment);
-#pragma warning restore 618
-        }
+        public abstract void ClientSend(ArraySegment<byte> segment, int channelId = Channels.Reliable);
 
         /// <summary>Disconnects the client from the server</summary>
         public abstract void ClientDisconnect();
@@ -89,6 +80,7 @@ namespace Mirror
         public Action<int, ArraySegment<byte>, int> OnServerDataReceived = (connId, data, channel) => Debug.LogWarning("OnServerDataReceived called with no handler");
 
         /// <summary>Called by Transport when a server's connection encountered a problem.</summary>
+        /// If a Disconnect will also be raised, raise the Error first.
         public Action<int, Exception> OnServerError = (connId, error) => Debug.LogWarning("OnServerError called with no handler");
 
         /// <summary>Called by Transport when a client disconnected from the server.</summary>
@@ -101,16 +93,7 @@ namespace Mirror
         public abstract void ServerStart();
 
         /// <summary>Send a message to a client over the given channel.</summary>
-        // TODO make second version abstract after removing the obsolete version
-        [Obsolete("Use ServerSend(connectionId, segment, channelId) instead. channelId is now the last parameter.")]
-        public virtual void ServerSend(int connectionId, int channelId, ArraySegment<byte> segment) {}
-        public virtual void ServerSend(int connectionId, ArraySegment<byte> segment, int channelId)
-        {
-            // defaults to obsolete version to not force break transports.
-#pragma warning disable 618
-            ServerSend(connectionId, channelId, segment);
-#pragma warning restore 618
-        }
+        public abstract void ServerSend(int connectionId, ArraySegment<byte> segment, int channelId = Channels.Reliable);
 
         /// <summary>Disconnect a client from the server.</summary>
         public abstract void ServerDisconnect(int connectionId);
@@ -130,13 +113,15 @@ namespace Mirror
         // running or available because it's needed for initializations.
         public abstract int GetMaxPacketSize(int channelId = Channels.Reliable);
 
-        /// <summary>Maximum batch(!) size for the given c hannel.</summary>
+        /// <summary>Recommended Batching threshold for this transport.</summary>
         // Uses GetMaxPacketSize by default.
         // Some transports like kcp support large max packet sizes which should
         // not be used for batching all the time because they end up being too
         // slow (head of line blocking etc.).
-        public virtual int GetMaxBatchSize(int channelId) =>
-            GetMaxPacketSize(channelId);
+        public virtual int GetBatchThreshold(int channelId = Channels.Reliable)
+        {
+            return GetMaxPacketSize(channelId);
+        }
 
         // block Update & LateUpdate to show warnings if Transports still use
         // them instead of using

@@ -60,12 +60,19 @@ namespace Mirror
             grid.GetWithNeighbours(current, newObservers);
         }
 
+        [ServerCallback]
+        public override void Reset()
+        {
+            lastRebuildTime = 0D;
+        }
+
         // update everyone's position in the grid
         // (internal so we can update from tests)
+        [ServerCallback]
         internal void Update()
         {
-            // only on server
-            if (!NetworkServer.active) return;
+            // NOTE: unlike Scene/MatchInterestManagement, this rebuilds ALL
+            //       entities every INTERVAL. consider the other approach later.
 
             // IMPORTANT: refresh grid every update!
             // => newly spawned entities get observers assigned via
@@ -103,13 +110,15 @@ namespace Mirror
             // rebuild all spawned entities' observers every 'interval'
             // this will call OnRebuildObservers which then returns the
             // observers at grid[position] for each entity.
-            if (NetworkTime.time >= lastRebuildTime + rebuildInterval)
+            if (NetworkTime.localTime >= lastRebuildTime + rebuildInterval)
             {
                 RebuildAll();
-                lastRebuildTime = NetworkTime.time;
+                lastRebuildTime = NetworkTime.localTime;
             }
         }
 
+// OnGUI allocates even if it does nothing. avoid in release.
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         // slider from dotsnet. it's nice to play around with in the benchmark
         // demo.
         void OnGUI()
@@ -129,5 +138,6 @@ namespace Mirror
             GUILayout.EndHorizontal();
             GUILayout.EndArea();
         }
+#endif
     }
 }

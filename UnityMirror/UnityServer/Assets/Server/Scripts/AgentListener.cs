@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using PlayFab.MultiplayerAgent.Model;
 
 public class AgentListener : MonoBehaviour {
+
+    const string ListeningPortKey = "game_port";
     private List<ConnectedPlayer> _connectedPlayers;
     public bool Debugging = true;
     // Use this for initialization
@@ -22,6 +24,19 @@ public class AgentListener : MonoBehaviour {
         UnityNetworkServer.Instance.OnPlayerAdded.AddListener(OnPlayerAdded);
         UnityNetworkServer.Instance.OnPlayerRemoved.AddListener(OnPlayerRemoved);
 
+        // get the port that the server will listen to
+        // we are getting the port via GSDK, the value of the "ListeningPortKey" must be the same value as the one you use when you create the Build
+        // or the one you use on LocalMultiplayerAgent JSON configuration file
+        // We *have to* do it on process mode, since there might be more than one game server instances on the same VM and we want to avoid port collision
+        // On container mode, we can omit the below code and set the port directly, since each game server instance will run on its own network namespace. However, below code will work as well
+        // we have to do that on process
+        var config = PlayFabMultiplayerAgentAPI.GetConfigSettings();
+        if(config.ContainsKey(ListeningPortKey))
+        {
+            var port = int.Parse(config[ListeningPortKey]);
+            UnityNetworkServer.Instance.Port = port; // set the Mirror server to the port we got from GSDK
+        }
+        
         StartCoroutine(ReadyForPlayers());
     }
 

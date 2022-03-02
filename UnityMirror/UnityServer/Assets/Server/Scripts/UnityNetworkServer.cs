@@ -31,11 +31,11 @@
             base.Awake();
             Instance = this;
             NetworkServer.RegisterHandler<ReceiveAuthenticateMessage>(OnReceiveAuthenticate);
-            //_netManager.transport.port = Port;
         }
 
         public void StartListen()
         {
+            this.GetComponent<TelepathyTransport>().port = (ushort)Port;
             NetworkServer.Listen(MaxConnections);
         }
 
@@ -73,11 +73,11 @@
             }
         }
 
-        public override void OnServerError(NetworkConnection conn, int errorCode)
+        public override void OnServerError(NetworkConnection conn, Exception ex)
         {
-            base.OnServerError(conn, errorCode);
+            base.OnServerError(conn, ex);
 
-            Debug.Log(string.Format("Unity Network Connection Status: code - {0}", errorCode));
+            Debug.Log(string.Format("Unity Network Connection Status: exception - {0}", ex.Message));
         }
 
         public override void OnServerDisconnect(NetworkConnection conn)
@@ -124,25 +124,5 @@
     public struct MaintenanceMessage : NetworkMessage
     {
         public DateTime ScheduledMaintenanceUTC;
-    }
-
-    public static class MaintenanceMessageFunctions
-    {
-        public static MaintenanceMessage Deserialize(this NetworkReader reader)
-        {
-            MaintenanceMessage msg = new MaintenanceMessage();
-            
-            var json = PlayFab.PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
-            msg.ScheduledMaintenanceUTC = json.DeserializeObject<DateTime>(reader.ReadString());
-
-            return msg;
-        }
-
-        public static void Serialize(this NetworkWriter writer, MaintenanceMessage value)
-        {
-            var json = PlayFab.PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
-            var str = json.SerializeObject(value.ScheduledMaintenanceUTC);
-            writer.Write(str);
-        }
     }
 }

@@ -1,3 +1,62 @@
+V1.17 [2022-01-09]
+- perf: server/client MaximizeSendReceiveBuffersToOSLimit option to set send/recv
+  buffer sizes to OS limit. avoids drops due to small buffers under heavy load.
+
+V1.16 [2022-01-06]
+- fix: SendUnreliable respects ArraySegment.Offset
+- fix: potential bug with negative length (see PR #2)
+- breaking: removed pause handling because it's not necessary for Mirror anymore
+
+V1.15 [2021-12-11]
+- feature: feature: MaxRetransmits aka dead_link now configurable
+- dead_link disconnect message improved to show exact retransmit count
+
+V1.14 [2021-11-30]
+- fix: Send() now throws an exception for messages which require > 255 fragments
+- fix: ReliableMaxMessageSize is now limited to messages which require <= 255 fragments
+
+V1.13 [2021-11-28]
+- fix: perf: uncork max message size from 144 KB to as much as we want based on
+  receive window size.
+    fixes https://github.com/vis2k/kcp2k/issues/22
+    fixes https://github.com/skywind3000/kcp/pull/291
+- feature: OnData now includes channel it was received on
+
+V1.12 [2021-07-16]
+- Tests: don't depend on Unity anymore
+- fix: #26 - Kcp now catches exception if host couldn't be resolved, and calls
+  OnDisconnected to let the user now.
+- fix: KcpServer.DualMode is now configurable in the constructor instead of
+  using #if UNITY_SWITCH. makes it run on all other non dual mode platforms too.
+- fix: where-allocation made optional via virtuals and inheriting
+  KcpServer/Client/Connection NonAlloc classes. fixes a bug where some platforms
+  might not support where-allocation.
+
+V1.11 rollback [2021-06-01]
+- perf: Segment MemoryStream initial capacity set to MTU to avoid early runtime
+  resizing/allocations
+
+V1.10 [2021-05-28]
+- feature: configurable Timeout
+- allocations explained with comments (C# ReceiveFrom / IPEndPoint.GetHashCode)
+- fix: #17 KcpConnection.ReceiveNextReliable now assigns message default so it
+  works in .net too
+- fix: Segment pool is not static anymore. Each kcp instance now has it's own
+  Pool<Segment>. fixes #18 concurrency issues
+
+V1.9 [2021-03-02]
+- Tick() split into TickIncoming()/TickOutgoing() to use in Mirror's new update
+  functions. allows to minimize latency.
+  => original Tick() is still supported for convenience. simply processes both!
+
+V1.8 [2021-02-14]
+- fix: Unity IPv6 errors on Nintendo Switch
+- fix: KcpConnection now disconnects if data message was received without content.
+  previously it would call OnData with an empty ArraySegment, causing all kinds of
+  weird behaviour in Mirror/DOTSNET. Added tests too.
+- fix: KcpConnection.SendData: don't allow sending empty messages anymore. disconnect
+  and log a warning to make it completely obvious.
+
 V1.7 [2021-01-13]
 - fix: unreliable messages reset timeout now too
 - perf: KcpConnection OnCheckEnabled callback changed to a simple 'paused' boolean.
