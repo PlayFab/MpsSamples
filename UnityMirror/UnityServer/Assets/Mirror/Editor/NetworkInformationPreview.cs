@@ -182,7 +182,7 @@ namespace Mirror
 
                 foreach (KeyValuePair<int, NetworkConnection> kvp in identity.observers)
                 {
-                    GUI.Label(observerRect, kvp.Value.address + ":" + kvp.Value, styles.componentName);
+                    GUI.Label(observerRect, $"{kvp.Value.address}:{kvp.Value}", styles.componentName);
                     observerRect.y += observerRect.height;
                     Y = observerRect.y;
                 }
@@ -196,7 +196,7 @@ namespace Mirror
             if (identity.connectionToClient != null)
             {
                 Rect ownerRect = new Rect(initialX, Y + 10, 400, 20);
-                GUI.Label(ownerRect, new GUIContent("Client Authority: " + identity.connectionToClient), styles.labelStyle);
+                GUI.Label(ownerRect, new GUIContent($"Client Authority: {identity.connectionToClient}"), styles.labelStyle);
                 Y += ownerRect.height;
             }
             return Y;
@@ -277,7 +277,7 @@ namespace Mirror
         NetworkIdentityInfo GetAssetId(NetworkIdentity identity)
         {
             string assetId = identity.assetId.ToString();
-            if (string.IsNullOrEmpty(assetId))
+            if (string.IsNullOrWhiteSpace(assetId))
             {
                 assetId = "<object has no prefab>";
             }

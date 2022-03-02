@@ -1,18 +1,17 @@
-# PlayFab Multiplayer Unity Custom Game Server Sample
+# PlayFab Multiplayer Unity Mirror Game Server Sample
 
 ## Overview
 
-This repository is the home of a custom game server example, made in Unity game engine, that shows how to create a game server that can talk to PlayFab's new multiplayer platform. There are a couple key components such as the MultiPlayer Agent API (GSDK) and a sample game client in this repository.  The purpose of this project is to provide you with an out-of-box example that you, as a game developer, can use as a starting point for your own game server.  In addition, we will identify in this document key parts of this project so that you can integrate what is needed into an existing project.
+This repository is the home of a custom game server example, made in Unity game engine, that shows how to create a game server that can talk to PlayFab's Multiplayer Servers platform (MPS). There are a couple key components such as the Multiplayer Agent API (GSDK) and a sample game client in this repository.  The purpose of this project is to provide you with an out-of-box example that you, as a game developer, can use as a starting point for your own game server.  In addition, we will identify in this document key parts of this project so that you can integrate what is needed into an existing project.
 
 ## Prerequisites
 
-- Unity Engine (tested with 2019.2.18f1)
+- Unity Engine (tested with 2021.2.7f1)
 - Understanding of C# language
 - Basic or Intermediate knowledge of Unity
 - Recent version of the [PlayFab Game Server SDK](https://github.com/PlayFab/gsdk/tree/master/UnityGsdk) - included
-- [PlayFab Unity SDK](https://github.com/PlayFab/UnitySDK) - included in the sample
-- When running locally you must have a copy of [Local Multiplayer Agent](https://github.com/PlayFab/LocalMultiplayerAgent)
-- It is recommended that you first run the [WindowsRunnerCSharp](https://github.com/PlayFab/gsdkSamples/blob/master/WindowsRunnerCSharp/README.md) sample to get acquainted with the GSDK.
+- When running locally you must have a copy of [Local Multiplayer Agent](https://github.com/PlayFab/MpsAgent)
+- It is recommended that you first run the [wrappingGsdk](https://github.com/PlayFab/MpsSamples/tree/main/wrappingGsdk) sample to get acquainted with the GSDK, LocalMultiplayerAgent and MPS in general.
 
 ## gsdk - Game Server SDK (aka Multiplayer Agent API)
 
@@ -28,46 +27,61 @@ There are two projects included in this repository.
 
 This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replacement for Unity's UNET Networking System. You can see Mirror's documentation [here](https://mirror-networking.com/docs/General/index.html).
 
-## Getting Started for Windows game servers using local Windows Containers
+## Getting Started for Windows game servers using  Windows Containers
 
 ### Setup
-1. Make sure you have Docker for Windows installed, check [here](https://docs.docker.com/docker-for-windows/install/) for installation instructions. You should have configured it to use Windows Containers. 
-1. Download the [repository](https://github.com/PlayFab/gsdkSamples)
-1. Open the two UnityMirror projects (UnityServer and UnityClient) and make sure they build. 
 
-### Running the Server
-1. Configure PlayFab integration.
-    - This sample integrates with PlayFab API. To configure your credentials, you should use `Window->PlayFab->Editor Extensions` from the Unity IDE.
+1. Make sure you have Docker for Windows installed, check [here](https://docs.docker.com/docker-for-windows/install/) for installation instructions. You should have configured it to use Windows Containers. 
+1. Download the [repository](https://github.com/PlayFab/MpsSamples)
+1. Open the two UnityMirror projects (UnityServer and UnityClient) and make sure they can build successfully. 
+
+### Building the Server on Windows
+
 1. Build the UnityServer project.
-    - Run Build from Unity IDE
+    - Run Dedicated Server Build from Unity IDE
         - Target platform = Windows
         - Architecture = x86_64
-        - Server Build = \<checked\>
     - Navigate to the build output folder
     - Select all files and then right click and select "Send to -> Compressed (zipped) Folder"
     - Please bear in mind that you should not compress the folder containing the Unity output, just the files themselves.
+
+### Testing the Server as a Windows container on Windows
+
 1. Open the folder where you have downloaded the *LocalMultiplayerAgent* and modify the *MultiplayerSettings.json* file. Set the following values: 
     - RunContainers = `true`
     - OutputFolder = A local path with enough space on your machine. Useful data for your game will be written there.
     - LocalFilePath = Path to the zip created above of the build output for the server project. 
-    - StartGameCommand = `C:\\Assets\\UnityServer.exe -nographics -batchmode -logFile C:\\GameLogs\\UnityEditor.log`
-    - Within GamePort, set Number to 7777 and Protocol to TCP. Also make a note of the external port number, called NodePort
+    - On ContainerStartParameters, set the StartGameCommand = `C:\\Assets\\UnityServer.exe -nographics -batchmode -logFile`
+    - Within GamePort, set Name to "game_port", Number to 7777 (or any value you prefer) and Protocol to TCP. Also make a note of the external port number, called NodePort. The "game_port" value must be the same as the one defined in AgentListener.cs.
 1. In PowerShell
     - Run the LocalMultiplayerAgentSetup file in *agentfolder/setup.ps1* (you may need to open Powershell with admin permissions for this purpose). If you get a signing violation, you may need to run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process`.
     - Run the Local Multiplayer Agent located in *agentfolder/PlayfabMultiplayerAgent.exe*.
-1. You will see the PlayfabMultiplayerAgent report state. Wait for reports to go from `Waiting for heartbeats from the game server.....` to `CurrentGameState: StandingBy` to `CurrentGameState: Active` then proceed to the next step
+1. You will see the PlayfabMultiplayerAgent report state. Wait for reports to go from `Waiting for heartbeats from the game server.....` to `CurrentGameState: StandingBy` to `CurrentGameState: Active` then proceed to the "running the client" step
+
+### Testing the Server as a Windows process on Windows
+
+1. Use this method if you prefer to run your game server as a Windows process (without Docker).
+1. Open the folder where you have downloaded the *LocalMultiplayerAgent* and modify the *MultiplayerSettings.json* file. Set the following values: 
+    - RunContainers = `false`
+    - OutputFolder = A local path with enough space on your machine. Useful data for your game will be written there.
+    - LocalFilePath = Path to the zip created above of the build output for the server project. 
+    - On ProcessStartParameters, set the StartGameCommand = `UnityServer.exe -nographics -batchmode -logFile`
+    - Within GamePort, set Name to "game_port" and Protocol to TCP. Number is ignored since on process mode it will be assigned dynamically via GSDK. Also make a note of the external port number, called NodePort. The "game_port" value must be the same as the one defined in AgentListener.cs.
+1. In PowerShell
+    - Run the Local Multiplayer Agent located in *agentfolder/PlayfabMultiplayerAgent.exe*.
+1. You will see the PlayfabMultiplayerAgent report state. Wait for reports to go from `Waiting for heartbeats from the game server.....` to `CurrentGameState: StandingBy` to `CurrentGameState: Active` then proceed to the "running the client" step
 
 ### Running the client
-1. With the server running, open the UnityClient project in the Unity IDE.
+
+1. With the server running, open the UnityClient project in Unity.
 1. Click the menu button PlayFab->MakePlayFabSharedSettings
-1. In the PlayFabSharedSettings widget, set your [Title Id](https://docs.microsoft.com/en-us/gaming/playfab/personas/developer#retrieving-your-titleid). It is a hex number, generally 4 or 5 digits.
 1. Ensure your server is still running and in the Active state from the step above then click File->Build/Run or Run inside Editor the client (UnityClient) project. Observe that the game is in *Active* state. When the server finishes execution, your client will disconnect as well.
 
 ## Debugging issues
-- Make sure the server is still running. It will shutdown after `NumHeartBeatsForTerminateResponse` heartbeats. If you would like more time, you can increase this value.
+
+- Make sure the server is still running. It will shutdown after `NumHeartBeatsForTerminateResponse` heartbeats. If you would the server to be active for more time, you can increase this value.
 - Check out the logs.  Client logs are available in the Unity IDE. Server logs are dropped in the `OutputFolder` specified in the MultiplayerSettings.json.
 - Check out additional information about [Locally debugging game servers](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/locally-debugging-game-servers-and-integration-with-playfab)
-
 
 ## PlayFabMulitiplayerAgent API reference
 
@@ -83,8 +97,6 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
 
 **GetConfigSettings()** -- Returns an object with a series of configuration values available to your server. Properties include the PlayFab TitleId, the ServerId, the Region for this server, etc.
 
-<hr/>
-
 ## GSDK (MultiplayerAgentAPI) - Events
 
 **OnMaintenanceCallback** - Listen to this event to get updates about when the server has scheduled maintenance.
@@ -94,8 +106,6 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
 **OnServerActiveCallback** - Listen to this event to know when the state of the server has been moved to Active.  In general, you will want to startup your networking service layer when this event has been fired.   When active, that means you are truely ready to receive player connections.
 
 **OnAgentErrorCallback** - If any error happens while trying to speak to the local agent
-
-<hr/>
 
 ## Components
 
@@ -115,7 +125,6 @@ We are doing the following tasks with this componenet
  ``` c#
 using System.Collections;
 using UnityEngine;
-using PlayFab;
 using System;
 using PlayFab.Networking;
 
@@ -198,23 +207,22 @@ public class AgentListener : MonoBehaviour {
 }
  ```
 
-## Running Unity Server as a Linux executable
+## Running Unity Server as a Linux container
 
-You can use Unity to publish a Linux executable for your game server. This will allow you to use it on PlayFab Multiplayer Services using Ubuntu Linux Virtual Machines. You can find the instructions to deploy Linux based builds [here](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/deploying-linux-based-builds). Furthermore, you can debug your Linux game server locally using the instructions [here](https://github.com/PlayFab/LocalMultiplayerAgent/blob/master/linuxContainersOnWindows.md).
+You can use Unity to publish a Linux executable for your game server which you can use to build a container image. This will allow you to use it on PlayFab Multiplayer Services using Ubuntu Linux Virtual Machines. You can find the instructions to deploy Linux based builds [here](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/deploying-linux-based-builds). Furthermore, you can debug your Linux game server locally using the instructions [here](https://github.com/PlayFab/LocalMultiplayerAgent/blob/master/linuxContainersOnWindows.md).
 
 To build the Unity Server as a Linux executable, you need to follow these instructions:
 
 - [Install Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/)
 - Make sure it's running [Linux Containers](https://docs.docker.com/docker-for-windows/#switch-between-windows-and-linux-containers)
-- You should mount one of your hard drives, instructions [here](https://docs.docker.com/docker-for-windows/#file-sharing)
-- Open and publish UnityServer as a Linux executable. Do not forget to *tick* "Server Build" on the Build window
+- Open and publish UnityServer as a Dedicated Server Linux executable.
 - As soon as your project is built, you need to make it into a container. Go to the folder where you published your Linux build and create the following Dockerfile, properly changing the file and folder names.
 
 ```Dockerfile
 FROM ubuntu:18.04
 WORKDIR /game
 ADD . .
-CMD ["/game/UnityServer.x86_64", "-nographics", "-batchmode"]
+CMD ["/game/UnityServer.x86_64", "-nographics", "-batchmode", "-logfile"]
 ```
 
 - You're now ready to build your image! If you want to develop locally, you can use `docker build -t myregistry.io/mygame:0.1 .` to build your game and test it with [LocalMultiplayerAgent](https://github.com/PlayFab/LocalMultiplayerAgent). Or, you can get the proper PlayFab container registry credentials (using [this](https://docs.microsoft.com/en-us/rest/api/playfab/multiplayer/multiplayerserver/getcontainerregistrycredentials?view=playfab-rest) API call or from the Builds page on PlayFab web site). Once you do that, you can `docker build/tag/push` your container image to the PlayFab container registry and spin game servers running it.

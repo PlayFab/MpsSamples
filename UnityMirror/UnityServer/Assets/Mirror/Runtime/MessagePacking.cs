@@ -6,18 +6,21 @@ namespace Mirror
     // message packing all in one place, instead of constructing headers in all
     // kinds of different places
     //
-    //   MsgType     (1-n bytes)
+    //   MsgType     (2 bytes)
     //   Content     (ContentSize bytes)
-    //
-    // -> we use varint for headers because most messages will result in 1 byte
-    //    type/size headers then instead of always
-    //    using 2 bytes for shorts.
-    // -> this reduces bandwidth by 10% if average message size is 20 bytes
-    //    (probably even shorter)
     public static class MessagePacking
     {
         // message header size
-        internal const int HeaderSize = sizeof(ushort);
+        public const int HeaderSize = sizeof(ushort);
+
+        // max message content size (without header) calculation for convenience
+        // -> Transport.GetMaxPacketSize is the raw maximum
+        // -> Every message gets serialized into <<id, content>>
+        // -> Every serialized message get put into a batch with a header
+        public static int MaxContentSize =>
+            Transport.activeTransport.GetMaxPacketSize()
+            - HeaderSize
+            - Batcher.HeaderSize;
 
         public static ushort GetId<T>() where T : struct, NetworkMessage
         {
@@ -46,7 +49,7 @@ namespace Mirror
         // -> NetworkReader will point at content afterwards!
         public static bool Unpack(NetworkReader messageReader, out ushort msgType)
         {
-            // read message type (varint)
+            // read message type
             try
             {
                 msgType = messageReader.ReadUShort();
@@ -59,7 +62,8 @@ namespace Mirror
             }
         }
 
-        internal static NetworkMessageDelegate WrapHandler<T, C>(Action<C, T> handler, bool requireAuthentication)
+        // version for handlers with channelId
+        internal static NetworkMessageDelegate WrapHandler<T, C>(Action<C, T, int> handler, bool requireAuthentication)
             where T : struct, NetworkMessage
             where C : NetworkConnection
             => (conn, reader, channelId) =>
@@ -112,13 +116,25 @@ namespace Mirror
             try
             {
                 // user implemented handler
-                handler((C)conn, message);
+                handler((C)conn, message, channelId);
             }
             catch (Exception e)
             {
-                Debug.LogError($"Exception in MessageHandler: {e.GetType().Name} {e.Message}\n{e.StackTrace}");
+                Debug.LogError($"Disconnecting connId={conn.connectionId} to prevent exploits from an Exception in MessageHandler: {e.GetType().Name} {e.Message}\n{e.StackTrace}");
                 conn.Disconnect();
             }
         };
+
+        // version for handlers without channelId
+        // TODO obsolete this some day to always use the channelId version.
+        //      all handlers in this version are wrapped with 1 extra action.
+        internal static NetworkMessageDelegate WrapHandler<T, C>(Action<C, T> handler, bool requireAuthentication)
+            where T : struct, NetworkMessage
+            where C : NetworkConnection
+        {
+            // wrap action as channelId version, call original
+            void Wrapped(C conn, T msg, int _) => handler(conn, msg);
+            return WrapHandler((Action<C, T, int>) Wrapped, requireAuthentication);
+        }
     }
 }

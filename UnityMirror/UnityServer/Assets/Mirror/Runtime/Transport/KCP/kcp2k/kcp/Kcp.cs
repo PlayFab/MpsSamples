@@ -26,7 +26,8 @@ namespace kcp2k
         public const int ACK_FAST = 3;
         public const int INTERVAL = 100;
         public const int OVERHEAD = 24;
-        public const int DEADLINK = 20;
+        public const int FRG_MAX = byte.MaxValue;  // kcp encodes 'frg' as byte. so we can only ever send up to 255 fragments.
+        public const int DEADLINK = 20;            // default maximum amount of 'xmit' retransmissions until a segment is considered lost
         public const int THRESH_INIT = 2;
         public const int THRESH_MIN = 2;
         public const int PROBE_INIT = 7000;        // 7 secs to probe window size
@@ -64,7 +65,7 @@ namespace kcp2k
         internal bool updated;
         internal uint ts_probe;      // timestamp probe
         internal uint probe_wait;
-        internal uint dead_link;
+        internal uint dead_link;     // maximum amount of 'xmit' retransmissions until a segment is considered lost
         internal uint incr;
         internal uint current;       // current time (milliseconds). set by Update.
 
@@ -86,6 +87,17 @@ namespace kcp2k
 
         // get how many packet is waiting to be sent
         public int WaitSnd => snd_buf.Count + snd_queue.Count;
+
+        // segment pool to avoid allocations in C#.
+        // this is not part of the original C code.
+        readonly Pool<Segment> SegmentPool = new Pool<Segment>(
+            // create new segment
+            () => new Segment(),
+            // reset segment before reuse
+            (segment) => segment.Reset(),
+            // initial capacity
+            32
+        );
 
         // ikcp_create
         // create a new kcp control object, 'conv' must equal in two endpoint
@@ -112,18 +124,12 @@ namespace kcp2k
         // ikcp_segment_new
         // we keep the original function and add our pooling to it.
         // this way we'll never miss it anywhere.
-        static Segment SegmentNew()
-        {
-            return Segment.Take();
-        }
+        Segment SegmentNew() => SegmentPool.Take();
 
         // ikcp_segment_delete
         // we keep the original function and add our pooling to it.
         // this way we'll never miss it anywhere.
-        static void SegmentDelete(Segment seg)
-        {
-            Segment.Return(seg);
-        }
+        void SegmentDelete(Segment seg) => SegmentPool.Return(seg);
 
         // ikcp_recv
         // receive data from kcp state machine
@@ -257,10 +263,19 @@ namespace kcp2k
             if (len <= mss) count = 1;
             else count = (int)((len + mss - 1) / mss);
 
-            // original kcp uses WND_RCV const even though rcv_wnd is the
-            // runtime variable. may or may not be correct, see also:
-            // see also: https://github.com/skywind3000/kcp/pull/291/files
-            if (count >= WND_RCV) return -2;
+            // IMPORTANT kcp encodes 'frg' as 1 byte.
+            // so we can only support up to 255 fragments.
+            // (which limits max message size to around 288 KB)
+            // this is really nasty to debug. let's make this 100% obvious.
+            if (count > FRG_MAX)
+                throw new Exception($"Send len={len} requires {count} fragments, but kcp can only handle up to {FRG_MAX} fragments.");
+
+            // original kcp uses WND_RCV const instead of rcv_wnd runtime:
+            // https://github.com/skywind3000/kcp/pull/291/files
+            // which always limits max message size to 144 KB:
+            //if (count >= WND_RCV) return -2;
+            // using configured rcv_wnd uncorks max message size to 'any':
+            if (count >= rcv_wnd) return -2;
 
             if (count == 0) count = 1;
 
@@ -506,6 +521,9 @@ namespace kcp2k
                 if (conv_ != conv) return -1;
 
                 offset += Utils.Decode8u(data, offset, ref cmd);
+                // IMPORTANT kcp encodes 'frg' as 1 byte.
+                // so we can only support up to 255 fragments.
+                // (which limits max message size to around 288 KB)
                 offset += Utils.Decode8u(data, offset, ref frg);
                 offset += Utils.Decode16U(data, offset, ref wnd);
                 offset += Utils.Decode32U(data, offset, ref ts);
@@ -517,7 +535,8 @@ namespace kcp2k
                 size -= OVERHEAD;
 
                 // enough remaining to read 'len' bytes of the actual payload?
-                if (size < len || len < 0) return -2;
+                // note: original kcp casts uint len to int for <0 check.
+                if (size < len || (int)len < 0) return -2;
 
                 if (cmd != CMD_PUSH && cmd != CMD_ACK &&
                     cmd != CMD_WASK && cmd != CMD_WINS)
@@ -742,10 +761,15 @@ namespace kcp2k
 
             // calculate window size
             uint cwnd_ = Math.Min(snd_wnd, rmt_wnd);
+            // if congestion window:
             if (!nocwnd) cwnd_ = Math.Min(cwnd, cwnd_);
 
             // move data from snd_queue to snd_buf
             // sliding window, controlled by snd_nxt && sna_una+cwnd
+            //
+            // ELI5: 'snd_nxt' is what we want to send.
+            //       'snd_una' is what hasn't been acked yet.
+            //       copy up to 'cwnd_' difference between them (sliding window)
             while (Utils.TimeDiff(snd_nxt, snd_una + cwnd_) < 0)
             {
                 if (snd_queue.Count == 0) break;
@@ -830,6 +854,8 @@ namespace kcp2k
                         offset += (int)segment.data.Position;
                     }
 
+                    // dead link happens if a message was resent N times, but an
+                    // ack was still not received.
                     if (segment.xmit >= dead_link)
                     {
                         state = -1;
