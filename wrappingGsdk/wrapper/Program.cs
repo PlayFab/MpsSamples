@@ -15,7 +15,7 @@ namespace wrapper
         private static IDictionary<string, string> activeConfig;
         private const string portName = "game_port";
         private const string commandExe = "cmd";
-        private static string _listeningPort = null;
+        private static int _listeningPort;
 
 
         static void Main(string[] args)
@@ -47,15 +47,16 @@ namespace wrapper
         {
             // Here we're starting the script that initiates the game process
 
-            activeConfig = GameserverSDK.getConfigSettings();
+            var gameServerConnectionInfo = GameserverSDK.GetGameServerConnectionInfo();
+            var portInfo = gameServerConnectionInfo.GamePortsConfiguration.Where(x=>x.Name == portName);
 
             // When Wrapper is running in a container, Port Information (Port Name, Port Number, and Protocol) is already set as build configuration.
             // For example, if you already set port number as 80 in container build configuration, activeConfig will return 80 as port number.
             // But if Wrapper is running as a process, port will be mapped internally by MPS, so different number will be dynamically assigned. 
-            if (activeConfig.TryGetValue(portName, out string listeningPortString))
+            if(portInfo.Count() > 0)
             {
-                GameserverSDK.LogMessage($"{portName}:{listeningPortString} was found in GSDK Config Settings.");
-                _listeningPort = listeningPortString;
+                LogMessage($"{portName} was found in GSDK Config Settings.");
+                _listeningPort = portInfo.Single().ServerListeningPort;
             }
             else
             {
@@ -69,7 +70,7 @@ namespace wrapper
 
             // We pass port number as a 3rd argument when we start fakegame.exe 
             // Port number is grabbed via GSDK and will be passed to fake game as a listening port.
-            gameProcess = StartProcess(gameserverExe, string.Join(' ', args.Append(_listeningPort)));
+            gameProcess = StartProcess(gameserverExe, string.Join(' ', args.Append(_listeningPort.ToString())));
             // as part of wrapping the main game server executable,
             // we create event handlers to process the output from the game (standard output/standard error)
             // based on this output, we will activate the server and process connected players
@@ -227,7 +228,7 @@ namespace wrapper
                     return null;
                 }
 
-                if (portFromHostPortToken != int.Parse(_listeningPort))
+                if (portFromHostPortToken != _listeningPort)
                 {
                     return null;
                 }
