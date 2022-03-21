@@ -5,10 +5,10 @@ using System;
 using PlayFab.Networking;
 using System.Collections.Generic;
 using PlayFab.MultiplayerAgent.Model;
+using System.Linq;
 
 public class AgentListener : MonoBehaviour {
 
-    const string ListeningPortKey = "game_port";
     private List<ConnectedPlayer> _connectedPlayers;
     public bool Debugging = true;
     // Use this for initialization
@@ -25,16 +25,23 @@ public class AgentListener : MonoBehaviour {
         UnityNetworkServer.Instance.OnPlayerRemoved.AddListener(OnPlayerRemoved);
 
         // get the port that the server will listen to
-        // we are getting the port via GSDK, the value of the "ListeningPortKey" must be the same value as the one you use when you create the Build
-        // or the one you use on LocalMultiplayerAgent JSON configuration file
         // We *have to* do it on process mode, since there might be more than one game server instances on the same VM and we want to avoid port collision
         // On container mode, we can omit the below code and set the port directly, since each game server instance will run on its own network namespace. However, below code will work as well
         // we have to do that on process
-        var config = PlayFabMultiplayerAgentAPI.GetConfigSettings();
-        if(config.ContainsKey(ListeningPortKey))
+        var connInfo = PlayFabMultiplayerAgentAPI.GetGameServerConnectionInfo();
+        // make sure the ListeningPortKey is the same as the one configured in your Build settings (either on LocalMultiplayerAgent or on MPS)
+        const string ListeningPortKey = "game_port";
+        var portInfo = connInfo.GamePortsConfiguration.Where(x=>x.Name == ListeningPortKey);
+        if(portInfo.Count() > 0)
         {
-            var port = int.Parse(config[ListeningPortKey]);
-            UnityNetworkServer.Instance.Port = port; // set the Mirror server to the port we got from GSDK
+            Debug.Log(string.Format("port with name {0} was found in GSDK Config Settings.", ListeningPortKey));
+            UnityNetworkServer.Instance.Port = portInfo.Single().ServerListeningPort;
+        }
+        else
+        {
+            string msg = string.Format("Cannot find port with name {0} in GSDK Config Settings. Please make sure the LocalMultiplayerAgent is running and that the MultiplayerSettings.json file includes correct name as a GamePort Name.", ListeningPortKey);
+            Debug.LogError(msg);
+            throw new Exception(msg);
         }
         
         StartCoroutine(ReadyForPlayers());

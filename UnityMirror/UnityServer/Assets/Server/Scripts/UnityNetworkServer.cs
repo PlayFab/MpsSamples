@@ -14,7 +14,7 @@
         public PlayerEvent OnPlayerRemoved = new PlayerEvent();
 
         public int MaxConnections = 100;
-        public int Port = 7777;
+        public int Port = 7777; // overwritten by the code in AgentListener.cs
 
         public List<UnityNetworkConnection> Connections
         {
