@@ -34,13 +34,13 @@ public class AgentListener : MonoBehaviour {
         var portInfo = connInfo.GamePortsConfiguration.Where(x=>x.Name == ListeningPortKey);
         if(portInfo.Count() > 0)
         {
-            Debug.Log($"port_name was found in GSDK Config Settings.");
+            Debug.Log(string.Format("port with name {0} was found in GSDK Config Settings.", ListeningPortKey));
             UnityNetworkServer.Instance.Port = portInfo.Single().ServerListeningPort;
         }
         else
         {
-            string msg = "Cannot find port_name in GSDK Config Settings. Please make sure the LocalMultiplayerAgent is running and that the MultiplayerSettings.json file includes correct name as a GamePort Name.";
-            Debug.Log(msg);
+            string msg = string.Format("Cannot find port with name {0} in GSDK Config Settings. Please make sure the LocalMultiplayerAgent is running and that the MultiplayerSettings.json file includes correct name as a GamePort Name.", ListeningPortKey);
+            Debug.LogError(msg);
             throw new Exception(msg);
         }
         
