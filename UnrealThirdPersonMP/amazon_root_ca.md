@@ -30,5 +30,7 @@ certutil.exe -addstore root .\SFSRootCAG2.cer
 ```
 - The first lines install the Amazon Root certificates into the Windows Trusted Root certificate store. The last line starts the game server.
 - Include the startup.cmd file and the *.cer files in your Assets file, when you are creating your Build
-- Modify your StartGameCommand to call the startup.cmd file (e.g. `StartGameCommand=".\startup.cmd"`)
+- Modify your StartGameCommand to call the startup.cmd file 
+    - for process mode it's a relative path, like `StartGameCommand=".\\startup.cmd"`
+    - whereas for container mode it's an absolute path, like `StartGameCommand="C:\\Assets\\startup.cmd"`
 - Don't forget to test your game server with [LocalMultiplayerAgent](https://github.com/PlayFab/MpsAgent)
