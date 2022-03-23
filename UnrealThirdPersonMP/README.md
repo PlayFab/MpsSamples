@@ -103,3 +103,7 @@ Using the port and IP address from this server, your players can now run your ga
 #### For more Information about MpsAllocatorSample
 
 In order to understand how the MpsAllocatorSample works an a more in-depth manner, you can [watch this video](https://www.youtube.com/watch?v=kj2TcMlvWgk) that is an introductory level overview of Azure PlayFab Multiplayer Servers, with guided steps to help developers successfully build & deploy a sample game server on PlayFab.
+
+#### Issues calling Epic Online Services
+
+If you have issues calling Epic Online Services from your Unreal game server, check [this file](amazon_root_ca.md)
