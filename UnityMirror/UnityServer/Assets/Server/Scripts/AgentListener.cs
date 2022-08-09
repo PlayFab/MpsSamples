@@ -39,7 +39,7 @@ public class AgentListener : MonoBehaviour {
         }
         else
         {
-            string msg = string.Format("Cannot find port with name {0} in GSDK Config Settings. Please make sure the LocalMultiplayerAgent is running and that the MultiplayerSettings.json file includes correct name as a GamePort Name.", ListeningPortKey);
+            string msg = string.Format("Cannot find port with name {0} in GSDK Config Settings. If you are running locally, make sure the LocalMultiplayerAgent is running and that the MultiplayerSettings.json file includes correct name as a GamePort Name. If you are running this sample in the cloud, make sure you have assigned the correct name to the port", ListeningPortKey);
             Debug.LogError(msg);
             throw new Exception(msg);
         }
