@@ -52,7 +52,7 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
     - OutputFolder = A local path with enough space on your machine. Useful data for your game will be written there.
     - LocalFilePath = Path to the zip created above of the build output for the server project. 
     - On ContainerStartParameters, set the StartGameCommand = `C:\\Assets\\UnityServer.exe -nographics -batchmode -logFile`
-    - Within GamePort, set Name to "game_port", Number to 7777 (or any value you prefer) and Protocol to TCP. Also make a note of the external port number, called NodePort. The "game_port" value must be the same as the one defined in AgentListener.cs.
+    - Within GamePort, set Name to "gameport", Number to 7777 (or any value you prefer) and Protocol to TCP. Also make a note of the external port number, called NodePort. The "gameport" value must be the same as the one defined in AgentListener.cs.
 1. In PowerShell
     - Run the LocalMultiplayerAgentSetup file in *agentfolder/setup.ps1* (you may need to open Powershell with admin permissions for this purpose). If you get a signing violation, you may need to run `Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process`.
     - Run the Local Multiplayer Agent located in *agentfolder/PlayfabMultiplayerAgent.exe*.
@@ -66,7 +66,7 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
     - OutputFolder = A local path with enough space on your machine. Useful data for your game will be written there.
     - LocalFilePath = Path to the zip created above of the build output for the server project. 
     - On ProcessStartParameters, set the StartGameCommand = `UnityServer.exe -nographics -batchmode -logFile`
-    - Within GamePort, set Name to "game_port" and Protocol to TCP. Number is ignored since on process mode it will be assigned dynamically via GSDK. Also make a note of the external port number, called NodePort. The "game_port" value must be the same as the one defined in AgentListener.cs.
+    - Within GamePort, set Name to "gameport" and Protocol to TCP. Number is ignored since on process mode it will be assigned dynamically via GSDK. Also make a note of the external port number, called NodePort. The "gameport" value must be the same as the one defined in AgentListener.cs.
 1. In PowerShell
     - Run the Local Multiplayer Agent located in *agentfolder/PlayfabMultiplayerAgent.exe*.
 1. You will see the PlayfabMultiplayerAgent report state. Wait for reports to go from `Waiting for heartbeats from the game server.....` to `CurrentGameState: StandingBy` to `CurrentGameState: Active` then proceed to the "running the client" step
@@ -83,7 +83,7 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
 - Check out the logs.  Client logs are available in the Unity IDE. Server logs are dropped in the `OutputFolder` specified in the MultiplayerSettings.json.
 - Check out additional information about [Locally debugging game servers](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/locally-debugging-game-servers-and-integration-with-playfab)
 
-## PlayFabMulitiplayerAgent API reference
+## PlayFabMultiplayerAgent API reference
 
 **Start()** -  This initializes the GameObject into the scene that will talk to the Agent.  It also uses environment variables to know how to talk to the local agent
 

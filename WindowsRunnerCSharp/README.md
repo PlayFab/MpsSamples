@@ -33,7 +33,7 @@ WindowsRunnerCSharpClient is a sample client that integrates with PlayFab's SDK.
     * Mount path: C:\Assets
 * Start Command: C:\Assets\WindowsRunnerCSharp.exe
 * Port configuration
-    * Name: game_port
+    * Name: gameport
     * Number: \<any valid port\>
 * Regions: Any region, but make sure standby servers is > 0
 

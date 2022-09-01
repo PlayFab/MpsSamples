@@ -13,7 +13,7 @@ namespace wrapper
     {
         private static Process gameProcess;
         private static IDictionary<string, string> activeConfig;
-        private const string portName = "game_port";
+        private const string portName = "gameport";
         private const string commandExe = "cmd";
         private static int _listeningPort;
 

@@ -59,7 +59,7 @@ During the creation of your Build, you should upload the zipped game assets and 
 - GameStartCommand : 
 C:\Assets\wrapper.exe -g C:\Assets\fakegame.exe arg1 arg2  
  ( Replace fakegame.exe with the name of your game server executable )
-- Port Name: game_port
+- Port Name: gameport
 - Port Type: TCP
 - Port Number: 80  
   
@@ -70,7 +70,7 @@ This is because MPS service will create a mapping between the Azure Load Balance
 - Virtual Machine OS: Windows
 - Game Serer Type : Process  
 - GameStartCommand : wrapper.exe -g fakegame.exe arg1 arg2
-- Port Name: game_port
+- Port Name: gameport
 - Port Type: TCP
 
 In this example, you don't need to specify Port Number. Once game server is running, port number will be assigned dynamically by MPS.  
@@ -78,7 +78,7 @@ This is how to grab a port number via GSDK in wrapper sample.
   
 ```bash
 activeConfig = GameserverSDK.getConfigSettings();
-portName = "game_port" 
+portName = "gameport" 
 
 if (activeConfig.TryGetValue(portName, out string listeningPortString))
 {
@@ -114,7 +114,7 @@ You can run the above script on [Windows Subsystem for Linux](https://docs.micro
 #### Build Configuration Example 3: Deploy Wrapper sample as Container on Linux VM.
 - Virtual Machine OS: Linux
 - Game Serer Type : Container  
-- Port Name: game_port
+- Port Name: gameport
 - Port Type: TCP
 - Port Number: 80
 
@@ -144,7 +144,7 @@ If you are using [LocalMultiplayerAgent](https://github.com/PlayFab/LocalMultipl
                 {
                     "NodePort": 56100,
                     "GamePort": {
-                        "Name": "game_port",
+                        "Name": "gameport",
                         "Number": 80,
                         "Protocol": "TCP"
                     }
@@ -171,7 +171,7 @@ If you are using [LocalMultiplayerAgent](https://github.com/PlayFab/LocalMultipl
                 {
                     "NodePort": 56100,
                     "GamePort": {
-                        "Name": "game_port",
+                        "Name": "gameport",
                         "Number": 80,
                         "Protocol": "TCP"
                     }
