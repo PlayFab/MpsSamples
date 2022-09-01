@@ -18,7 +18,7 @@ namespace WindowsRunnerCSharp
     class Program
     {
         private static HttpListener _listener = new HttpListener();
-        const string ListeningPortKey = "game_port";
+        const string ListeningPortKey = "gameport";
         
         const string AssetFilePath = @"C:\Assets\testassetfile.txt";
         private const string GameCertAlias = "winRunnerTestCert";

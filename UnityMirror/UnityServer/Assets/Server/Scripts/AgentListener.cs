@@ -30,7 +30,7 @@ public class AgentListener : MonoBehaviour {
         // we have to do that on process
         var connInfo = PlayFabMultiplayerAgentAPI.GetGameServerConnectionInfo();
         // make sure the ListeningPortKey is the same as the one configured in your Build settings (either on LocalMultiplayerAgent or on MPS)
-        const string ListeningPortKey = "game_port";
+        const string ListeningPortKey = "gameport";
         var portInfo = connInfo.GamePortsConfiguration.Where(x=>x.Name == ListeningPortKey);
         if(portInfo.Count() > 0)
         {
