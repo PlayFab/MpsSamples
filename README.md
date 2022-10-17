@@ -42,7 +42,7 @@ Simple executable that integrates with PlayFab's Gameserver SDK (GSDK). It start
 
 ## Questions
 
-If you have any questions, feel free to engage in the repo's discussions [here](https://github.com/PlayFab/MpsSamples/discussions) or find us in Discord [here](https://discord.com/invite/gamestack)
+If you have any questions, feel free to engage in the repo's discussions [here](https://github.com/PlayFab/MpsSamples/discussions) or find us in Discord [here](https://aka.ms/msftgamedevdiscord)
 
 ## Community samples
 
