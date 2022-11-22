@@ -53,5 +53,5 @@ Here you can find a list of samples and utilities created and supported by our c
 - [PlayFab UE4 GSDK Integration](https://github.com/narthur157/playfab-gsdk-ue4) by [narthur157](https://github.com/narthur157): a plugin providing a simple GSDK integration for Unreal Engine 4
 - [Integrating Photon with PlayFab Multiplayer Servers](https://doc.photonengine.com/en-us/bolt/current/demos-and-tutorials/playfab-integration/overview)
 - [Unity Multiplayer - Top to Bottom](https://dev.to/robodoig/unity-multiplayer-bottom-to-top-46cj) A blog post that shows how to use Unity with DarkRift and Multiplayer Servers
-- [MPS Azure Function](https://github.com/Solias99/playfab-mps-azure-functions) Code to show how to request a Multiplayer Server via an Azure Function, so you don't have to include the secret key in your game
-- A [Unity handbook](https://github.com/Solias99/playfabmultiplayer-unity-handbook) by [Solias99](https://github.com/Solias99)
+- [MPS Azure Function](https://github.com/rohanmayya/playfab-mps-azure-functions) Code to show how to request a Multiplayer Server via an Azure Function, so you don't have to include the secret key in your game
+- A [Unity handbook](https://github.com/rohanmayya/playfabmultiplayer-unity-handbook) by [Rohan Mayya](https://github.com/rohanmayya)
