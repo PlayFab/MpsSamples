@@ -14,24 +14,21 @@ public class AgentListener : MonoBehaviour {
     // Use this for initialization
     void Start () {
         _connectedPlayers = new List<ConnectedPlayer>();
+
+     #if UNITY_SERVER
         PlayFabMultiplayerAgentAPI.Start();
-        PlayFabMultiplayerAgentAPI.IsDebugging = Debugging;
-        PlayFabMultiplayerAgentAPI.OnMaintenanceCallback += OnMaintenance;
-        PlayFabMultiplayerAgentAPI.OnShutDownCallback += OnShutdown;
-        PlayFabMultiplayerAgentAPI.OnServerActiveCallback += OnServerActive;
-        PlayFabMultiplayerAgentAPI.OnAgentErrorCallback += OnAgentError;
-
-        UnityNetworkServer.Instance.OnPlayerAdded.AddListener(OnPlayerAdded);
-        UnityNetworkServer.Instance.OnPlayerRemoved.AddListener(OnPlayerRemoved);
-
-        // get the port that the server will listen to
+        StartCoroutine(ReadyForPlayers());
+        
+         // get the port that the server will listen to
         // We *have to* do it on process mode, since there might be more than one game server instances on the same VM and we want to avoid port collision
         // On container mode, we can omit the below code and set the port directly, since each game server instance will run on its own network namespace. However, below code will work as well
         // we have to do that on process
         var connInfo = PlayFabMultiplayerAgentAPI.GetGameServerConnectionInfo();
+
         // make sure the ListeningPortKey is the same as the one configured in your Build settings (either on LocalMultiplayerAgent or on MPS)
         const string ListeningPortKey = "gameport";
         var portInfo = connInfo.GamePortsConfiguration.Where(x=>x.Name == ListeningPortKey);
+
         if(portInfo.Count() > 0)
         {
             Debug.Log(string.Format("port with name {0} was found in GSDK Config Settings.", ListeningPortKey));
@@ -43,8 +40,16 @@ public class AgentListener : MonoBehaviour {
             Debug.LogError(msg);
             throw new Exception(msg);
         }
-        
-        StartCoroutine(ReadyForPlayers());
+    #endif
+
+        PlayFabMultiplayerAgentAPI.IsDebugging = Debugging;
+        PlayFabMultiplayerAgentAPI.OnMaintenanceCallback += OnMaintenance;
+        PlayFabMultiplayerAgentAPI.OnShutDownCallback += OnShutdown;
+        PlayFabMultiplayerAgentAPI.OnServerActiveCallback += OnServerActive;
+        PlayFabMultiplayerAgentAPI.OnAgentErrorCallback += OnAgentError;
+
+        UnityNetworkServer.Instance.OnPlayerAdded.AddListener(OnPlayerAdded);
+        UnityNetworkServer.Instance.OnPlayerRemoved.AddListener(OnPlayerRemoved);
     }
 
     IEnumerator ReadyForPlayers()
