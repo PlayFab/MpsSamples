@@ -225,4 +225,15 @@ ADD . .
 CMD ["/game/UnityServer.x86_64", "-nographics", "-batchmode", "-logfile"]
 ```
 
+Sometimes Linux won't wrap ca-certificates inside the built image container which will result in `Curl error 35: Cert handshake failed. verify result: UNITYTLS_X509VERIFY_FATAL_ERROR`. If this happens you will need to modify Dockerfile with `apt update` and `apt install`. The modified file should look as follows:
+
+```Dockerfile
+FROM ubuntu:18.04
+WORKDIR /game
+ADD . .
+RUN apt update
+RUN apt install -y --reinstall ca-certificates
+CMD ["/game/UnityServer.x86_64", "-nographics", "-batchmode", "-logfile"]
+```
+
 - You're now ready to build your image! If you want to develop locally, you can use `docker build -t myregistry.io/mygame:0.1 .` to build your game and test it with [LocalMultiplayerAgent](https://github.com/PlayFab/LocalMultiplayerAgent). Or, you can get the proper PlayFab container registry credentials (using [this](https://docs.microsoft.com/en-us/rest/api/playfab/multiplayer/multiplayerserver/getcontainerregistrycredentials?view=playfab-rest) API call or from the Builds page on PlayFab web site). Once you do that, you can `docker build/tag/push` your container image to the PlayFab container registry and spin game servers running it.
