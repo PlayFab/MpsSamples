@@ -40,10 +40,6 @@ The Matchmake sample logs in a configurable number of clients and attempts to ma
 
 Simple executable that integrates with PlayFab's Gameserver SDK (GSDK). It starts an http server that will respond to GET requests with a json file containing whatever configuration values it read from the GSDK. More information [here](WindowsRunnerCSharp/README.md).
 
-## Questions
-
-If you have any questions, feel free to engage in the repo's discussions [here](https://github.com/PlayFab/MpsSamples/discussions) or find us in Discord [here](https://aka.ms/msftgamedevdiscord)
-
 ## Community samples
 
 Here you can find a list of samples and utilities created and supported by our community. [Let us know](https://github.com/PlayFab/gsdkSamples/issues) if you have created a sample yourself and would like to have it mentioned here.
@@ -55,3 +51,11 @@ Here you can find a list of samples and utilities created and supported by our c
 - [Unity Multiplayer - Top to Bottom](https://dev.to/robodoig/unity-multiplayer-bottom-to-top-46cj) A blog post that shows how to use Unity with DarkRift and Multiplayer Servers
 - [MPS Azure Function](https://github.com/rohanmayya/playfab-mps-azure-functions) Code to show how to request a Multiplayer Server via an Azure Function, so you don't have to include the secret key in your game
 - A [Unity handbook](https://github.com/rohanmayya/playfabmultiplayer-unity-handbook) by [Rohan Mayya](https://github.com/rohanmayya)
+
+## Videos
+
+MPS team has published a series of videos in the past, check them on our [videos page](videos.md).
+
+## Questions
+
+If you have any questions, feel free to engage in the repo's discussions [here](https://github.com/PlayFab/MpsSamples/discussions) or find us in Discord [here](https://discord.com/invite/gamestack)
