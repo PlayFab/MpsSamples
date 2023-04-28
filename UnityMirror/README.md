@@ -91,9 +91,7 @@ This sample uses [Mirror](https://github.com/vis2k/Mirror), the community replac
 
 **SetState(SessionHostStatus status)** -  This api tells the mutliplayer agent service that you are changing the state on the next heartbeat.  For example, if you are shutting down the game server, you can tell the agent and it will move to terminating status.
 
-**AddPlayer(string playerId)** - Informs the multiplayer agent that a player has been added to the server.  PlayerId is arbitrary, but most common is to use the PlayFabId or EntityId of the player added.
-
-**RemovePlayer(string playerId)** - Informs the multiplayer agent that a player has been removed or left the server.  PlayerId is arbitrary, but most common is to use the PlayFabId or EntityId of the player removed.
+**UpdateConnectedPlayers(IList<ConnectedPlayer> currentlyConnectedPlayers)** - Informs the multiplayer agent about the players that are currently connected to the server. Developer has to provide the full connected players list when calling this method.
 
 **GetConfigSettings()** -- Returns an object with a series of configuration values available to your server. Properties include the PlayFab TitleId, the ServerId, the Region for this server, etc.
 
