@@ -1,12 +1,12 @@
 # Videos
 
-PlayFab Multiplayer Servers (MPS) team has created a number of videos to showcase the service as well as related technologies.
+PlayFab Multiplayer Servers (MPS) team has created a number of videos to showcase and demonstrate the service:
 
 ## PlayFab Multiplayer Hosted Servers part 1: Multiplayer Servers Quick Start
 
 [![PlayFab Multiplayer Hosted Servers part 1: Multiplayer Servers Quick Start](https://img.youtube.com/vi/kj2TcMlvWgk/0.jpg)](https://www.youtube.com/watch?v=kj2TcMlvWgk)
 
-Overview of MPS, GSDK information, Windows game server demo, game server wrapper, Build and Build region lifecycle, allocation flow using MpsAllocator sample, game server state, network architecture.
+Overview of MPS, [Game Server SDK (GSDK)](https://github.com/PlayFab/gsdk) and game server lifecycle information, Windows game server demo, [game server wrapper](https://github.com/PlayFab/MpsSamples/tree/main/wrappingGsdk), Build and Build region lifecycle, allocation flow using [MpsAllocator sample](https://github.com/PlayFab/MpsSamples/tree/main/MpsAllocatorSample), game server state, network architecture.
 
 ---
 
@@ -14,7 +14,7 @@ Overview of MPS, GSDK information, Windows game server demo, game server wrapper
 
 [![PlayFab Multiplayer Hosted Servers part 2: Foundations for Scaling Game Server Resources](https://img.youtube.com/vi/Jj5kVCUmvlY/0.jpg)](https://www.youtube.com/watch?v=Jj5kVCUmvlY)
 
-Overview of MPS scaling scenarios. Default (using a pre-configured standby pool), scheduled standby, dynamic standby, event driven.
+Overview of MPS scaling scenarios. Default auto-scaling (using a pre-configured standby pool), [scheduled standby](https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/scheduled-standby), [dynamic standby](https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/dynamic-standby), event driven.
 
 ---
 
@@ -22,7 +22,7 @@ Overview of MPS scaling scenarios. Default (using a pre-configured standby pool)
 
 [![Azure PlayFab Multiplayer Servers Quick Start (Linux Game Servers)](https://img.youtube.com/vi/hsHLWS6UY6s/0.jpg)](https://www.youtube.com/watch?v=hsHLWS6UY6s)
 
-Overview of MPS, GSDK information, Linux game server demo using containers, debugging Linux containers with LocalMultiplayerAgent, using a wrapper sample, building and uploading the container image to Azure Container Registry, game server lifecycle, MPS powershell cmdlets, Build and Build region lifecycle.
+[Game Server SDK (GSDK)](https://github.com/PlayFab/gsdk) and game server lifecycle information, Linux game server demo using containers, debugging Linux containers with [LocalMultiplayerAgent](https://github.com/PlayFab/MpsAgent), using a [wrapper sample](https://github.com/PlayFab/MpsSamples/tree/main/wrappingGsdk), building and uploading your game server container image to Azure Container Registry, [MPS powershell cmdlets](https://github.com/PlayFab/MpsPowershell), Build and Build region lifecycle.
 
 ---
 
@@ -30,7 +30,15 @@ Overview of MPS, GSDK information, Linux game server demo using containers, debu
 
 [![Build and Manage Your Global Multiplayer Servers with Azure PlayFab](https://img.youtube.com/vi/3NtK90ofryQ/0.jpg)](https://www.youtube.com/watch?v=3NtK90ofryQ)
 
-Overview of MPS, deploying new builds on MPS (process vs container and relevant ports), locally debugging Windows game servers with LocalMultiplayerAgent, build management using Game Manager.
+Deploying new builds on MPS (process vs container and relevant ports), locally debugging Windows game servers with [LocalMultiplayerAgent](https://github.com/PlayFab/MpsAgent) to verify GSDK integration, Build management using Game Manager.
+
+---
+
+## Using the VmStartupScript feature
+
+[![Using the VmStartupScript feature](https://img.youtube.com/vi/oc-X7rHCwUU/0.jpg)](https://www.youtube.com/watch?v=oc-X7rHCwUU)
+
+An overview of the [VmStartupScript feature](https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/vmstartupscript) which enables you to install custom software on your Virtual Machine. Check [here for sample scripts](https://github.com/PlayFab/VmStartupScriptGallery). 
 
 ---
 
