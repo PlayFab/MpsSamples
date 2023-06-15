@@ -57,6 +57,10 @@ public class AgentListener : MonoBehaviour {
     {
         UnityNetworkServer.Instance.StartListen();
         Debug.Log("Server Started From Agent Activation");
+        foreach (KeyValuePair<string,string> kvp in PlayFabMultiplayerAgentAPI.GetConfigSettings())
+        {
+            Debug.Log(kvp.Key + ": " + kvp.Value);
+        }
     }
 
     private void OnPlayerRemoved(string playfabId)
