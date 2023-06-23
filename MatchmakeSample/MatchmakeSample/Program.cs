@@ -8,7 +8,7 @@ using System.CommandLine.Invocation;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace WindowsRunnerCSharpClient
+namespace MatchmakeSample
 {
     /// <summary>
     ///   Simple executable that integrates with PlayFab's SDK.
@@ -104,8 +104,28 @@ namespace WindowsRunnerCSharpClient
             {
                 QueueName = mmQueueName,
                 GiveUpAfterSeconds = 15,
-                Creator = new MatchmakingPlayer { Entity = new PlayFab.MultiplayerModels.EntityKey { Id = player.context.EntityId, Type = player.context.EntityType } } // Why isn't this just the caller?
+                Creator = new MatchmakingPlayer
+                {
+                    Entity = new PlayFab.MultiplayerModels.EntityKey { Id = player.context.EntityId, Type = player.context.EntityType }
+                }
             };
+
+            // uncomment and edit the following lines if you want to use Multiplayer Servers allocation
+            // https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/matchmaking/multiplayer-servers
+            // createRequest.Creator.Attributes = new MatchmakingPlayerAttributes
+            // {
+            //     DataObject = new
+            //     {
+            //         Latencies = new object[]
+            //             {
+            //                 new {
+            //                 region = "EastUs", // select the appropriate region
+            //                 latency = 150 // make sure that this value is less than the maximum latency value for the region in your matchmaking rule
+            //                 }
+            //             }
+            //     }
+            // };
+             
             PlayFabResult<CreateMatchmakingTicketResult> ticketResult = await player.mpApi.CreateMatchmakingTicketAsync(createRequest);
             CreateMatchmakingTicketResult ticket = VerifyPlayFabCall(ticketResult, "Failed to create matchmake ticket");
             player.mmTicketId = ticket.TicketId;
@@ -116,7 +136,7 @@ namespace WindowsRunnerCSharpClient
             var getTicketRequest = new GetMatchmakingTicketRequest
             {
                 TicketId = player.mmTicketId,
-                QueueName = mmQueueName // Why isn't this discoverable from the ticketId?
+                QueueName = mmQueueName
             };
 
             bool success = false;

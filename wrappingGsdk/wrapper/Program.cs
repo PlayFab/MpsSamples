@@ -101,6 +101,12 @@ namespace wrapper
                 {
                     LogMessage($"The session cookie from the allocation call is: {sessionCookie}");
                 }
+
+                // if you are using matchmaking, this value will be set
+                if (activeConfig.TryGetValue("PF_MATCH_QUEUE_NAME", out string matchQueueName))
+                {
+                    LogMessage($"The queue name from matchmaking is: {matchQueueName}");
+                }
             }
             else
             {

@@ -57,10 +57,16 @@ public class AgentListener : MonoBehaviour {
     {
         UnityNetworkServer.Instance.StartListen();
         Debug.Log("Server Started From Agent Activation");
-        foreach (KeyValuePair<string,string> kvp in PlayFabMultiplayerAgentAPI.GetConfigSettings())
+        if(PlayFabMultiplayerAgentAPI.IsDebugging)
         {
-            Debug.Log(kvp.Key + ": " + kvp.Value);
+            foreach (KeyValuePair<string,string> kvp in PlayFabMultiplayerAgentAPI.GetConfigSettings())
+            {
+                Debug.Log(kvp.Key + ": " + kvp.Value);
+            }
         }
+
+        // if using PlayFab matchmaking, you can get the matchmaking queue name with
+        // string queueName = PlayFabMultiplayerAgentAPI.GetConfigSettings()["PF_MATCH_QUEUE_NAME"];
     }
 
     private void OnPlayerRemoved(string playfabId)
