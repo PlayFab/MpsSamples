@@ -47,6 +47,28 @@ We have recently launched a preview feature that allows you to get the matchmaki
 }
 ```
 
+ ### Unreal Engine
+
+ - Make sure you grab the [latest version of the Unreal Engine GSDK](https://github.com/PlayFab/gsdk/tree/main/UnrealPlugin)
+ - Register the OnGSDKServerActive callback in your game server code. See the following code sample as well as the setup guide here:
+ [GSDK project setup](https://github.com/PlayFab/gsdk/blob/main/UnrealPlugin/ThirdPersonMPGSDKSetup.md)
+
+ ```cpp
+    // Add this code in the Init method of your GameInstace class
+    FOnGSDKServerActive_Dyn OnGSDKServerActive;
+    OnGSDKServerActive.BindDynamic(this, &YourGameInstanceClassName::OnGSDKServerActive);
+ ```
+
+  - In the callback, get the queue name from the config:
+
+```cpp
+void UShooterGameInstance::OnGSDKServerActive()
+{
+    FString queueName = UGSDKUtils::GetConfigValue("PF_MATCH_QUEUE_NAME");
+}
+```
+
+
 ## Support
 
 This is a preview feature, so please reach out to us on [Discord](https://aka.ms/msftgamedevdiscord) on "multiplayer-servers" channel if you have any questions or feedback. 
