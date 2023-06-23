@@ -3,7 +3,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
 
-namespace WindowsRunnerCSharpClient
+namespace MatchmakeSample
 {
     /// <summary>
     /// Used to create and run the root command for VmAgent.  
