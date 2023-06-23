@@ -64,7 +64,7 @@ We have recently launched a preview feature that allows you to get the matchmaki
 ```cpp
 void UShooterGameInstance::OnGSDKServerActive()
 {
-	FString queueName = UGSDKUtils::GetConfigValue("PF_MATCH_QUEUE_NAME");
+    FString queueName = UGSDKUtils::GetConfigValue("PF_MATCH_QUEUE_NAME");
 }
 ```
 
