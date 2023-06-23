@@ -112,19 +112,19 @@ namespace MatchmakeSample
 
             // uncomment and edit the following lines if you want to use Multiplayer Servers allocation
             // https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/matchmaking/multiplayer-servers
-            createRequest.Creator.Attributes = new MatchmakingPlayerAttributes
-                {
-                    DataObject = new
-                    {
-                        Latencies = new object[]
-                            {
-                                new {
-                                region = "EastUs", // select the appropriate region
-                                latency = 150 // make sure that this value is less than the maximum latency value for the region in your matchmaking rule
-                                }
-                            }
-                    }
-                };
+            // createRequest.Creator.Attributes = new MatchmakingPlayerAttributes
+            // {
+            //     DataObject = new
+            //     {
+            //         Latencies = new object[]
+            //             {
+            //                 new {
+            //                 region = "EastUs", // select the appropriate region
+            //                 latency = 150 // make sure that this value is less than the maximum latency value for the region in your matchmaking rule
+            //                 }
+            //             }
+            //     }
+            // };
              
             PlayFabResult<CreateMatchmakingTicketResult> ticketResult = await player.mpApi.CreateMatchmakingTicketAsync(createRequest);
             CreateMatchmakingTicketResult ticket = VerifyPlayFabCall(ticketResult, "Failed to create matchmake ticket");

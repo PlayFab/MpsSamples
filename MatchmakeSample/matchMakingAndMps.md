@@ -8,7 +8,7 @@ We have recently launched a preview feature that allows you to get the matchmaki
 
 ### C#
 
- - Make sure you grab the latest version of the C# GSDK
+ - Make sure you grab the [latest version of the C# GSDK](https://www.nuget.org/packages/com.playfab.csharpgsdk)
  - Add the following code to your game server code:
 
  ```csharp
