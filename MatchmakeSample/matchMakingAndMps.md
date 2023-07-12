@@ -1,6 +1,6 @@
-# Matchmaking and Multiplayer Servers integration
+# PlayFab Matchmaking and Multiplayer Servers integration
 
-You can have Matchmaking integrate and allocate servers on PlayFab Multiplayer Servers, you can see the documentation [here](https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/matchmaking/multiplayer-servers).
+Azure PlayFab Matchmaking has the option to automatically create and allocate a game server on Azure PlayFab Multiplayer Servers after a match. To learn more, see [Integrating with PlayFab Multiplayer Servers](https://learn.microsoft.com/gaming/playfab/features/multiplayer/matchmaking/multiplayer-servers).
 
 ## Preview feature - getting the matchmaking queue name after a server allocation
 
