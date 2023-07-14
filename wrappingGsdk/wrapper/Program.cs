@@ -68,9 +68,20 @@ namespace wrapper
             // Check if there is any process already using the port (_listeningPort). This will only work for Windows.
             if (CheckIfPortIsUsed(gameserverExe)) { return; };
 
+            activeConfig = GameserverSDK.getConfigSettings();
+            if (activeConfig.TryGetValue(GameserverSDK.ServerIdKey, out string serverId))
+            {
+                LogMessage($"The server Id is: {serverId}");
+            }
+
+            if (serverId == null)
+            {
+                serverId = "Unknown";
+            }
+
             // We pass port number as a 3rd argument when we start fakegame.exe 
             // Port number is grabbed via GSDK and will be passed to fake game as a listening port.
-            gameProcess = StartProcess(gameserverExe, string.Join(' ', args.Append(_listeningPort.ToString())));
+            gameProcess = StartProcess(gameserverExe, string.Join(' ', args.Append($"-TestServerPort {_listeningPort.ToString()} -MpsServerId {serverId}")));
             // as part of wrapping the main game server executable,
             // we create event handlers to process the output from the game (standard output/standard error)
             // based on this output, we will activate the server and process connected players
