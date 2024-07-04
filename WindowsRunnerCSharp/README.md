@@ -7,7 +7,7 @@ Sample executable that integrates with PlayFab's Multiplayer Gameserver SDK (GSD
 
 ## Prerequisites
 * Understanding of C#.
-* Get [PlayFab's local debugging toolset](https://api.playfab.com/docs/tutorials/landing-tournaments/multiplayer-servers-2.0/debugging-playfab-multiplayer-platform-integration-locally).
+* Get [PlayFab's local debugging toolset](https://learn.microsoft.com/en-US/gaming/playfab/features/multiplayer/servers/locally-debugging-game-servers-and-integration-with-playfab).
 
 ## Overview
 WindowsRunnserCSharp is a sample executable that integrates with PlayFab's Gameserver SDK (GSDK). It starts an http server that will respond to GET requests with a json file containing whatever configuration values it read from the GSDK.
@@ -17,7 +17,7 @@ WindowsRunnerCSharpClient is a sample client that integrates with PlayFab's SDK.
 ## Getting Started Guide
 
 ### To run this sample locally (server only)
-1. Setup [PlayFab's local debugging toolset](https://api.playfab.com/docs/tutorials/landing-tournaments/multiplayer-servers-2.0/debugging-playfab-multiplayer-platform-integration-locally), following the *Verifying GSDK integration* section.
+1. Setup [PlayFab's local debugging toolset](https://learn.microsoft.com/en-US/gaming/playfab/features/multiplayer/servers/locally-debugging-game-servers-and-integration-with-playfab), following the *Verifying GSDK integration* section.
 1. Once the local agent is running, open any browser, and navigate to `http://localhost:<port>`, where `<port>` is the NodePort set in your MultiplayerSettings.json (default 56100). You should see a json body with details about the game server.
 1. The local deployment does not include the PlayFab service so the client will not be able to run locally
 
