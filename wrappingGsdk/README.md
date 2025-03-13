@@ -7,17 +7,20 @@ There are cases in which you want to wrap an existing game with a custom process
 
 > This sample and corresponding technique is NOT recommended for use in production but only for evaluation/development purposes. Proper integration of your game server with the GSDK is highly recommended.
 
-The samples require .NET Core 3.1 SDK, you can download it [here](https://dotnet.microsoft.com/download). Usage of [Visual Studio Code](https://code.visualstudio.com/) is also highly recommended.
+The samples require .NET 8.0 SDK, you can download it [here](https://dotnet.microsoft.com/download). Usage of [Visual Studio Code](https://code.visualstudio.com/) is also highly recommended.
 
 ## Wrapping an existing game server using the wrapper app
 
-To get started, you can find two .NET Core projects in the current folder. 
-- `wrapper` is a .NET Core console application that acts as a wrapper for your game server and integrates with GSDK using the [latest Nuget package](https://www.nuget.org/packages/com.playfab.csharpgsdk)
-- `fakegame` is a .NET Core console application. It's meant as literally a `fake game`, it just starts ASP.NET Core Web Server [Kestrel](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel?view=aspnetcore-3.1) that listens to TCP port 80. It's meant to simulate a game server that has absolutely zero knowledge of GSDK. You can use it if you don't have a game server of your own. It has two GET routes we can use, `/hello` for getting a simple response and `/hello/terminate` that can terminate the server.
+To get started, you can find two .NET projects in the current folder:
+
+- `wrapper` is a .NET console application that acts as a wrapper for your game server and integrates with GSDK using the [latest Nuget package](https://www.nuget.org/packages/com.playfab.csharpgsdk)
+- `fakegame` is a .NET console application. It's meant as literally a `fake game`, it just starts ASP.NET Core Web Server [Kestrel](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel?view=aspnetcore-3.1) that listens to TCP port 80. It's meant to simulate a game server that has absolutely zero knowledge of GSDK. You can use it if you don't have a game server of your own. It has two GET routes we can use, `/hello` for getting a simple response and `/hello/terminate` that can terminate the server.
+
+Checkout the intructions below to build the wrapper and the game server, package them and deploy them on MPS. You can also use the provided `build.ps1` script to build and package both projects.
 
 ### Building the wrapper
 
-To build the `wrapper` app you should use the following .NET Core CLI command from inside the `wrapper` directory:
+To build the `wrapper` app you should use the following .NET CLI command from inside the `wrapper` directory:
 
 ```bash
 dotnet publish --self-contained -r win-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true
@@ -35,7 +38,7 @@ You can use the zipped file that was created from `build.ps1` script during your
 
 > If PowerShell throws up an error message – <b>File cannot be loaded because running scripts is disabled on this system</b>, then you need to enable the `build.ps1` script to run on your Windows computer.  You can enable this by running the following PowerShell command in Administrative mode in advance of running `build.ps1`:
 
-```
+```powershell
 Set-ExecutionPolicy Unrestricted
 ```
 
@@ -54,11 +57,12 @@ You can refer to our [public documentation](https://docs.microsoft.com/en-us/gam
 During the creation of your Build, you should upload the zipped game assets and specify build configuration such as StartGameCommand, Port, and Virtual Machine Type as below:
 
 #### Build Configuration Example 1: Deploy Wrapper sample as Windows Container on Windows VM.
+
 - Virtual Machine OS : Windows  
-- Game Serer Type : Container  
-- GameStartCommand : 
+- Game Server Type : Container  
+- GameStartCommand :
 C:\Assets\wrapper.exe -g C:\Assets\fakegame.exe arg1 arg2  
- ( Replace fakegame.exe with the name of your game server executable )
+ ( Replace fakegame.exe with the name of your game server executable, if you are using your own game server)
 - Port Name: gameport
 - Port Type: TCP
 - Port Number: 80  
