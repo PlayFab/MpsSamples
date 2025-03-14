@@ -4,7 +4,7 @@
 
 This sample demonstrates a way to wrap any existing game with the PlayFab Multiplayer Game Server SDK. For this to work, game server should output relevant information about its lifecycle into its output and error streams.
 
-In this sample, we are using the Linux build of an open source game [OpenArena](https://openarena.fandom.com/wiki/Main_Page) and a simple .NET Core app that starts the game and processes its output. When the game starts, the .NET Core app calls the proper GSDK methods. Since PlayFab Multiplayer Servers needs Docker Containers for Linux Builds, we're using one of the available OpenArena Docker images on Docker Hub as a base image, available [here](https://hub.docker.com/r/fgracia/openarena).
+In this sample, we are using the Linux build of an open source game [OpenArena](https://openarena.fandom.com/wiki/Main_Page) and a simple .NET app that starts the game and processes its output. When the game starts, the .NET app calls the proper GSDK methods. Since PlayFab Multiplayer Servers needs Docker Containers for Linux Builds, we're using one of the available OpenArena Docker images on Docker Hub as a base image, available [here](https://hub.docker.com/r/fgracia/openarena).
 
 Specifically, OpenArena game server outputs messages (like "Opening IP socket", "ClientBegin", "ClientDisconnect") that allows the .NET Core app/wrapper to call the specific GSDK methods. For example, on "Opening IP socket" the app will call `GameserverSDK.Start()`.
 
@@ -25,8 +25,11 @@ You can run the above script on [Windows Subsystem for Linux](https://docs.micro
 
 5. Create a new MPS Build either via playfab.com or via [the CreateBuildWithCustomerContainer API call](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/createbuildwithcustomcontainer?view=playfab-rest). On this Build, select Linux VMs, the image:tag container image you uploaded and a single port for the game, 27960/UDP. 
 6. Wait for the Build to be deployed
-7. To allocate a server and get IP/port, you can use the [MpsAllocator sample](../MpsAllocatorSample/README.md) or use the [RequestMultiplayerServer](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/requestmultiplayerserver?view=playfab-rest) API call. For more information you can check the [documentation](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers)
-8. Download [OpenArena client](https://openarena.fandom.com/wiki/Main_Page), open the game executable for your platform and connect to your server. Enjoy!
+7. To allocate a server and get IP/port, you have three options. You can:
+    - use the [MpsAllocator sample](../MpsAllocatorSample/README.md) 
+    - use the [RequestMultiplayerServer](https://docs.microsoft.com/en-gb/rest/api/playfab/multiplayer/multiplayerserver/requestmultiplayerserver?view=playfab-rest) API call. For more information you can check the [documentation](https://docs.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers)
+    - use the "Request server" button on the Game Manager on PlayFab Multiplayer Servers page
+8. Download [OpenArena client](https://openarena.fandom.com/wiki/Main_Page), open the game executable for your platform and connect to your server, by providing the IP:PORT you got from the allocation call. Enjoy!
 
 ### Is this the recommended way I should use GSDK?
 

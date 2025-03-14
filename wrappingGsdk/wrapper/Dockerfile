@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /source
 
 # copy csproj and restore as distinct layers
@@ -10,7 +10,7 @@ COPY ./Program.cs ./
 RUN dotnet publish ./ -c release -o /wrapperpublish --self-contained -r linux-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true /p:PublishReadyToRun=true
 
 # final stage/image
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 WORKDIR /app
 COPY --from=build /wrapperpublish .
 RUN chmod +x wrapper

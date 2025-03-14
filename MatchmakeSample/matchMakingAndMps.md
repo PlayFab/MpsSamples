@@ -2,9 +2,9 @@
 
 Azure PlayFab Matchmaking has the option to automatically create and allocate a game server on Azure PlayFab Multiplayer Servers after a match. To learn more, see [Integrating with PlayFab Multiplayer Servers](https://learn.microsoft.com/gaming/playfab/features/multiplayer/matchmaking/multiplayer-servers).
 
-## Preview feature - getting the matchmaking queue name after a server allocation
+## Getting the matchmaking queue name after a server allocation
 
-We have recently launched a preview feature that allows you to get the matchmaking queue name after a server allocation. The way to retrieve the queue name is to search the config dictionary for the "PF_MATCH_QUEUE_NAME" string **after server is allocated**.
+You can get the matchmaking queue name after a server allocation. The way to retrieve the queue name is to search the config dictionary for the "PF_MATCH_QUEUE_NAME" string **after server is allocated**.
 
 ### C#
 
@@ -54,7 +54,7 @@ We have recently launched a preview feature that allows you to get the matchmaki
  [GSDK project setup](https://github.com/PlayFab/gsdk/blob/main/UnrealPlugin/ThirdPersonMPGSDKSetup.md)
 
  ```cpp
-    // Add this code in the Init method of your GameInstace class
+    // Add this code in the Init method of your GameInstance class
     FOnGSDKServerActive_Dyn OnGSDKServerActive;
     OnGSDKServerActive.BindDynamic(this, &YourGameInstanceClassName::OnGSDKServerActive);
  ```
@@ -71,4 +71,4 @@ void UShooterGameInstance::OnGSDKServerActive()
 
 ## Support
 
-This is a preview feature, so please reach out to us on [Discord](https://aka.ms/msftgamedevdiscord) on "multiplayer-servers" channel if you have any questions or feedback. 
+This is a preview feature, so please reach out to us on [Discord](https://aka.ms/msftgamedevdiscord) on "playfab-chat" channel if you have any questions or feedback. 
