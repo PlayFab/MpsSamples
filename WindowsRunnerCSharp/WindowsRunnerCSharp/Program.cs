@@ -18,9 +18,9 @@ namespace WindowsRunnerCSharp
     class Program
     {
         private static HttpListener _listener = new HttpListener();
-        const string ListeningPortKey = "gameport";
+        const string ListeningPortKey = "RealPort";
         
-        const string AssetFilePath = @"C:\Assets\testassetfile.txt";
+        const string AssetFilePath = "testassetfile.txt";
         private const string GameCertAlias = "winRunnerTestCert";
 
         private static List<ConnectedPlayer> players = new List<ConnectedPlayer>();
@@ -90,7 +90,7 @@ namespace WindowsRunnerCSharp
             }
             else
             {
-                LogMessage($"Cannot find {ListeningPortKey} in GSDK Config Settings. Please make sure the MockAgent is running " +
+                LogMessage($"Cannot find {ListeningPortKey} in GSDK Config Settings. Please make sure the LocalMultiplayerAgent is running " +
                            $"and that the MultiplayerSettings.json file includes {ListeningPortKey} as a GamePort Name.");
                 return;
             }
@@ -161,7 +161,7 @@ namespace WindowsRunnerCSharp
                     const int maxPlayers = 20;
                     if (players.Count < maxPlayers )
                     {
-                        players.Add(new ConnectedPlayer("gamer" + requestCount));
+                        players.Add(new ConnectedPlayer("Player" + requestCount));
                     }
                     else
                     {
@@ -174,6 +174,7 @@ namespace WindowsRunnerCSharp
                     config = GameserverSDK.getConfigSettings() ?? new Dictionary<string, string>();
                     
                     config.Add("isActivated", _isActivated.ToString());
+                    config.Add("isShutdown", "false");
                     config.Add("assetFileText", _assetFileText);
                     config.Add("logsDirectory", GameserverSDK.GetLogsDirectory());
                     config.Add("installedCertThumbprint", _installedCertThumbprint);
@@ -182,8 +183,7 @@ namespace WindowsRunnerCSharp
                     if (_isActivated)
                     {
                         IList<string> players = GameserverSDK.GetInitialPlayers();
-                        config.Add("players", players == null ? "NULL" : string.Join(", ", players));
-
+                        config.Add("initialPlayers", players == null ? "NULL" : string.Join(",", players));
                     }
 
                     config.Add("connectionInfo", JsonConvert.SerializeObject(GameserverSDK.GetGameServerConnectionInfo()));
