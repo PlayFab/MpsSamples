@@ -54,3 +54,10 @@ Options:
   --verbose                When passed, print verbose results
   --version                Display version information
 ```
+#### Compile for Linux process Build
+
+To compile this for a Linux process Build, you need to run a command like the following
+
+```bash
+dotnet publish /p:Configuration=Release WindowsRunnerCSharp.csproj -o outputfolder /p:PublishSingleFile=true && chmod 777 outputfolder/* && rm -rf outputfolder/*.pdb && mv outputfolder/WindowsRunnerCSharp outputfolder/WinTestRunnerGame && tar -cvzf WinRunnerLinuxProcess.tar.gz -C outputfolder .
+```
