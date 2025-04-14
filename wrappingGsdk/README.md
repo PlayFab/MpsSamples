@@ -26,7 +26,7 @@ To build the `wrapper` app you should use the following .NET CLI command from in
 dotnet publish --self-contained -r win-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true
 ```
 
-The `wrapper` executable (as well as its debugging symbols) will be published into `wrapper\bin\Debug\netcoreapp3.1\win-x64\publish` directory. Next step would be to build your game server executable and package it along the `wrapper` output.
+The `wrapper` executable (as well as its debugging symbols) will be published into `wrapper\bin\Release\net8.0\win-x64\publish` directory. Next step would be to build your game server executable and package it along with the `wrapper` output.
 
 As mentioned, if you're just evaluating the platform or don't have a game server of your own, you can use `fakegame` sample. In this case, we have provided a convenient script [build.ps1](./build.ps1) that will build and package both projects (`wrapper` and `fakegame`). Script will create a `drop` folder with a .zip file containing the required files. 
 
