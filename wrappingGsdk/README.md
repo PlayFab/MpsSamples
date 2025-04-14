@@ -3,7 +3,7 @@
 There are cases in which you want to wrap an existing game with a custom process that uses Multiplayer Servers Game Server SDK (GSDK). Specifically, the process created by the `wrapper` project integrates with GSDK and is responsible for spawning your game server executable. You may want to create this wrapper for one of the following reasons:
 
 - you already have an existing game (or building a new one) and you want to try Multiplayer Servers service with the minimum possible effort
-- you want to evaluate the MPS platform (in this case you may also see our [OpenArena sample](./OpenArena/README.md))
+- you want to evaluate the MPS platform (in this case you may also see our [OpenArena sample](/OpenArena/README.md))
 
 > This sample and corresponding technique is NOT recommended for use in production but only for evaluation/development purposes. Proper integration of your game server with the GSDK is highly recommended.
 
@@ -14,7 +14,7 @@ The samples require .NET 8.0 SDK, you can download it [here](https://dotnet.micr
 To get started, you can find two .NET projects in the current folder:
 
 - `wrapper` is a .NET console application that acts as a wrapper for your game server and integrates with GSDK using the [latest Nuget package](https://www.nuget.org/packages/com.playfab.csharpgsdk)
-- `fakegame` is a .NET console application. It's meant as literally a `fake game`, it just starts ASP.NET Core Web Server [Kestrel](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel?view=aspnetcore-3.1) that listens to TCP port 80. It's meant to simulate a game server that has absolutely zero knowledge of GSDK. You can use it if you don't have a game server of your own. It has two GET routes we can use, `/hello` for getting a simple response and `/hello/terminate` that can terminate the server.
+- `fakegame` is a .NET console application. It's meant as literally a `fake game`, it just starts ASP.NET Core Web Server [Kestrel](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel?view=aspnetcore-8.0) that listens to TCP port 80. It's meant to simulate a game server that has absolutely zero knowledge of GSDK. You can use it if you don't have a game server of your own. It has two GET routes we can use, `/hello` for getting a simple response and `/hello/terminate` that can terminate the server.
 
 Checkout the intructions below to build the wrapper and the game server, package them and deploy them on MPS. You can also use the provided `build.ps1` script to build and package both projects.
 
@@ -26,7 +26,7 @@ To build the `wrapper` app you should use the following .NET CLI command from in
 dotnet publish --self-contained -r win-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true
 ```
 
-The `wrapper` executable (as well as its debugging symbols) will be published into `wrapper\bin\Debug\netcoreapp3.1\win-x64\publish` directory. Next step would be to build your game server executable and package it along the `wrapper` output.
+The `wrapper` executable (as well as its debugging symbols) will be published into `wrapper\bin\Release\net8.0\win-x64\publish` directory. Next step would be to build your game server executable and package it along with the `wrapper` output.
 
 As mentioned, if you're just evaluating the platform or don't have a game server of your own, you can use `fakegame` sample. In this case, we have provided a convenient script [build.ps1](./build.ps1) that will build and package both projects (`wrapper` and `fakegame`). Script will create a `drop` folder with a .zip file containing the required files. 
 
@@ -44,7 +44,7 @@ Set-ExecutionPolicy Unrestricted
 
 #### If you are using your own game server
 
-You should copy all your game server build files from wherever your `wrapper` executable is located (if you used the aforementioned `dotnet publish` command, files should be on `wrapper\bin\Debug\netcoreapp3.1\win-x64\publish` directory). You would need to zip the contents of this folder along with the files necessary to run your game server. This is the zip file that you will use with `LocalMultiplayerAgent` (if you are doing local development) and/or upload onto the MPS Service (if you need to deploy your game server on MPS service).
+You should copy all your game server build files from wherever your `wrapper` executable is located (if you used the aforementioned `dotnet publish` command, files should be in the `wrapper\bin\Release\net8.0\win-x64\publish` directory). You would need to zip the contents of this folder along with the files necessary to run your game server. This is the zip file that you will use with `LocalMultiplayerAgent` (if you are doing local development) and/or upload onto the MPS Service (if you need to deploy your game server on MPS service).
 
 > A common mistake new users do is that they compress the `publish` directory. This may create issues if you use incorrect mapping, so we highly recommend you zip the **files** of the `publish` folder instead.
 
