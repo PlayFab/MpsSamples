@@ -3,7 +3,7 @@
 There are cases in which you want to wrap an existing game with a custom process that uses Multiplayer Servers Game Server SDK (GSDK). Specifically, the process created by the `wrapper` project integrates with GSDK and is responsible for spawning your game server executable. You may want to create this wrapper for one of the following reasons:
 
 - you already have an existing game (or building a new one) and you want to try Multiplayer Servers service with the minimum possible effort
-- you want to evaluate the MPS platform (in this case you may also see our [OpenArena sample](./OpenArena/README.md))
+- you want to evaluate the MPS platform (in this case you may also see our [OpenArena sample](/OpenArena/README.md))
 
 > This sample and corresponding technique is NOT recommended for use in production but only for evaluation/development purposes. Proper integration of your game server with the GSDK is highly recommended.
 
