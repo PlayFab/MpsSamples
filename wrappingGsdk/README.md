@@ -28,7 +28,7 @@ dotnet publish --self-contained -r win-x64 /p:PublishSingleFile=true /p:PublishT
 
 The `wrapper` executable (as well as its debugging symbols) will be published into `wrapper\bin\Release\net8.0\win-x64\publish` directory. Next step would be to build your game server executable and package it along with the `wrapper` output.
 
-As mentioned, if you're just evaluating the platform or don't have a game server of your own, you can use `fakegame` sample. In this case, we have provided a convenient script [build.ps1](./build.ps1) that will build and package both projects (`wrapper` and `fakegame`). Script will create a `drop` folder with a .zip file containing the required files. 
+As mentioned, if you're just evaluating the platform or don't have a game server of your own, you can use `fakegame` sample. In this case, we have provided a convenient script [build.ps1](./build.ps1) that will build and package both projects (`wrapper` and `fakegame`). Script will create a `drop` folder with a .zip file containing the required files. Make sure you define a unique name for your zip file example compared against the already existing assets of your title to avoid issues in PlayFab.
 
 ### Creating the zipped game assets archive
 
@@ -68,7 +68,8 @@ C:\Assets\wrapper.exe -g C:\Assets\fakegame.exe arg1 arg2
 - Port Number: 80  
   
 > Bear in mind that during the allocation (i.e. usage of RequestMultiplayerServer API) the port you will get to connect will be different than 80. 
-This is because MPS service will create a mapping between the Azure Load Balancer (that exposes your ports to the Public internet) to the game servers running on the Azure Virtual Machines.   
+This is because MPS service will create a mapping between the Azure Load Balancer (that exposes your ports to the Public internet) to the game servers running on the Azure Virtual Machines.
+If you did the Local Multiplayer Agent [example] (https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/servers/localmultiplayeragent/local-multiplayer-agent-overview), check on the PortMappingsList's Game Port Name of the settings file you used, make sure use the same for the PortName field, either using [Container] https://github.com/(PlayFab/MpsAgent/blob/main/LocalMultiplayerAgent/MultiplayerSettingsLinuxContainersOnWindowsSample.json) or [Process] (https://github.com/PlayFab/MpsAgent/blob/main/LocalMultiplayerAgent/MultiplayerSettings.json) when you create the Build on Game Manager.
   
 #### Build Configuration Example 2: Deploy Wrapper sample as Process on Windows VM.
 - Virtual Machine OS: Windows
