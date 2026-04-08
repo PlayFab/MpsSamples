@@ -26,7 +26,7 @@ public class PlayFabTelemetrySender
         _titleId = titleId;
         _telemetryKey = telemetryKey;
         _serverId = serverId.Length > MaxEntityIdLength ? serverId.Substring(0, MaxEntityIdLength) : serverId;
-        _url = $"https://{titleId}.playfabapi.com/Event/WriteTelemetryEvents";
+        _url = $"https://{_titleId}.playfabapi.com/Event/WriteTelemetryEvents";
     }
 
     /// <summary>

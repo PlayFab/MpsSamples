@@ -10,7 +10,7 @@ It consists of three scripts that you can drop into any Unity game server projec
 
 | Category | Metric | Source | Notes |
 |----------|--------|--------|-------|
-| Simulation | Update loop rate (fps) | Frame counting | Not render FPS — server simulation loop rate |
+| Simulation | Update loop rate (fps) | Frame counting | Server simulation loop rate (not rendering FPS) |
 | Simulation | Avg frame time (ms) | `Time.unscaledDeltaTime` | Wall-clock frame duration, averaged over window |
 | Simulation | Max frame time (ms) | `Time.unscaledDeltaTime` | Spike detection |
 | Simulation | Fixed tick rate | FixedUpdate counting | Physics simulation rate |
