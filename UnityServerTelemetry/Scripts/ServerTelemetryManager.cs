@@ -19,7 +19,7 @@ using UnityEngine;
 public class ServerTelemetryManager : MonoBehaviour
 {
     [Header("PlayFab Configuration")]
-    [Tooltip("PlayFab Title ID. If empty, reads from GSDK config.")]
+    [Tooltip("PlayFab Title ID. If empty, reads from env var PF_TITLE_ID.")]
     public string titleId;
 
     [Tooltip("PlayFab Telemetry Key. If empty, reads from env var PF_MPS_SECRET_TelemetryKey.")]
@@ -35,6 +35,11 @@ public class ServerTelemetryManager : MonoBehaviour
     [Tooltip("How often to send buffered metrics to PlayFab (seconds).")]
     public float sendIntervalSeconds = 60f;
 
+    [Tooltip("Maximum buffered snapshots. Oldest are dropped when full.")]
+    public int maxBufferSize = 500;
+
+    static ServerTelemetryManager _instance;
+
     ServerMetricsCollector _collector;
     PlayFabTelemetrySender _sender;
     List<Dictionary<string, object>> _buffer = new List<Dictionary<string, object>>();
@@ -42,6 +47,13 @@ public class ServerTelemetryManager : MonoBehaviour
 
     void Awake()
     {
+        // Singleton guard — prevent duplicates across scene loads
+        if (_instance != null && _instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        _instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
@@ -51,9 +63,30 @@ public class ServerTelemetryManager : MonoBehaviour
 
         if (string.IsNullOrEmpty(titleId) || string.IsNullOrEmpty(telemetryKey))
         {
-            Debug.LogError("[ServerTelemetryManager] Missing titleId or telemetryKey. Telemetry disabled.");
+            Debug.LogWarning("[ServerTelemetryManager] Missing titleId or telemetryKey. " +
+                "Call Initialize(titleId, telemetryKey) to start telemetry later.");
             return;
         }
+
+        InitializeInternal();
+    }
+
+    /// <summary>
+    /// Initialize telemetry with explicit configuration.
+    /// Use this when titleId/telemetryKey are not available at Start() time
+    /// (e.g. when reading from GSDK config in OnServerActive).
+    /// </summary>
+    public void Initialize(string titleId, string telemetryKey, string serverId = null)
+    {
+        this.titleId = titleId;
+        this.telemetryKey = telemetryKey;
+        if (!string.IsNullOrEmpty(serverId)) this.serverId = serverId;
+        InitializeInternal();
+    }
+
+    void InitializeInternal()
+    {
+        if (_sender != null) return; // already initialized
 
         if (string.IsNullOrEmpty(serverId))
         {
@@ -74,28 +107,22 @@ public class ServerTelemetryManager : MonoBehaviour
     /// </summary>
     public void StartTelemetry()
     {
-        if (_isRunning) return;
+        if (_isRunning || _sender == null) return;
         _isRunning = true;
         StartCoroutine(CollectionLoop());
         StartCoroutine(SendLoop());
     }
 
     /// <summary>
-    /// Stops the collection and sending loops and flushes remaining metrics.
-    /// Call this from your GSDK shutdown callback before Application.Quit().
+    /// Stops the collection and sending loops.
+    /// Note: buffered metrics that haven't been sent will be lost.
+    /// For graceful shutdown, call this from your GSDK shutdown callback.
     /// </summary>
     public void StopTelemetry()
     {
         if (!_isRunning) return;
         _isRunning = false;
         StopAllCoroutines();
-
-        // Flush remaining buffered metrics
-        if (_buffer.Count > 0 && _sender != null)
-        {
-            Debug.Log($"[ServerTelemetryManager] Flushing {_buffer.Count} remaining metric(s)");
-            StartCoroutine(_sender.SendMetrics(_buffer));
-        }
     }
 
     /// <summary>
@@ -114,12 +141,18 @@ public class ServerTelemetryManager : MonoBehaviour
     {
         while (_isRunning)
         {
-            yield return new WaitForSeconds(collectionIntervalSeconds);
+            yield return new WaitForSecondsRealtime(collectionIntervalSeconds);
 
             if (_collector != null)
             {
                 var metrics = _collector.CollectMetrics();
                 _buffer.Add(metrics);
+
+                // Drop oldest if buffer exceeds max size
+                while (_buffer.Count > maxBufferSize)
+                {
+                    _buffer.RemoveAt(0);
+                }
             }
         }
     }
@@ -128,7 +161,7 @@ public class ServerTelemetryManager : MonoBehaviour
     {
         while (_isRunning)
         {
-            yield return new WaitForSeconds(sendIntervalSeconds);
+            yield return new WaitForSecondsRealtime(sendIntervalSeconds);
 
             if (_buffer.Count > 0 && _sender != null)
             {
@@ -142,9 +175,8 @@ public class ServerTelemetryManager : MonoBehaviour
 
     void OnDestroy()
     {
-        // Note: coroutines won't run in OnDestroy. Call StopTelemetry() from your
-        // GSDK shutdown callback before Application.Quit() for a graceful flush.
         _isRunning = false;
+        if (_instance == this) _instance = null;
     }
 
     void ResolveConfiguration()
@@ -160,7 +192,7 @@ public class ServerTelemetryManager : MonoBehaviour
             }
         }
 
-        // Title ID: try GSDK config if available, fall back to Inspector value
+        // Title ID: try env var, fall back to Inspector value
         if (string.IsNullOrEmpty(titleId))
         {
             string envTitleId = Environment.GetEnvironmentVariable("PF_TITLE_ID");
@@ -171,7 +203,7 @@ public class ServerTelemetryManager : MonoBehaviour
             }
         }
 
-        // Server ID: try GSDK, fall back to machine name
+        // Server ID: try env var, fall back to machine name
         if (string.IsNullOrEmpty(serverId))
         {
             string envServerId = Environment.GetEnvironmentVariable("PF_SERVER_ID");

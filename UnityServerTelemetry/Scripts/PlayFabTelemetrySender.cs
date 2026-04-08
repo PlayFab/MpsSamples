@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -17,12 +18,14 @@ public class PlayFabTelemetrySender
     readonly string _url;
 
     const int MaxEventsPerBatch = 200;
+    const int RequestTimeoutSeconds = 30;
+    const int MaxEntityIdLength = 64;
 
     public PlayFabTelemetrySender(string titleId, string telemetryKey, string serverId)
     {
         _titleId = titleId;
         _telemetryKey = telemetryKey;
-        _serverId = serverId;
+        _serverId = serverId.Length > MaxEntityIdLength ? serverId.Substring(0, MaxEntityIdLength) : serverId;
         _url = $"https://{titleId}.playfabapi.com/Event/WriteTelemetryEvents";
     }
 
@@ -32,6 +35,8 @@ public class PlayFabTelemetrySender
     /// </summary>
     public IEnumerator SendMetrics(List<Dictionary<string, object>> metricsList)
     {
+        if (metricsList.Count == 0) yield break;
+
         for (int i = 0; i < metricsList.Count; i += MaxEventsPerBatch)
         {
             int count = Mathf.Min(MaxEventsPerBatch, metricsList.Count - i);
@@ -43,6 +48,7 @@ public class PlayFabTelemetrySender
                 request.uploadHandler = new UploadHandlerRaw(bodyBytes) { contentType = "application/json" };
                 request.downloadHandler = new DownloadHandlerBuffer();
                 request.SetRequestHeader("X-TelemetryKey", _telemetryKey);
+                request.timeout = RequestTimeoutSeconds;
 
                 yield return request.SendWebRequest();
 
@@ -71,9 +77,9 @@ public class PlayFabTelemetrySender
             sb.Append("{");
             sb.Append("\"EventNamespace\":\"custom.server_telemetry\",");
             sb.Append("\"Name\":\"server_metrics\",");
-            string timestamp = metrics.ContainsKey("_timestamp") ? metrics["_timestamp"].ToString() : DateTime.UtcNow.ToString("O");
+            string timestamp = metrics.ContainsKey("_timestamp") ? EscapeJson(metrics["_timestamp"].ToString()) : DateTime.UtcNow.ToString("O");
             sb.Append($"\"OriginalTimestamp\":\"{timestamp}\",");
-            sb.Append($"\"Entity\":{{\"Type\":\"external\",\"Id\":\"{EscapeJson(_serverId)}\"}},");
+            sb.Append($"\"Entity\":{{\"type\":\"external\",\"id\":\"{EscapeJson(_serverId)}\"}},");
             sb.Append("\"Payload\":{");
 
             bool first = true;
@@ -106,10 +112,10 @@ public class PlayFabTelemetrySender
                 sb.Append(l);
                 break;
             case float f:
-                sb.Append(f.ToString("G"));
+                sb.Append(f.ToString("G", CultureInfo.InvariantCulture));
                 break;
             case double d:
-                sb.Append(d.ToString("G"));
+                sb.Append(d.ToString("G", CultureInfo.InvariantCulture));
                 break;
             case string s:
                 sb.Append($"\"{EscapeJson(s)}\"");

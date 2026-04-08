@@ -40,10 +40,11 @@ public class ServerMetricsCollector : MonoBehaviour
 
     void OnEnable()
     {
-        _totalUsedMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Total Used Memory");
-        _gcUsedMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Used Memory");
-        _gcReservedMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Reserved Memory");
-        _gcAllocInFrameRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Allocated In Frame");
+        // ProfilerRecorder may not be available on all platforms/build configs
+        try { _totalUsedMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Total Used Memory"); } catch { }
+        try { _gcUsedMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Used Memory"); } catch { }
+        try { _gcReservedMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Reserved Memory"); } catch { }
+        try { _gcAllocInFrameRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Allocated In Frame"); } catch { }
 
         ResetAccumulators();
         InitCpuTracking();
@@ -92,7 +93,7 @@ public class ServerMetricsCollector : MonoBehaviour
         metrics["totalUsedMemoryMB"] = GetRecorderMB(_totalUsedMemoryRecorder);
         metrics["gcUsedMemoryMB"] = GetRecorderMB(_gcUsedMemoryRecorder);
         metrics["gcReservedMemoryMB"] = GetRecorderMB(_gcReservedMemoryRecorder);
-        metrics["gcAllocatedPerFrameBytes"] = GetRecorderValue(_gcAllocInFrameRecorder);
+        metrics["lastFrameGcAllocBytes"] = GetRecorderValue(_gcAllocInFrameRecorder);
         metrics["monoHeapSizeMB"] = Mathf.Round(Profiler.GetMonoHeapSizeLong() / (1024f * 1024f) * 10f) / 10f;
         metrics["monoUsedSizeMB"] = Mathf.Round(Profiler.GetMonoUsedSizeLong() / (1024f * 1024f) * 10f) / 10f;
 
@@ -141,9 +142,11 @@ public class ServerMetricsCollector : MonoBehaviour
     {
         try
         {
-            var proc = Process.GetCurrentProcess();
-            _lastCpuTime = proc.TotalProcessorTime;
-            _lastCpuCheckTime = Time.realtimeSinceStartup;
+            using (var proc = Process.GetCurrentProcess())
+            {
+                _lastCpuTime = proc.TotalProcessorTime;
+                _lastCpuCheckTime = Time.realtimeSinceStartup;
+            }
         }
         catch
         {
@@ -162,21 +165,23 @@ public class ServerMetricsCollector : MonoBehaviour
 
         try
         {
-            var proc = Process.GetCurrentProcess();
-            TimeSpan currentCpuTime = proc.TotalProcessorTime;
-            float currentTime = Time.realtimeSinceStartup;
-            float elapsedWall = currentTime - _lastCpuCheckTime;
-
-            if (elapsedWall > 0.1f)
+            using (var proc = Process.GetCurrentProcess())
             {
-                double cpuElapsed = (currentCpuTime - _lastCpuTime).TotalSeconds;
-                int coreCount = SystemInfo.processorCount;
-                _cpuUsagePercent = Mathf.Round((float)(cpuElapsed / (elapsedWall * coreCount)) * 1000f) / 10f;
-                _cpuUsagePercent = Mathf.Clamp(_cpuUsagePercent, 0f, 100f);
-            }
+                TimeSpan currentCpuTime = proc.TotalProcessorTime;
+                float currentTime = Time.realtimeSinceStartup;
+                float elapsedWall = currentTime - _lastCpuCheckTime;
 
-            _lastCpuTime = currentCpuTime;
-            _lastCpuCheckTime = currentTime;
+                if (elapsedWall > 0.1f)
+                {
+                    double cpuElapsed = (currentCpuTime - _lastCpuTime).TotalSeconds;
+                    int coreCount = Mathf.Max(1, SystemInfo.processorCount);
+                    _cpuUsagePercent = Mathf.Round((float)(cpuElapsed / (elapsedWall * coreCount)) * 1000f) / 10f;
+                    _cpuUsagePercent = Mathf.Clamp(_cpuUsagePercent, 0f, 100f);
+                }
+
+                _lastCpuTime = currentCpuTime;
+                _lastCpuCheckTime = currentTime;
+            }
         }
         catch
         {
@@ -189,7 +194,10 @@ public class ServerMetricsCollector : MonoBehaviour
     {
         try
         {
-            return Process.GetCurrentProcess().Threads.Count;
+            using (var proc = Process.GetCurrentProcess())
+            {
+                return proc.Threads.Count;
+            }
         }
         catch
         {

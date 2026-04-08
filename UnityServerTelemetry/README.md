@@ -17,7 +17,7 @@ It consists of three scripts that you can drop into any Unity game server projec
 | Memory | Total used (MB) | `ProfilerRecorder` | All Unity memory |
 | Memory | GC used (MB) | `ProfilerRecorder` | Managed heap in use |
 | Memory | GC reserved (MB) | `ProfilerRecorder` | Managed heap reserved |
-| Memory | GC alloc/frame (bytes) | `ProfilerRecorder` | Per-frame allocation pressure |
+| Memory | Last frame GC alloc (bytes) | `ProfilerRecorder` | GC allocation in the most recent frame |
 | Memory | Mono heap (MB) | `Profiler` API | Mono backend |
 | Memory | Mono used (MB) | `Profiler` API | Mono backend |
 | CPU | CPU usage % | `System.Diagnostics.Process` | Best-effort; -1 if unavailable |
@@ -94,14 +94,14 @@ public class AgentListener : MonoBehaviour
         // Start your networking server...
         UNetServer.StartListen();
 
-        // Read title ID from GSDK config if needed
+        // Initialize telemetry with title ID from GSDK config
         var config = PlayFabMultiplayerAgentAPI.GetConfigSettings();
         if (config.ContainsKey("titleId"))
         {
-            telemetryManager.titleId = config["titleId"];
+            // Initialize() can be called after Start() — it supports deferred init
+            // The telemetry key should already be set via MPS secret (env var) or Inspector
+            telemetryManager.Initialize(config["titleId"], telemetryManager.telemetryKey);
         }
-
-        // Telemetry starts automatically in ServerTelemetryManager.Start()
     }
 
     private void OnPlayerAdded(string playfabId)
@@ -129,7 +129,7 @@ public class AgentListener : MonoBehaviour
 
 ## How It Works
 
-1. **ServerTelemetryManager** starts on `Start()` and resolves configuration from MPS secrets / environment variables / Inspector fields
+1. **ServerTelemetryManager** starts on `Start()` and resolves configuration from MPS secrets / environment variables / Inspector fields. If config is not yet available (e.g. waiting for GSDK), call `Initialize(titleId, telemetryKey)` later.
 2. Every `collectionIntervalSeconds` (default: 30s), it calls `ServerMetricsCollector.CollectMetrics()` to take a snapshot
 3. Snapshots are buffered in memory
 4. Every `sendIntervalSeconds` (default: 60s), buffered snapshots are sent to `POST https://{titleId}.playfabapi.com/Event/WriteTelemetryEvents` with the `X-TelemetryKey` header
@@ -144,10 +144,12 @@ public class AgentListener : MonoBehaviour
 | `serverId` | Machine name | Identifier for this server instance |
 | `collectionIntervalSeconds` | 30 | How often to collect metrics |
 | `sendIntervalSeconds` | 60 | How often to flush buffered metrics to PlayFab |
+| `maxBufferSize` | 500 | Maximum buffered snapshots; oldest dropped when full |
 
 ## Limitations
 
 - **CPU metrics** (`cpuUsagePercent`, `threadCount`) use `System.Diagnostics.Process` which may not be available on all platforms (especially IL2CPP). These fields report `-1` when unavailable.
 - **ProfilerRecorder** counters may not be available in all build configurations. Unavailable counters report `-1`.
 - **Mono heap metrics** are most useful with the Mono scripting backend; values may be limited on IL2CPP.
-- This is sample code — for production use, consider adding retry logic with exponential backoff, bounded queues, and event deduplication.
+- **Buffered metrics are lost on crash** — `StopTelemetry()` stops collection but does not perform a synchronous flush. Call it from your GSDK shutdown callback for a clean stop.
+- This is sample code — for production use, consider adding retry logic with exponential backoff and event deduplication.
