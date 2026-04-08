@@ -16,6 +16,12 @@ Unity Server and Client sample that utilize the GameServer SDK.
 
 More information [here](UnityMirror/README.md).
 
+## UnityServerTelemetry
+
+Unity sample scripts that collect game server performance metrics (simulation rate, memory, CPU, player counts) and send them to the PlayFab Telemetry API using a telemetry key. Can be dropped into any Unity MPS project.
+
+More information [here](UnityServerTelemetry/README.md).
+
 ## UnrealThirdPersonMP
 
 Unreal Server and Client sample that utilize the GameServer SDK which is integrated through an Unreal plugin.
