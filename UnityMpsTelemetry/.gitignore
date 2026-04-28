@@ -1,0 +1,34 @@
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+UnityServer/Assets/PlayFabSdk/
+UnityServer/Assets/PlayFabSdk.meta
+
+# Visual Studio / Rider cache and generated project files
+.vs/
+.idea/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.opendb
+
+# Unity generated files
+*.pidb.meta
+*.pdb.meta
+sysinfo.txt
+
+# Build outputs
+*.apk
+*.unitypackage

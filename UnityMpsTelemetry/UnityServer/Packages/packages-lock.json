@@ -1,0 +1,35 @@
+{
+  "dependencies": {
+    "com.unity.sdk.linux-x86_64": {
+      "version": "1.0.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.sysroot.base": "1.0.2"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.sysroot.base": {
+      "version": "1.0.2",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.toolchain.win-x86_64-linux": {
+      "version": "1.0.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.sysroot.base": "1.0.2"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.modules.unitywebrequest": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    }
+  }
+}
