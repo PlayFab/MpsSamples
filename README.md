@@ -16,6 +16,12 @@ Unity Server and Client sample that utilize the GameServer SDK.
 
 More information [here](UnityMirror/README.md).
 
+## UnityMpsTelemetry
+
+Unity dedicated server telemetry sample intended to be wired into an existing GSDK-enabled server.
+
+More information [here](UnityMpsTelemetry/README.md).
+
 ## UnrealThirdPersonMP
 
 Unreal Server and Client sample that utilize the GameServer SDK which is integrated through an Unreal plugin.
