@@ -1,0 +1,19 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0.0",
+  "FriendlyName": "PlayFab MPS Telemetry Sample",
+  "Description": "Drop-in Unreal dedicated server telemetry sample for PlayFab Multiplayer Servers.",
+  "Category": "PlayFab",
+  "CreatedBy": "Microsoft PlayFab",
+  "CanContainContent": false,
+  "IsBetaVersion": true,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "UnrealMpsTelemetry",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ]
+}

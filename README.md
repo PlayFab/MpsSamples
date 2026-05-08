@@ -28,6 +28,12 @@ Unreal Server and Client sample that utilize the GameServer SDK which is integra
 
 More information [here](UnrealThirdPersonMP/README.md).
 
+## UnrealMpsTelemetry
+
+Unreal dedicated server telemetry plugin sample intended to be wired into an existing GSDK-enabled server.
+
+More information [here](UnrealMpsTelemetry/README.md).
+
 ## OpenArena
 
 This sample wraps the open source [OpenArena](https://openarena.fandom.com/wiki/Main_Page) game using a .NET Core app and Linux containers.
